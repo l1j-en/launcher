@@ -61,6 +61,7 @@ namespace Launcher
             this.chkResize.Checked = savedSettings.Resize;
             this.chkWindowed.Checked = savedSettings.Windowed;
             this.chkCentre.Checked = savedSettings.Centred;
+            this.chkAutoPlay.Checked = savedSettings.AutoPlay;
 
             this.txtDirectory.Text = savedSettings.ClientDirectory ?? "";
 
