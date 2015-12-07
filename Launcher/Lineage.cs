@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Runtime.InteropServices;
 
 namespace Launcher
@@ -70,9 +71,15 @@ namespace Launcher
                 ProcessCreationFlags.CreateSuspended | ProcessCreationFlags.CreateDefaultErrorMode,
                 IntPtr.Zero, null, ref startupInfo, out _processInfo);
 
-            var logindllpath = System.IO.Path.Combine(clientFolder, "Login.dll");
+            var logindllpath = Path.Combine(clientFolder, "Login.dll");
             DllInjector.GetInstance.BInject(_processInfo.DwProcessId, logindllpath);
-            DllInjector.GetInstance.BInject(_processInfo.DwProcessId, System.IO.Path.Combine(clientFolder, "closenp.dll"));
+
+            var closeNpPath = Path.Combine(clientFolder, "closenp.dll");
+
+            //just in case the user doesnt copy closenp to their directory
+            if (File.Exists(closeNpPath))
+                DllInjector.GetInstance.BInject(_processInfo.DwProcessId, closeNpPath);
+
             System.Threading.Thread.Sleep(1000);
 
             var tHandle = _processInfo.HThread;
