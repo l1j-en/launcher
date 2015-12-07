@@ -30,6 +30,7 @@ namespace Launcher
                 Centred = this.chkCentre.Checked,
                 Windowed = this.chkWindowed.Checked,
                 Resize = this.chkResize.Checked,
+                AutoPlay = this.chkAutoPlay.Checked,
                 ClientDirectory = this.txtDirectory.Text,
                 ClientBin = this.cmbBin.Text
             };

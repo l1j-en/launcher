@@ -34,10 +34,12 @@
             this.pictureBox2 = new System.Windows.Forms.PictureBox();
             this.cmbServer = new System.Windows.Forms.ComboBox();
             this.processChecker = new System.ComponentModel.BackgroundWorker();
+            this.pctVote = new System.Windows.Forms.PictureBox();
+            this.btnPlay = new Launcher.GlassButton();
             this.btnSettings = new Launcher.GlassButton();
             this.btnClose = new Launcher.GlassButton();
-            this.btnPlay = new Launcher.GlassButton();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pctVote)).BeginInit();
             this.SuspendLayout();
             // 
             // lblServerStatusText
@@ -94,7 +96,7 @@
             // 
             this.cmbServer.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cmbServer.FormattingEnabled = true;
-            this.cmbServer.Location = new System.Drawing.Point(386, 333);
+            this.cmbServer.Location = new System.Drawing.Point(310, 335);
             this.cmbServer.Name = "cmbServer";
             this.cmbServer.Size = new System.Drawing.Size(158, 21);
             this.cmbServer.TabIndex = 21;
@@ -103,6 +105,33 @@
             // processChecker
             // 
             this.processChecker.DoWork += new System.ComponentModel.DoWorkEventHandler(this.processChecker_DoWork);
+            // 
+            // pctVote
+            // 
+            this.pctVote.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.pctVote.Image = global::Launcher.Properties.Resources.vote;
+            this.pctVote.Location = new System.Drawing.Point(474, 319);
+            this.pctVote.Name = "pctVote";
+            this.pctVote.Size = new System.Drawing.Size(88, 53);
+            this.pctVote.TabIndex = 25;
+            this.pctVote.TabStop = false;
+            this.pctVote.Click += new System.EventHandler(this.pctVote_Click);
+            // 
+            // btnPlay
+            // 
+            this.btnPlay.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.btnPlay.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnPlay.GlowColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(192)))), ((int)(((byte)(255)))));
+            this.btnPlay.InnerBorderColor = System.Drawing.Color.Transparent;
+            this.btnPlay.Location = new System.Drawing.Point(568, 319);
+            this.btnPlay.Name = "btnPlay";
+            this.btnPlay.OuterBorderColor = System.Drawing.Color.Transparent;
+            this.btnPlay.ShineColor = System.Drawing.Color.Transparent;
+            this.btnPlay.Size = new System.Drawing.Size(93, 51);
+            this.btnPlay.SpecialSymbolColor = System.Drawing.Color.Transparent;
+            this.btnPlay.TabIndex = 24;
+            this.btnPlay.Text = "PLAY!";
+            this.btnPlay.Click += new System.EventHandler(this.playButton_Click);
             // 
             // btnSettings
             // 
@@ -138,27 +167,13 @@
             this.btnClose.TabIndex = 22;
             this.btnClose.Click += new System.EventHandler(this.btnClose_Click);
             // 
-            // btnPlay
-            // 
-            this.btnPlay.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnPlay.GlowColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(192)))), ((int)(((byte)(255)))));
-            this.btnPlay.InnerBorderColor = System.Drawing.Color.Transparent;
-            this.btnPlay.Location = new System.Drawing.Point(568, 319);
-            this.btnPlay.Name = "btnPlay";
-            this.btnPlay.OuterBorderColor = System.Drawing.Color.Transparent;
-            this.btnPlay.ShineColor = System.Drawing.Color.Transparent;
-            this.btnPlay.Size = new System.Drawing.Size(93, 51);
-            this.btnPlay.SpecialSymbolColor = System.Drawing.Color.Transparent;
-            this.btnPlay.TabIndex = 24;
-            this.btnPlay.Text = "PLAY!";
-            this.btnPlay.Click += new System.EventHandler(this.playButton_Click);
-            // 
             // LauncherForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackgroundImage = global::Launcher.Properties.Resources.launcherBg;
             this.ClientSize = new System.Drawing.Size(670, 377);
+            this.Controls.Add(this.pctVote);
             this.Controls.Add(this.btnPlay);
             this.Controls.Add(this.btnSettings);
             this.Controls.Add(this.btnClose);
@@ -173,6 +188,7 @@
             this.Text = "Lineage Resurrection";
             this.Load += new System.EventHandler(this.LauncherForm_Load);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pctVote)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -189,6 +205,7 @@
         private GlassButton btnClose;
         private GlassButton btnSettings;
         private GlassButton btnPlay;
+        private System.Windows.Forms.PictureBox pctVote;
 
 
     }

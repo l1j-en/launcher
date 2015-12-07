@@ -60,7 +60,7 @@ namespace Launcher
 
         public static void Run(string clientFolder, string bin, long ip, ushort port)
         {
-            var binpath = System.IO.Path.Combine(clientFolder, bin);
+            var binpath = Path.Combine(clientFolder, bin);
 
             var startupInfo = new Startupinfo();
             _processInfo = new ProcessInformation();

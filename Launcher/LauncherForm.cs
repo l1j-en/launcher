@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -55,10 +56,29 @@ namespace Launcher
 
         private void LauncherForm_Load(object sender, EventArgs e)
         {
-            this.CheckServerStatus(false);
+            var settings = Helpers.LoadSettings();
+            var serverOnline = this.CheckServerStatus(false);
+
+            if (!settings.AutoPlay || ModifierKeys == Keys.Control)
+                return;
+
+            if (!serverOnline)
+            {
+                MessageBox.Show("Did not auto play because server is offline.");
+                return;
+            }
+            this.WindowState = FormWindowState.Minimized;
+            this.ShowInTaskbar = false;
+
+            this.Launch();
         }
 
         private void playButton_Click(object sender, EventArgs e)
+        {
+            this.Launch();
+        }
+
+        private void Launch()
         {
             var settings = Helpers.LoadSettings();
 
@@ -69,7 +89,6 @@ namespace Launcher
 
                 return;
             }
-               
 
             var binFile = Path.GetFileNameWithoutExtension(settings.ClientBin);
 
@@ -83,7 +102,7 @@ namespace Launcher
             if (settings.Resize)
                 revertResolution = WindowStyling.ChangeDisplaySettings(settings.Resolution.Width, settings.Resolution.Height, 16);
 
-            if(settings.Windowed)
+            if (settings.Windowed)
                 WindowStyling.SetWindowed(binFile);
 
             if (settings.Centred)
@@ -91,8 +110,8 @@ namespace Launcher
                 var windowSize = Screen.PrimaryScreen.WorkingArea;
                 WindowStyling.SetCentred(binFile, windowSize.Width, windowSize.Height);
             }
-                
-            if(!settings.Resize)
+
+            if (!settings.Resize)
                 Application.Exit();
 
             //hide the form and start a thread that checks for lineage to close. When it does, set the window back to normal
@@ -109,8 +128,10 @@ namespace Launcher
             statusThread.Start();
         }
 
-        private void CheckServerStatus(bool threaded)
+        private bool CheckServerStatus(bool threaded)
         {
+            var returnValue = false;
+
             var host = string.Empty;
             var port = -1;
 
@@ -134,7 +155,7 @@ namespace Launcher
 
             //should never happen, but let's handle it just in case
             if (host == string.Empty || port == -1)
-                return;
+                return false;
 
             using (var socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp))
             {
@@ -150,6 +171,7 @@ namespace Launcher
                     }
                     else
                     {
+                        returnValue = true;
                         Helpers.SetControlPropertyThreadSafe(this.lblServerStatus, "Text", "Online");
                         Helpers.SetControlPropertyThreadSafe(this.lblServerStatus, "ForeColor", Color.Green);
                     }
@@ -164,6 +186,8 @@ namespace Launcher
                     socket.Close();
                 } //end try/catch/finally
             } //end using
+
+            return returnValue;
         } //end checkServerStatus
 
         private void processChecker_DoWork(object sender, DoWorkEventArgs e)
@@ -182,5 +206,11 @@ namespace Launcher
                 }
             }
         } //end processChecker_DoWork
+
+        private void pctVote_Click(object sender, EventArgs e)
+        {
+            var voteUrl = new ProcessStartInfo("http://lineage.extreme-gamerz.org/in.php?id=soren");
+            Process.Start(voteUrl);
+        } //end pctVote_Click
     } //end class
 } //end namespace
