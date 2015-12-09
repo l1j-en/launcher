@@ -95,23 +95,25 @@ namespace Launcher
             var selectedServer = this._servers[this.cmbServer.SelectedItem.ToString()];
             var ip = (uint)IPAddress.NetworkToHostOrder(BitConverter.ToInt32(IPAddress.Parse(selectedServer.Ip).GetAddressBytes(), 0));
 
-            Lineage.Run(settings.ClientDirectory, settings.ClientBin, ip, (ushort)selectedServer.Port);
-
             var revertResolution = new DevMode();
 
             if (settings.Resize)
                 revertResolution = WindowStyling.ChangeDisplaySettings(settings.Resolution.Width, settings.Resolution.Height, 16);
+            else if(settings.Windowed)
+                revertResolution = WindowStyling.ChangeDisplayColour(16);
+
+            Lineage.Run(settings, settings.ClientBin, ip, (ushort)selectedServer.Port);
 
             if (settings.Windowed)
                 WindowStyling.SetWindowed(binFile);
-
+                
             if (settings.Centred)
             {
                 var windowSize = Screen.PrimaryScreen.WorkingArea;
                 WindowStyling.SetCentred(binFile, windowSize.Width, windowSize.Height);
             }
 
-            if (!settings.Resize)
+            if (!settings.Resize && !settings.Windowed)
                 Application.Exit();
 
             //hide the form and start a thread that checks for lineage to close. When it does, set the window back to normal

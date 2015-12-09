@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System.Configuration;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -57,13 +58,22 @@ namespace Launcher
                 MessageBox.Show("Lineage.cfg file not found. Unable to update Windowed settings.");
                 return;
             }
-                
-            var cfgFile = File.Open(lincfgPath, FileMode.Open);
-            var windowedByte = settings.Windowed ? 0 : 1;
 
-            cfgFile.Seek(0xe4, SeekOrigin.Begin);
-            cfgFile.WriteByte((byte)windowedByte);
-            cfgFile.Close();
+            using (var cfgFile = File.Open(lincfgPath, FileMode.Open))
+            {
+                var windowedByte = settings.Windowed ? (byte)0 : (byte)1;
+
+                cfgFile.Seek(0xe4, SeekOrigin.Begin);
+                cfgFile.WriteByte(windowedByte);
+                cfgFile.Close();
+            }
+           
+            var musicFilePath = Path.Combine(settings.ClientDirectory, "music.cfg");
+
+            if (!File.Exists(musicFilePath))
+                using (File.Create(musicFilePath)){ }
+
+            File.WriteAllText(musicFilePath, (settings.MusicType == "Original Midi Music" ? "1" : "0"));
         } //end SaveSettings
 
         public static byte[] Serialize(object objectToSerialize)

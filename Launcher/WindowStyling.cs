@@ -102,6 +102,11 @@ namespace Launcher
         private const int MaxRetries = 10;
         #endregion
 
+        public static DevMode ChangeDisplayColour(int bitCount)
+        {
+            return ChangeDisplaySettings(-1, -1, bitCount);
+        }
+
         public static DevMode ChangeDisplaySettings(int width, int height, int bitCount)
         {
             var originalMode = new DevMode();
@@ -116,8 +121,12 @@ namespace Launcher
             var newMode = originalMode;
 
             // Changing the settings
-            newMode.dmPelsHeight = width;
-            newMode.dmDisplayFlags = height;
+            if (width != -1 && height != -1)
+            {
+                newMode.dmPelsHeight = width;
+                newMode.dmDisplayFlags = height;
+            }
+            
             newMode.dmPelsWidth = bitCount;
 
             // Capturing the operation result

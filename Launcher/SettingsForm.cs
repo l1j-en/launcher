@@ -32,9 +32,20 @@ namespace Launcher
                 Resize = this.chkResize.Checked,
                 AutoPlay = this.chkAutoPlay.Checked,
                 ClientDirectory = this.txtDirectory.Text,
-                ClientBin = this.cmbBin.Text
+                ClientBin = this.cmbBin.Text,
+                DisableDark = this.chkDisableDark.Checked,
+                MusicType = this.cmbMusic.SelectedItem.ToString()
             };
 
+            if (settings.ClientBin.Trim() == string.Empty || settings.ClientBin.Trim() == "No Client Directory Selected"
+                || settings.ClientBin.Trim() == string.Empty)
+            {
+                MessageBox.Show("You must enter a client directory and select a bin to continue.", "Invalid Settings",
+                    MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+
+                return;
+            }
+                
             Helpers.SaveSettings(settings);
             this.Close();
         }
@@ -62,6 +73,7 @@ namespace Launcher
             this.chkWindowed.Checked = savedSettings.Windowed;
             this.chkCentre.Checked = savedSettings.Centred;
             this.chkAutoPlay.Checked = savedSettings.AutoPlay;
+            this.chkDisableDark.Checked = savedSettings.DisableDark;
 
             this.txtDirectory.Text = savedSettings.ClientDirectory ?? "";
 
@@ -73,6 +85,11 @@ namespace Launcher
             }
             else
                 this.cmbBin.SelectedIndex = 0;
+
+            if (string.IsNullOrEmpty(savedSettings.MusicType))
+                this.cmbMusic.SelectedIndex = 0;
+            else
+                this.cmbMusic.SelectedIndex = this.cmbMusic.FindString(savedSettings.MusicType);
         }
 
         private void btnDirectory_Click(object sender, EventArgs e)

@@ -58,9 +58,9 @@ namespace Launcher
         [DllImport("kernel32.dll")]
         private static extern uint ResumeThread(IntPtr hThread);
 
-        public static void Run(string clientFolder, string bin, long ip, ushort port)
+        public static void Run(Settings settings, string bin, long ip, ushort port)
         {
-            var binpath = Path.Combine(clientFolder, bin);
+            var binpath = Path.Combine(settings.ClientDirectory, bin);
 
             var startupInfo = new Startupinfo();
             _processInfo = new ProcessInformation();
@@ -71,10 +71,12 @@ namespace Launcher
                 ProcessCreationFlags.CreateSuspended | ProcessCreationFlags.CreateDefaultErrorMode,
                 IntPtr.Zero, null, ref startupInfo, out _processInfo);
 
-            var logindllpath = Path.Combine(clientFolder, "Login.dll");
-            DllInjector.GetInstance.BInject(_processInfo.DwProcessId, logindllpath);
+            DllInjector.GetInstance.BInject(_processInfo.DwProcessId, Path.Combine(settings.ClientDirectory, "Login.dll"));
 
-            var closeNpPath = Path.Combine(clientFolder, "closenp.dll");
+            if(settings.DisableDark)
+                DllInjector.GetInstance.BInject(_processInfo.DwProcessId, Path.Combine(settings.ClientDirectory, "LinS3EP1.dll"));
+
+            var closeNpPath = Path.Combine(settings.ClientDirectory, "closenp.dll");
 
             //just in case the user doesnt copy closenp to their directory
             if (File.Exists(closeNpPath))

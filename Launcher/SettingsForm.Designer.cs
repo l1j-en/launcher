@@ -40,6 +40,14 @@
             this.chkWindowed = new System.Windows.Forms.CheckBox();
             this.tabSettings = new System.Windows.Forms.TabControl();
             this.tabGeneral = new System.Windows.Forms.TabPage();
+            this.grpLauncher = new System.Windows.Forms.GroupBox();
+            this.lblAutoNote = new System.Windows.Forms.Label();
+            this.chkAutoPlay = new System.Windows.Forms.CheckBox();
+            this.tabInGame = new System.Windows.Forms.TabPage();
+            this.grpMusic = new System.Windows.Forms.GroupBox();
+            this.cmbMusic = new System.Windows.Forms.ComboBox();
+            this.grpDisableDark = new System.Windows.Forms.GroupBox();
+            this.chkDisableDark = new System.Windows.Forms.CheckBox();
             this.tabClient = new System.Windows.Forms.TabPage();
             this.grpClient = new System.Windows.Forms.GroupBox();
             this.cmbBin = new System.Windows.Forms.ComboBox();
@@ -48,16 +56,16 @@
             this.txtDirectory = new System.Windows.Forms.TextBox();
             this.lblDirectory = new System.Windows.Forms.Label();
             this.folderBrowserDialog = new System.Windows.Forms.FolderBrowserDialog();
-            this.grpLauncher = new System.Windows.Forms.GroupBox();
-            this.chkAutoPlay = new System.Windows.Forms.CheckBox();
-            this.lblAutoNote = new System.Windows.Forms.Label();
             this.grpWindowed.SuspendLayout();
             this.grpResolution.SuspendLayout();
             this.tabSettings.SuspendLayout();
             this.tabGeneral.SuspendLayout();
+            this.grpLauncher.SuspendLayout();
+            this.tabInGame.SuspendLayout();
+            this.grpMusic.SuspendLayout();
+            this.grpDisableDark.SuspendLayout();
             this.tabClient.SuspendLayout();
             this.grpClient.SuspendLayout();
-            this.grpLauncher.SuspendLayout();
             this.SuspendLayout();
             // 
             // btnClose
@@ -185,6 +193,7 @@
             // tabSettings
             // 
             this.tabSettings.Controls.Add(this.tabGeneral);
+            this.tabSettings.Controls.Add(this.tabInGame);
             this.tabSettings.Controls.Add(this.tabClient);
             this.tabSettings.Location = new System.Drawing.Point(5, 30);
             this.tabSettings.Name = "tabSettings";
@@ -203,6 +212,90 @@
             this.tabGeneral.Size = new System.Drawing.Size(287, 217);
             this.tabGeneral.TabIndex = 0;
             this.tabGeneral.Text = "General";
+            // 
+            // grpLauncher
+            // 
+            this.grpLauncher.Controls.Add(this.lblAutoNote);
+            this.grpLauncher.Controls.Add(this.chkAutoPlay);
+            this.grpLauncher.Location = new System.Drawing.Point(10, 152);
+            this.grpLauncher.Name = "grpLauncher";
+            this.grpLauncher.Size = new System.Drawing.Size(271, 59);
+            this.grpLauncher.TabIndex = 6;
+            this.grpLauncher.TabStop = false;
+            this.grpLauncher.Text = "Launcher Settings";
+            // 
+            // lblAutoNote
+            // 
+            this.lblAutoNote.AutoSize = true;
+            this.lblAutoNote.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblAutoNote.Location = new System.Drawing.Point(11, 39);
+            this.lblAutoNote.Name = "lblAutoNote";
+            this.lblAutoNote.Size = new System.Drawing.Size(240, 13);
+            this.lblAutoNote.TabIndex = 1;
+            this.lblAutoNote.Text = "Note*: Hold Ctrl down on launch to stop auto play";
+            // 
+            // chkAutoPlay
+            // 
+            this.chkAutoPlay.AutoSize = true;
+            this.chkAutoPlay.Location = new System.Drawing.Point(14, 19);
+            this.chkAutoPlay.Name = "chkAutoPlay";
+            this.chkAutoPlay.Size = new System.Drawing.Size(158, 17);
+            this.chkAutoPlay.TabIndex = 0;
+            this.chkAutoPlay.Text = "Automatically Launch Game";
+            this.chkAutoPlay.UseVisualStyleBackColor = true;
+            // 
+            // tabInGame
+            // 
+            this.tabInGame.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(206)))), ((int)(((byte)(203)))), ((int)(((byte)(203)))));
+            this.tabInGame.Controls.Add(this.grpMusic);
+            this.tabInGame.Controls.Add(this.grpDisableDark);
+            this.tabInGame.Location = new System.Drawing.Point(4, 22);
+            this.tabInGame.Name = "tabInGame";
+            this.tabInGame.Size = new System.Drawing.Size(287, 217);
+            this.tabInGame.TabIndex = 2;
+            this.tabInGame.Text = "In-Game";
+            // 
+            // grpMusic
+            // 
+            this.grpMusic.Controls.Add(this.cmbMusic);
+            this.grpMusic.Location = new System.Drawing.Point(6, 60);
+            this.grpMusic.Name = "grpMusic";
+            this.grpMusic.Size = new System.Drawing.Size(278, 52);
+            this.grpMusic.TabIndex = 1;
+            this.grpMusic.TabStop = false;
+            this.grpMusic.Text = "In-Game Music";
+            // 
+            // cmbMusic
+            // 
+            this.cmbMusic.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cmbMusic.FormattingEnabled = true;
+            this.cmbMusic.Items.AddRange(new object[] {
+            "Newer Music",
+            "Original Midi Music"});
+            this.cmbMusic.Location = new System.Drawing.Point(14, 19);
+            this.cmbMusic.Name = "cmbMusic";
+            this.cmbMusic.Size = new System.Drawing.Size(247, 21);
+            this.cmbMusic.TabIndex = 0;
+            // 
+            // grpDisableDark
+            // 
+            this.grpDisableDark.Controls.Add(this.chkDisableDark);
+            this.grpDisableDark.Location = new System.Drawing.Point(6, 6);
+            this.grpDisableDark.Name = "grpDisableDark";
+            this.grpDisableDark.Size = new System.Drawing.Size(278, 48);
+            this.grpDisableDark.TabIndex = 0;
+            this.grpDisableDark.TabStop = false;
+            this.grpDisableDark.Text = "Disable Darkness";
+            // 
+            // chkDisableDark
+            // 
+            this.chkDisableDark.AutoSize = true;
+            this.chkDisableDark.Location = new System.Drawing.Point(26, 19);
+            this.chkDisableDark.Name = "chkDisableDark";
+            this.chkDisableDark.Size = new System.Drawing.Size(109, 17);
+            this.chkDisableDark.TabIndex = 0;
+            this.chkDisableDark.Text = "Disable Darkness";
+            this.chkDisableDark.UseVisualStyleBackColor = true;
             // 
             // tabClient
             // 
@@ -261,6 +354,7 @@
             // 
             // txtDirectory
             // 
+            this.txtDirectory.Enabled = false;
             this.txtDirectory.Location = new System.Drawing.Point(8, 32);
             this.txtDirectory.Name = "txtDirectory";
             this.txtDirectory.Size = new System.Drawing.Size(234, 20);
@@ -274,37 +368,6 @@
             this.lblDirectory.Size = new System.Drawing.Size(49, 13);
             this.lblDirectory.TabIndex = 0;
             this.lblDirectory.Text = "Directory";
-            // 
-            // grpLauncher
-            // 
-            this.grpLauncher.Controls.Add(this.lblAutoNote);
-            this.grpLauncher.Controls.Add(this.chkAutoPlay);
-            this.grpLauncher.Location = new System.Drawing.Point(10, 152);
-            this.grpLauncher.Name = "grpLauncher";
-            this.grpLauncher.Size = new System.Drawing.Size(271, 59);
-            this.grpLauncher.TabIndex = 6;
-            this.grpLauncher.TabStop = false;
-            this.grpLauncher.Text = "Launcher Settings";
-            // 
-            // chkAutoPlay
-            // 
-            this.chkAutoPlay.AutoSize = true;
-            this.chkAutoPlay.Location = new System.Drawing.Point(14, 19);
-            this.chkAutoPlay.Name = "chkAutoPlay";
-            this.chkAutoPlay.Size = new System.Drawing.Size(158, 17);
-            this.chkAutoPlay.TabIndex = 0;
-            this.chkAutoPlay.Text = "Automatically Launch Game";
-            this.chkAutoPlay.UseVisualStyleBackColor = true;
-            // 
-            // lblAutoNote
-            // 
-            this.lblAutoNote.AutoSize = true;
-            this.lblAutoNote.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblAutoNote.Location = new System.Drawing.Point(11, 39);
-            this.lblAutoNote.Name = "lblAutoNote";
-            this.lblAutoNote.Size = new System.Drawing.Size(240, 13);
-            this.lblAutoNote.TabIndex = 1;
-            this.lblAutoNote.Text = "Note*: Hold Ctrl down on launch to stop auto play";
             // 
             // SettingsForm
             // 
@@ -329,11 +392,15 @@
             this.grpResolution.ResumeLayout(false);
             this.tabSettings.ResumeLayout(false);
             this.tabGeneral.ResumeLayout(false);
+            this.grpLauncher.ResumeLayout(false);
+            this.grpLauncher.PerformLayout();
+            this.tabInGame.ResumeLayout(false);
+            this.grpMusic.ResumeLayout(false);
+            this.grpDisableDark.ResumeLayout(false);
+            this.grpDisableDark.PerformLayout();
             this.tabClient.ResumeLayout(false);
             this.grpClient.ResumeLayout(false);
             this.grpClient.PerformLayout();
-            this.grpLauncher.ResumeLayout(false);
-            this.grpLauncher.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -364,6 +431,11 @@
         private System.Windows.Forms.GroupBox grpLauncher;
         private System.Windows.Forms.CheckBox chkAutoPlay;
         private System.Windows.Forms.Label lblAutoNote;
+        private System.Windows.Forms.TabPage tabInGame;
+        private System.Windows.Forms.GroupBox grpMusic;
+        private System.Windows.Forms.ComboBox cmbMusic;
+        private System.Windows.Forms.GroupBox grpDisableDark;
+        private System.Windows.Forms.CheckBox chkDisableDark;
 
     }
 }
