@@ -14,6 +14,7 @@ namespace Launcher
 {
     public partial class LauncherForm : Form
     {
+        private readonly object _lockObject = new object();
         private readonly Dictionary<string, Server> _servers = new Dictionary<string, Server>
         {
             {
@@ -33,6 +34,8 @@ namespace Launcher
                 }
             }
         };
+
+        private static readonly List<int> HookedProcIds = new List<int>(); 
 
         public LauncherForm()
         {
@@ -104,21 +107,24 @@ namespace Launcher
 
             Lineage.Run(settings, settings.ClientBin, ip, (ushort)selectedServer.Port);
 
+            var hookedProcId = -1;
+
             if (settings.Windowed)
-                WindowStyling.SetWindowed(binFile);
+                lock (this._lockObject)
+                    hookedProcId = WindowStyling.SetWindowed(binFile, HookedProcIds);
                 
             if (settings.Centred)
             {
                 var windowSize = Screen.PrimaryScreen.WorkingArea;
-                WindowStyling.SetCentred(binFile, windowSize.Width, windowSize.Height);
+                hookedProcId = WindowStyling.SetCentred(binFile, windowSize.Width, windowSize.Height, hookedProcId);
             }
 
-            if (!settings.Resize && !settings.Windowed)
-                Application.Exit();
+            if(hookedProcId != -1)
+                lock (this._lockObject)
+                    HookedProcIds.Add(hookedProcId);
 
-            //hide the form and start a thread that checks for lineage to close. When it does, set the window back to normal
-            this.Hide();
-            processChecker.RunWorkerAsync(revertResolution);
+            if(!processChecker.IsBusy)
+                processChecker.RunWorkerAsync(revertResolution);
         }
 
         private void cmbServer_SelectedIndexChanged(object sender, EventArgs e)
@@ -195,16 +201,29 @@ namespace Launcher
         private void processChecker_DoWork(object sender, DoWorkEventArgs e)
         {
             var revertResolution = (DevMode)e.Argument;
-            var settings = Helpers.LoadSettings();
-            var bin = Path.GetFileNameWithoutExtension(settings.ClientBin);
-
+            
             while (true)
             {
-                if (!Helpers.CheckProcessRunning(bin))
+                lock (this._lockObject)
                 {
-                    e.Cancel = true;
-                    WindowStyling.ChangeDisplaySettings(ref revertResolution, 0);
-                    Application.Exit();
+                    for (var i = HookedProcIds.Count - 1; i >= 0; i--)
+                    {
+                        try
+                        {
+                            var runningProcess = Process.GetProcessById(HookedProcIds[i]);
+                        }
+                        catch (Exception)
+                        {
+                            HookedProcIds.RemoveAt(i);
+                        }
+                    }
+
+                    if (HookedProcIds.Count == 0)
+                    {
+                        e.Cancel = true;
+                        WindowStyling.ChangeDisplaySettings(ref revertResolution, 0);
+                        return;
+                    }
                 }
             }
         } //end processChecker_DoWork

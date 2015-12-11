@@ -22,13 +22,6 @@ namespace Launcher
                 control.GetType().InvokeMember(propertyName, BindingFlags.SetProperty, null, control, new[] { propertyValue });
         }//end SetControlPropertyThreadSafe
 
-        public static bool CheckProcessRunning(string processName)
-        {
-            var procs = Process.GetProcesses();
-
-            return procs.Any(proc => proc.ProcessName.StartsWith(processName));
-        } //end CheckProcessRunning
-
         public static Settings LoadSettings()
         {
             var settingsKey = Registry.CurrentUser.OpenSubKey(@"Software\LineageLauncher", true);

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
@@ -139,12 +140,11 @@ namespace Launcher
             return originalMode;
         } //end ChangeDisplaySettings
 
-        public static void SetWindowed(string processName)
+        public static int SetWindowed(string processName, List<int> alreadyHookedProcs)
         {
-            var processFound = false;
             var attempts = 0;
 
-            while (!processFound && attempts < MaxRetries)
+            while (attempts < MaxRetries)
             {
                 var procs = Process.GetProcesses();
                 foreach (var proc in procs)
@@ -153,10 +153,9 @@ namespace Launcher
                         continue;
 
                     var pFoundWindow = proc.MainWindowHandle;
-                    if (pFoundWindow.ToInt32() > 0)
+                    var procHandleId = pFoundWindow.ToInt32();
+                    if (procHandleId > 0 && alreadyHookedProcs.IndexOf(proc.Id) == -1)
                     {
-                        processFound = true;
-
                         var style = GetWindowLong(pFoundWindow, GwlStyle);
 
                         //get menu
@@ -170,20 +169,23 @@ namespace Launcher
                         //force a redraw
                         DrawMenuBar(proc.MainWindowHandle);
                         SetWindowLong(pFoundWindow, GwlStyle, (style & ~WsSysmenu));
+
+                        return proc.Id;
                     }
                 } //end for
 
                 System.Threading.Thread.Sleep(500);
                 attempts++;
             } //end while
+
+            return -1;
         } //end SetWindowed
 
-        public static void SetCentred(string processName, int screenWidth, int screenHeight)
+        public static int SetCentred(string processName, int screenWidth, int screenHeight, int procId = -1)
         {
-            var processFound = false;
             var attempts = 0;
 
-            while (!processFound && attempts < MaxRetries)
+            while (attempts < MaxRetries)
             {
                 var procs = Process.GetProcesses();
                 foreach (var proc in procs)
@@ -192,20 +194,22 @@ namespace Launcher
                         continue;
 
                     var pFoundWindow = proc.MainWindowHandle;
-
-                    if (pFoundWindow.ToInt32() > 0)
+                    var foundProcHandleId = pFoundWindow.ToInt32();
+                    if ((proc.Id == procId) || (foundProcHandleId > 0 && procId == -1))
                     {
-                        processFound = true;
-
                         var startPointX = (screenWidth / 2) - 320;
                         var startPointY = (screenHeight / 2) - 240;
                         SetWindowPosPtr(pFoundWindow, (IntPtr)0, startPointX, startPointY, 645, 507, SwpFramechanged);
+
+                        return proc.Id;
                     }
                 } //end for
 
                 System.Threading.Thread.Sleep(500);
                 attempts++;
             } //end while
+
+            return procId;
         } //end WindowRestyle
     } //end class
 } //end namespace
