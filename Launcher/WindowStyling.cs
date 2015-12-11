@@ -170,7 +170,6 @@ namespace Launcher
                         //force a redraw
                         DrawMenuBar(proc.MainWindowHandle);
                         SetWindowLong(pFoundWindow, GwlStyle, (style & ~WsSysmenu));
-                        style = GetWindowLong(pFoundWindow, GwlStyle);
                     }
                 } //end for
 
