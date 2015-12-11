@@ -92,6 +92,7 @@ namespace Launcher
         private const int WsDlgframe = 0x00400000; //window with double border but no title
         private const int WsCaption = WsBorder | WsDlgframe; //window with a title bar 
         private const int WsSysmenu = 0x00080000; //window menu 
+        private const int CS_NOCLOSE = 0x0200; // close icon
 
         private const int SwpFramechanged = 0x0020;
 
@@ -169,7 +170,7 @@ namespace Launcher
                         //force a redraw
                         DrawMenuBar(proc.MainWindowHandle);
                         SetWindowLong(pFoundWindow, GwlStyle, (style & ~WsSysmenu));
-                        SetWindowLong(pFoundWindow, GwlStyle, (style & ~WsCaption));
+                        style = GetWindowLong(pFoundWindow, GwlStyle);
                     }
                 } //end for
 
@@ -199,8 +200,7 @@ namespace Launcher
 
                         var startPointX = (screenWidth / 2) - 320;
                         var startPointY = (screenHeight / 2) - 240;
-
-                        SetWindowPosPtr(pFoundWindow, (IntPtr)0, startPointX, startPointY, 640, 480, SwpFramechanged);
+                        SetWindowPosPtr(pFoundWindow, (IntPtr)0, startPointX, startPointY, 645, 507, SwpFramechanged);
                     }
                 } //end for
 
