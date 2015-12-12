@@ -40,7 +40,7 @@ namespace Launcher
             if (settings.ClientBin.Trim() == string.Empty || settings.ClientBin.Trim() == "No Client Directory Selected"
                 || settings.ClientBin.Trim() == string.Empty)
             {
-                MessageBox.Show("You must enter a client directory and select a bin to continue.", "Invalid Settings",
+                MessageBox.Show(@"You must enter a client directory and select a bin to continue.", @"Invalid Settings",
                     MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
 
                 return;

@@ -9,6 +9,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using System.Windows.Forms;
+using Launcher.WindowsAPI;
 
 namespace Launcher
 {
@@ -17,7 +18,7 @@ namespace Launcher
         private readonly object _lockObject = new object();
         private readonly Dictionary<string, Server> _servers = new Dictionary<string, Server>
         {
-            {
+           {
                 "Resurrection", 
                 new Server
                 {
@@ -39,10 +40,19 @@ namespace Launcher
 
         public LauncherForm()
         {
-            InitializeComponent();
+            if (this._servers == null || this._servers.Count == 0)
+            {
+                MessageBox.Show(@"No servers configured, contact your server admin. Closing launcher.", @"No Servers Found", MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
 
-            cmbServer.Items.AddRange(_servers.Keys.ToArray());
-            cmbServer.SelectedIndex = 0;
+                this.Load += (s, e) =>
+                {
+                    this.Close(); 
+                    Application.Exit(); 
+                };
+            }
+
+            InitializeComponent();
         }
 
         private void btnClose_Click(object sender, EventArgs e)
@@ -59,6 +69,9 @@ namespace Launcher
 
         private void LauncherForm_Load(object sender, EventArgs e)
         {
+            cmbServer.Items.AddRange(this._servers.Keys.ToArray());
+            cmbServer.SelectedIndex = 0;
+            
             var settings = Helpers.LoadSettings();
             var serverOnline = this.CheckServerStatus(false);
 
@@ -70,6 +83,7 @@ namespace Launcher
                 MessageBox.Show("Did not auto play because server is offline.");
                 return;
             }
+
             this.WindowState = FormWindowState.Minimized;
             this.ShowInTaskbar = false;
 
@@ -87,8 +101,8 @@ namespace Launcher
 
             if (settings.ClientDirectory == string.Empty || settings.ClientBin == string.Empty)
             {
-                MessageBox.Show("You must select your lineage directory under settings before continuing.",
-                   "Cannot continue!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(@"You must select your lineage directory under settings before continuing.",
+                   @"Cannot continue!", MessageBoxButtons.OK, MessageBoxIcon.Error);
 
                 return;
             }
@@ -98,7 +112,7 @@ namespace Launcher
             var selectedServer = this._servers[this.cmbServer.SelectedItem.ToString()];
             var ip = (uint)IPAddress.NetworkToHostOrder(BitConverter.ToInt32(IPAddress.Parse(selectedServer.Ip).GetAddressBytes(), 0));
 
-            var revertResolution = new DevMode();
+            var revertResolution = new User32.DevMode();
 
             if (settings.Resize)
                 revertResolution = WindowStyling.ChangeDisplaySettings(settings.Resolution.Width, settings.Resolution.Height, 16);
@@ -123,13 +137,13 @@ namespace Launcher
                 lock (this._lockObject)
                     HookedProcIds.Add(hookedProcId);
 
-            if(!processChecker.IsBusy)
-                processChecker.RunWorkerAsync(revertResolution);
+            if(!this.processChecker.IsBusy)
+                this.processChecker.RunWorkerAsync(revertResolution);
         }
 
         private void cmbServer_SelectedIndexChanged(object sender, EventArgs e)
         {
-            this.lblServerStatus.Text = "Pinging...";
+            this.lblServerStatus.Text = @"Pinging...";
             this.lblServerStatus.ForeColor = Color.Khaki;
             
             var statusThread = new Thread(() => this.CheckServerStatus(true)) {  IsBackground = true };
@@ -151,14 +165,14 @@ namespace Launcher
                 cmbServer.Invoke(new Action(
                     () =>
                     {
-                        host = _servers[this.cmbServer.Text].Ip;
-                        port = _servers[this.cmbServer.Text].Port;
+                        host = this._servers[this.cmbServer.Text].Ip;
+                        port = this._servers[this.cmbServer.Text].Port;
                     }));
             }
             else
             {
-                host = _servers[this.cmbServer.Text].Ip;
-                port = _servers[this.cmbServer.Text].Port;
+                host = this._servers[this.cmbServer.Text].Ip;
+                port = this._servers[this.cmbServer.Text].Port;
             }
 
             //should never happen, but let's handle it just in case
@@ -200,7 +214,7 @@ namespace Launcher
 
         private void processChecker_DoWork(object sender, DoWorkEventArgs e)
         {
-            var revertResolution = (DevMode)e.Argument;
+            var revertResolution = (User32.DevMode)e.Argument;
             
             while (true)
             {
@@ -221,7 +235,7 @@ namespace Launcher
                     if (HookedProcIds.Count == 0)
                     {
                         e.Cancel = true;
-                        WindowStyling.ChangeDisplaySettings(ref revertResolution, 0);
+                        WindowStyling.ChangeDisplaySettings(revertResolution);
                         return;
                     }
                 }

@@ -115,6 +115,8 @@
     <Compile Include="SettingsForm.Designer.cs">
       <DependentUpon>SettingsForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="WindowsAPI\Kernel32.cs" />
+    <Compile Include="WindowsAPI\User32.cs" />
     <Compile Include="WindowStyling.cs" />
     <EmbeddedResource Include="GlassButton.resx">
       <DependentUpon>GlassButton.cs</DependentUpon>

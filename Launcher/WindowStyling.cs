@@ -3,120 +3,36 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
+using Launcher.WindowsAPI;
 
 namespace Launcher
 {
-    public struct DevMode
-    {
-        private const int CCHDEVICENAME = 0x20;
-        private const int CCHFORMNAME = 0x20;
-        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 0x20)]
-        public string dmDeviceName;
-        public short dmSpecVersion;
-        public short dmDriverVersion;
-        public short dmSize;
-        public short dmDriverExtra;
-        public int dmFields;
-        public int dmPositionX;
-        public int dmPositionY;
-        public int dmDisplayFixedOutput;
-        public short dmColor;
-        public short dmDuplex;
-        public short dmYResolution;
-        public short dmTTOption;
-        public short dmCollate;
-        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 0x20)]
-        public string dmFormName;
-        public short dmLogPixels;
-        public int dmBitsPerPel;
-        public int dmPelsWidth;
-        public int dmPelsHeight;
-        public int dmDisplayFlags;
-        public int dmDisplayFrequency;
-        public int dmICMMethod;
-        public int dmICMIntent;
-        public int dmMediaType;
-        public int dmDitherType;
-        public int dmReserved1;
-        public int dmReserved2;
-        public int dmPanningWidth;
-        public int dmPanningHeight;
-        public int dmDisplayOrientation;
-    }
-
     public class WindowStyling
     {
-        #region Constants
-        //Finds a window by class name
-
-        [DllImport("user32.dll")]
-        public static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
-
-        //Sets a window to be a child window of another window
-        [DllImport("user32.dll")]
-        public static extern IntPtr SetParent(IntPtr hWndChild, IntPtr hWndNewParent);
-
-        //Sets window attributes
-        [DllImport("user32.dll")]
-        public static extern int SetWindowLong(IntPtr hWnd, int nIndex, int dwNewLong);
-
-        //Gets window attributes
-        [DllImport("user32.dll")]
-        public static extern int GetWindowLong(IntPtr hWnd, int nIndex);
-
-        [DllImport("user32.dll")]
-        static extern IntPtr GetMenu(IntPtr hWnd);
-
-        [DllImport("user32.dll")]
-        static extern int GetMenuItemCount(IntPtr hMenu);
-
-        [DllImport("user32.dll")]
-        static extern bool DrawMenuBar(IntPtr hWnd);
-
-        [DllImport("user32.dll")]
-        static extern bool RemoveMenu(IntPtr hMenu, uint uPosition, uint uFlags);
-
-        [DllImport("user32.dll", EntryPoint = "SetWindowPos")]
-        public static extern IntPtr SetWindowPosPtr(IntPtr hWnd, IntPtr hMenu, int x, int y, int cx, int cy, uint uFlags);
-
-        [DllImport("user32.dll")]
-        static extern bool EnumDisplaySettings(string lpszDeviceName, int iModeNum, ref DevMode lpDevMode);
-
-        [DllImport("user32.dll")]
-        public static extern int ChangeDisplaySettings([In, Out]ref DevMode lpDevMode, [param: MarshalAs(UnmanagedType.U4)] uint dwflags);
-
         //assorted constants needed
-        private const uint MfByposition = 0x400;
-        private const uint MfRemove = 0x1000;
-        private const int GwlStyle = -16;
-        private const int WsBorder = 0x00800000; //window with border
-        private const int WsDlgframe = 0x00400000; //window with double border but no title
-        private const int WsCaption = WsBorder | WsDlgframe; //window with a title bar 
-        private const int WsSysmenu = 0x00080000; //window menu 
-        private const int CS_NOCLOSE = 0x0200; // close icon
-
-        private const int SwpFramechanged = 0x0020;
-
-        private const int DISP_CHANGE_SUCCESSFUL = 0;
-
-        private const int ENUM_CURRENT_SETTINGS = -1;
+        private const int DispChangeSuccessful = 0;
+        private const int EnumCurrentSettings = -1;
 
         private const int MaxRetries = 10;
-        #endregion
 
-        public static DevMode ChangeDisplayColour(int bitCount)
+        public static User32.DevMode ChangeDisplayColour(int bitCount)
         {
-            return ChangeDisplaySettings(-1, -1, bitCount);
+            return WindowStyling.ChangeDisplaySettings(-1, -1, bitCount);
         }
 
-        public static DevMode ChangeDisplaySettings(int width, int height, int bitCount)
+        public static User32.DevMode ChangeDisplaySettings(User32.DevMode mode)
         {
-            var originalMode = new DevMode();
-            originalMode.dmSize = (short)Marshal.SizeOf(originalMode);
+            return WindowStyling.ChangeDisplaySettings(mode.DmPelsHeight, mode.DmDisplayFlags, mode.DmPelsWidth);
+        }
+
+        public static User32.DevMode ChangeDisplaySettings(int width, int height, int bitCount)
+        {
+            var originalMode = new User32.DevMode();
+            originalMode.DmSize = (short)Marshal.SizeOf(originalMode);
 
             // Retrieving current settings
             // to edit them
-            EnumDisplaySettings(null, ENUM_CURRENT_SETTINGS, ref originalMode);
+            User32.EnumDisplaySettings(null, EnumCurrentSettings, ref originalMode);
 
             // Making a copy of the current settings
             // to allow reseting to the original mode
@@ -125,17 +41,17 @@ namespace Launcher
             // Changing the settings
             if (width != -1 && height != -1)
             {
-                newMode.dmPelsHeight = width;
-                newMode.dmDisplayFlags = height;
+                newMode.DmPelsHeight = width;
+                newMode.DmDisplayFlags = height;
             }
             
-            newMode.dmPelsWidth = bitCount;
+            newMode.DmPelsWidth = bitCount;
 
             // Capturing the operation result
-            var result = ChangeDisplaySettings(ref newMode, 0);
+            var result = User32.ChangeDisplaySettings(ref newMode, 0);
 
-            if (result != DISP_CHANGE_SUCCESSFUL)
-                MessageBox.Show("Resolution change failed. Unable to modify resolution.");
+            if (result != DispChangeSuccessful)
+                MessageBox.Show(@"Resolution change failed. Unable to modify resolution.");
 
             return originalMode;
         } //end ChangeDisplaySettings
@@ -156,19 +72,17 @@ namespace Launcher
                     var procHandleId = pFoundWindow.ToInt32();
                     if (procHandleId > 0 && alreadyHookedProcs.IndexOf(proc.Id) == -1)
                     {
-                        var style = GetWindowLong(pFoundWindow, GwlStyle);
+                        var style = User32.GetWindowLong(pFoundWindow, (int)User32.WindowLongFlags.GwlStyle);
 
-                        //get menu
-                        var hmenu = GetMenu(proc.MainWindowHandle);
-                        //get item count
-                        var count = GetMenuItemCount(hmenu);
-                        //loop & remove
+                        var hmenu = User32.GetMenu(proc.MainWindowHandle);
+                        var count = User32.GetMenuItemCount(hmenu);
+
                         for (var i = 0; i < count; i++)
-                            RemoveMenu(hmenu, 0, (MfByposition | MfRemove));
+                            User32.RemoveMenu(hmenu, 0, (int)(User32.MenuFlags.MfByposition | User32.MenuFlags.MfRemove));
 
                         //force a redraw
-                        DrawMenuBar(proc.MainWindowHandle);
-                        SetWindowLong(pFoundWindow, GwlStyle, (style & ~WsSysmenu));
+                        User32.DrawMenuBar(proc.MainWindowHandle);
+                        User32.SetWindowLong(pFoundWindow, (int)User32.WindowLongFlags.GwlStyle, (style & ~(int)User32.WindowLongFlags.WsSysmenu));
 
                         return proc.Id;
                     }
@@ -199,7 +113,7 @@ namespace Launcher
                     {
                         var startPointX = (screenWidth / 2) - 320;
                         var startPointY = (screenHeight / 2) - 240;
-                        SetWindowPosPtr(pFoundWindow, (IntPtr)0, startPointX, startPointY, 645, 507, SwpFramechanged);
+                        User32.SetWindowPosPtr(pFoundWindow, (IntPtr)0, startPointX, startPointY, 646, 508, (int)User32.SetWindowPosFlags.FrameChanged);
 
                         return proc.Id;
                     }
