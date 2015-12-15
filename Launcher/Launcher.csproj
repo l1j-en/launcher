@@ -11,7 +11,8 @@
     <AssemblyName>Launcher</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
-    <TargetFrameworkProfile>Client</TargetFrameworkProfile>
+    <TargetFrameworkProfile>
+    </TargetFrameworkProfile>
     <IsWebBootstrapper>false</IsWebBootstrapper>
     <PublishUrl>publish\</PublishUrl>
     <Install>true</Install>
@@ -82,6 +83,8 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.ServiceModel.Web" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="System.Data" />
@@ -93,6 +96,7 @@
   <ItemGroup>
     <Compile Include="ComboBoxItem.cs" />
     <Compile Include="DllInjector.cs" />
+    <Compile Include="ExtensionMethods.cs" />
     <Compile Include="Helpers.cs" />
     <Compile Include="LauncherForm.cs">
       <SubType>Form</SubType>
@@ -104,6 +108,7 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Lineage.cs" />
+    <Compile Include="VersionInfo.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Resolution.cs" />
@@ -114,6 +119,12 @@
     </Compile>
     <Compile Include="SettingsForm.Designer.cs">
       <DependentUpon>SettingsForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="UpdateForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="UpdateForm.Designer.cs">
+      <DependentUpon>UpdateForm.cs</DependentUpon>
     </Compile>
     <Compile Include="WindowsAPI\Kernel32.cs" />
     <Compile Include="WindowsAPI\User32.cs" />
@@ -130,6 +141,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="SettingsForm.resx">
       <DependentUpon>SettingsForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UpdateForm.resx">
+      <DependentUpon>UpdateForm.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="app.config" />
     <None Include="app.manifest" />

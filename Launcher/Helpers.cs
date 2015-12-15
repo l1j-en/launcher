@@ -1,10 +1,11 @@
-﻿using System.Configuration;
-using System.Diagnostics;
+﻿using System;
 using System.IO;
-using System.Linq;
+using System.Net;
 using System.Reflection;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
+using System.Security.Cryptography;
+using System.Text;
 using System.Windows.Forms;
 using Microsoft.Win32;
 
@@ -30,7 +31,6 @@ namespace Launcher
                 return new Settings();
 
             var ms = new MemoryStream((byte[])((RegistryKey)settingsKey).GetValue("AppSettings"));
-
             return DeserializeFromStream<Settings>(ms);
         }
 
@@ -86,5 +86,40 @@ namespace Launcher
 
             return (T)formatter.Deserialize(stream);
         } //end DeserializeFromStream
+
+        public static VersionInfo GetVersionInfo()
+        {
+            try
+            {
+                const string pubKey = "<RSAKeyValue><Modulus>l5mJTTO/MHTnaLbzkr0bfbOvY6qC9jWa39IIOtujP1mAPqhdEG2dIbtx20QEZ5P/9hg0KP16RvYj6BSwU4/Ees90mKpXV/7PzTp9uSRZuKNo+uoku7oqar4ruWmpcpPErKVGqD0i7908C/833VzSxdBxnqFqgF1nAk1iRJsnjxC8hseimjfe/E1EvO+Uk/NcA9VFR7YRPknuMLWMoLyl0EN6lJ4z5xLZKhPqGpMdIjDRmW2PdQxSFs5FIsVK9jYnqW/M6o+PiL1uj1py3EaBgIOkOMSUhEAHlgNkqdYlXHkqQ4W3HTuNkQmVLL8oZd6NXrflcF3PDEr1JtbTd+X+DQ==</Modulus><Exponent>JQ==</Exponent></RSAKeyValue>";
+
+                var rsa = new RSACryptoServiceProvider();
+                rsa.FromXmlString(pubKey);
+
+                var request = (HttpWebRequest)WebRequest.Create("http://launcher.travis-smith.ca/Version.php");
+                request.Timeout = 2000;
+                request.Proxy = null;
+                request.UserAgent = "L1J Launcher";
+
+                var response = request.GetResponse();
+                var data = response.GetResponseStream();
+                var signature = Convert.FromBase64String(response.Headers["Verify-Hash"]);
+                string json;
+
+                using (var sr = new StreamReader(data))
+                    json = sr.ReadToEnd();
+
+                var result = rsa.VerifyData(Encoding.UTF8.GetBytes(json), CryptoConfig.MapNameToOID("SHA512"), signature);
+
+                if(result)
+                    return json.JsonDeserialize<VersionInfo>();
+
+                return null;
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+        }
     } //end class
 } //end namespace

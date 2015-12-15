@@ -15,6 +15,7 @@ namespace Launcher
 {
     public partial class LauncherForm : Form
     {
+        private const string Version = "1.0";
         private readonly object _lockObject = new object();
         private readonly Dictionary<string, Server> _servers = new Dictionary<string, Server>
         {
@@ -89,6 +90,19 @@ namespace Launcher
 
             this.Launch();
         }
+
+        private void LauncherForm_Shown(object sender, EventArgs e)
+        {
+            //TODO -- maybe I want to thread this in the future to stop the UI freeze?
+            //TODO -- 2 seconds doesn't seem too bad so far
+            var versionInfo = Helpers.GetVersionInfo();
+
+            if (versionInfo != null && Version != versionInfo.Version)
+                new UpdateForm(versionInfo).ShowDialog();
+
+            if (versionInfo != null && versionInfo.Required)
+                Application.Exit();
+        } 
 
         private void playButton_Click(object sender, EventArgs e)
         {
@@ -184,7 +198,7 @@ namespace Launcher
                 try
                 {
                     var result = socket.BeginConnect(host, port, null, null);
-                    result.AsyncWaitHandle.WaitOne(3000, true);
+                    result.AsyncWaitHandle.WaitOne(2000, true);
 
                     if (!socket.Connected)
                     {

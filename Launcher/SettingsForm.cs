@@ -83,8 +83,8 @@ namespace Launcher
 
                 this.cmbBin.Text = savedSettings.ClientBin;
             }
-            else
                 this.cmbBin.SelectedIndex = 0;
+                
 
             if (string.IsNullOrEmpty(savedSettings.MusicType))
                 this.cmbMusic.SelectedIndex = 0;
@@ -108,6 +108,12 @@ namespace Launcher
             var binFiles = Directory.GetFiles(this.txtDirectory.Text, "*.bin");
             this.cmbBin.Items.Clear();
             this.cmbBin.Items.AddRange(binFiles.Select(b => new ComboBoxItem { Text = Path.GetFileName(b), Value = b }).ToArray());
+
+            var initialBinIndex = this.cmbBin.FindString("S3EP1.bin");
+
+            if (initialBinIndex > -1)
+                this.cmbBin.SelectedIndex = initialBinIndex;
+
         }
 
         private void chkWindowed_CheckedChanged(object sender, EventArgs e)

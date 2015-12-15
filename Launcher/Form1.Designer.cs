@@ -187,6 +187,7 @@
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Lineage Resurrection";
             this.Load += new System.EventHandler(this.LauncherForm_Load);
+            this.Shown += new System.EventHandler(this.LauncherForm_Shown);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pctVote)).EndInit();
             this.ResumeLayout(false);
