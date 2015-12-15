@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using Launcher.WindowsAPI;
@@ -22,13 +23,45 @@ namespace Launcher
 
         public static User32.DevMode ChangeDisplaySettings(User32.DevMode mode)
         {
-            return WindowStyling.ChangeDisplaySettings(mode.DmPelsHeight, mode.DmDisplayFlags, mode.DmPelsWidth);
+            return WindowStyling.ChangeDisplaySettings(mode.dmPelsWidth, mode.dmPelsHeight, mode.dmBitsPerPel);
         }
+
+        public static List<Resolution> GetResolutions()
+        {
+            var currentResolution = new User32.DevMode();
+            User32.EnumDisplaySettings(null, EnumCurrentSettings, ref currentResolution);
+
+            var returnValue = new List<Resolution>();
+            var i = 0;
+            var displayDevice = new User32.DevMode();
+
+            while (User32.EnumDisplaySettings(null, i, ref displayDevice))
+            {
+                var colour = displayDevice.dmBitsPerPel;
+                var width = displayDevice.dmPelsWidth;
+                var height = displayDevice.dmPelsHeight;
+
+                // since windowed mode only supports 16 bit, only add 16 bit
+                if (colour == 16 && currentResolution.dmDisplayFrequency == displayDevice.dmDisplayFrequency
+                    && displayDevice.dmDisplayFixedOutput == 0 && width >= 800 &&
+                    (width != currentResolution.dmPelsWidth && height != currentResolution.dmPelsHeight))
+                    returnValue.Add(new Resolution
+                    {
+                        Width = width,
+                        Height = height,
+                        Colour = colour
+                    });
+
+                i++;
+            }
+
+            return returnValue.OrderByDescending(b => b.Width).ThenByDescending(b => b.Height).ToList();
+        } 
 
         public static User32.DevMode ChangeDisplaySettings(int width, int height, int bitCount)
         {
             var originalMode = new User32.DevMode();
-            originalMode.DmSize = (short)Marshal.SizeOf(originalMode);
+            originalMode.dmSize = (short)Marshal.SizeOf(originalMode);
 
             // Retrieving current settings
             // to edit them
@@ -41,11 +74,11 @@ namespace Launcher
             // Changing the settings
             if (width != -1 && height != -1)
             {
-                newMode.DmPelsHeight = width;
-                newMode.DmDisplayFlags = height;
+                newMode.dmPelsHeight = height;
+                newMode.dmPelsWidth = width;
             }
             
-            newMode.DmPelsWidth = bitCount;
+            newMode.dmBitsPerPel = bitCount;
 
             // Capturing the operation result
             var result = User32.ChangeDisplaySettings(ref newMode, 0);

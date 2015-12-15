@@ -60,12 +60,7 @@ namespace Launcher
 
         private void SettingsForm_Load(object sender, EventArgs e)
         {
-            this.cmbResolution.Items.Add(new Resolution
-            {
-                Width = 800,
-                Height = 600,
-                Colour = 16
-            });
+            this.cmbResolution.Items.AddRange(WindowStyling.GetResolutions().ToArray());
 
             var savedSettings = Helpers.LoadSettings();
 
@@ -74,6 +69,7 @@ namespace Launcher
             this.chkCentre.Checked = savedSettings.Centred;
             this.chkAutoPlay.Checked = savedSettings.AutoPlay;
             this.chkDisableDark.Checked = savedSettings.DisableDark;
+            this.cmbResolution.SelectedIndex = this.cmbResolution.FindString(savedSettings.Resolution.ToString());
 
             this.txtDirectory.Text = savedSettings.ClientDirectory ?? "";
 
@@ -83,9 +79,9 @@ namespace Launcher
 
                 this.cmbBin.Text = savedSettings.ClientBin;
             }
+            else
                 this.cmbBin.SelectedIndex = 0;
                 
-
             if (string.IsNullOrEmpty(savedSettings.MusicType))
                 this.cmbMusic.SelectedIndex = 0;
             else
@@ -113,7 +109,6 @@ namespace Launcher
 
             if (initialBinIndex > -1)
                 this.cmbBin.SelectedIndex = initialBinIndex;
-
         }
 
         private void chkWindowed_CheckedChanged(object sender, EventArgs e)

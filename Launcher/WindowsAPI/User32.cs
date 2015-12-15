@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.InteropServices;
+using System.Windows.Forms;
 
 namespace Launcher.WindowsAPI
 {
@@ -7,40 +8,40 @@ namespace Launcher.WindowsAPI
     {
         public struct DevMode
         {
-            private const int Cchdevicename = 0x20;
-            private const int Cchformname = 0x20;
+            private const int CCHDEVICENAME = 0x20;
+            private const int CCHFORMNAME = 0x20;
             [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 0x20)]
-            public string DmDeviceName;
-            public short DmSpecVersion;
-            public short DmDriverVersion;
-            public short DmSize;
-            public short DmDriverExtra;
-            public int DmFields;
-            public int DmPositionX;
-            public int DmPositionY;
-            public int DmDisplayFixedOutput;
-            public short DmColor;
-            public short DmDuplex;
-            public short DmYResolution;
-            public short DmTtOption;
-            public short DmCollate;
+            public string dmDeviceName;
+            public short dmSpecVersion;
+            public short dmDriverVersion;
+            public short dmSize;
+            public short dmDriverExtra;
+            public int dmFields;
+            public int dmPositionX;
+            public int dmPositionY;
+            public ScreenOrientation dmDisplayOrientation;
+            public int dmDisplayFixedOutput;
+            public short dmColor;
+            public short dmDuplex;
+            public short dmYResolution;
+            public short dmTTOption;
+            public short dmCollate;
             [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 0x20)]
-            public string DmFormName;
-            public short DmLogPixels;
-            public int DmBitsPerPel;
-            public int DmPelsWidth;
-            public int DmPelsHeight;
-            public int DmDisplayFlags;
-            public int DmDisplayFrequency;
-            public int DmIcmMethod;
-            public int DmIcmIntent;
-            public int DmMediaType;
-            public int DmDitherType;
-            public int DmReserved1;
-            public int DmReserved2;
-            public int DmPanningWidth;
-            public int DmPanningHeight;
-            public int DmDisplayOrientation;
+            public string dmFormName;
+            public short dmLogPixels;
+            public int dmBitsPerPel;
+            public int dmPelsWidth;
+            public int dmPelsHeight;
+            public int dmDisplayFlags;
+            public int dmDisplayFrequency;
+            public int dmICMMethod;
+            public int dmICMIntent;
+            public int dmMediaType;
+            public int dmDitherType;
+            public int dmReserved1;
+            public int dmReserved2;
+            public int dmPanningWidth;
+            public int dmPanningHeight;
         }
 
         [Flags]
