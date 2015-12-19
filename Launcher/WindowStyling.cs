@@ -16,6 +16,8 @@ namespace Launcher
 
         private const int MaxRetries = 10;
 
+        public static Dictionary<int, User32.WinEventProc> Listeners = new Dictionary<int, User32.WinEventProc>();
+
         public static User32.DevMode ChangeDisplayColour(int bitCount)
         {
             return WindowStyling.ChangeDisplaySettings(-1, -1, bitCount);
@@ -105,7 +107,7 @@ namespace Launcher
                     var procHandleId = pFoundWindow.ToInt32();
                     if (procHandleId > 0 && alreadyHookedProcs.IndexOf(proc.Id) == -1)
                     {
-                        var style = User32.GetWindowLong(pFoundWindow, (int)User32.WindowLongFlags.GwlStyle);
+                        var style = User32.GetWindowLong(pFoundWindow, (int)(User32.WindowLongFlags.GwlStyle));
 
                         var hmenu = User32.GetMenu(proc.MainWindowHandle);
                         var count = User32.GetMenuItemCount(hmenu);
@@ -117,6 +119,12 @@ namespace Launcher
                         User32.DrawMenuBar(proc.MainWindowHandle);
                         User32.SetWindowLong(pFoundWindow, (int)User32.WindowLongFlags.GwlStyle, (style & ~(int)User32.WindowLongFlags.WsSysmenu));
 
+                        Listeners.Add(proc.Id, new User32.WinEventProc(EventCallback));
+
+                        User32.SetWinEventHook((uint)User32.WinEventDelegateFlags.EventSystemMovesizeend,
+                            (uint)User32.WinEventDelegateFlags.EventSystemMovesizeend, IntPtr.Zero, Listeners[proc.Id], proc.Id, 0,
+                            (uint)User32.WinEventDelegateFlags.WineventOutofcontext);
+
                         return proc.Id;
                     }
                 } //end for
@@ -127,6 +135,29 @@ namespace Launcher
 
             return -1;
         } //end SetWindowed
+
+        private static void EventCallback(IntPtr hWinEventHook, uint iEvent, IntPtr hWnd, int idObject, int idChild, int dwEventThread, int dwmsEventTime)
+        {
+            User32.InvalidateRect(IntPtr.Zero, IntPtr.Zero, true);
+            User32.RedrawWindow(hWinEventHook, IntPtr.Zero, IntPtr.Zero, User32.RedrawWindowFlags.UpdateNow);
+
+           foreach (var procId in Listeners.Keys)
+            {
+                var proc = Process.GetProcessById(procId);
+                var windowHandle = proc.MainWindowHandle;
+
+                if (windowHandle != hWnd)
+                {
+                    User32.AllowSetForegroundWindow(-1);
+                    User32.SetForegroundWindow(windowHandle);
+                } 
+            }
+
+            System.Threading.Thread.Sleep(100);
+            //re-set the moved window to be the active window
+            User32.AllowSetForegroundWindow(-1);
+            User32.SetForegroundWindow(hWnd);
+        }
 
         public static int SetCentred(string processName, int screenWidth, int screenHeight, int procId = -1)
         {

@@ -245,6 +245,7 @@ namespace Launcher
                         }
                         catch (Exception)
                         {
+                            WindowStyling.Listeners.Remove(HookedProcIds[i]);
                             HookedProcIds.RemoveAt(i);
                         }
                     }
@@ -253,7 +254,6 @@ namespace Launcher
                     {
                         e.Cancel = true;
                         WindowStyling.ChangeDisplaySettings(revertResolution);
-                        Application.Exit();
                         return;
                     }
                 }
