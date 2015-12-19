@@ -69,7 +69,9 @@ namespace Launcher
             this.chkCentre.Checked = savedSettings.Centred;
             this.chkAutoPlay.Checked = savedSettings.AutoPlay;
             this.chkDisableDark.Checked = savedSettings.DisableDark;
-            this.cmbResolution.SelectedIndex = this.cmbResolution.FindString(savedSettings.Resolution.ToString());
+
+            if(savedSettings.Resolution != null)
+                this.cmbResolution.SelectedIndex = this.cmbResolution.FindString(savedSettings.Resolution.ToString());
 
             this.txtDirectory.Text = savedSettings.ClientDirectory ?? "";
 
