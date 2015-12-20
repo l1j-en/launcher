@@ -14,7 +14,7 @@ using System.Windows.Forms;
 using System.Drawing.Drawing2D;
 using PushButtonState = System.Windows.Forms.VisualStyles.PushButtonState;
 
-namespace Launcher
+namespace Launcher.Controls
 {
     /// <summary>
     /// Represents a glass button control.

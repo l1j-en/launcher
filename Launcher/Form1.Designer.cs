@@ -1,4 +1,6 @@
-﻿namespace Launcher
+﻿using Launcher.Controls;
+
+namespace Launcher
 {
     partial class LauncherForm
     {
@@ -28,45 +30,19 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.lblServerStatusText = new System.Windows.Forms.Label();
-            this.lblServerStatus = new System.Windows.Forms.Label();
             this.BannerBrowser = new System.Windows.Forms.WebBrowser();
-            this.pictureBox2 = new System.Windows.Forms.PictureBox();
+            this.pctLinLogo = new System.Windows.Forms.PictureBox();
             this.cmbServer = new System.Windows.Forms.ComboBox();
             this.processChecker = new System.ComponentModel.BackgroundWorker();
             this.pctVote = new System.Windows.Forms.PictureBox();
-            this.btnPlay = new Launcher.GlassButton();
-            this.btnSettings = new Launcher.GlassButton();
-            this.btnClose = new Launcher.GlassButton();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).BeginInit();
+            this.btnPlay = new Launcher.Controls.GlassButton();
+            this.btnSettings = new Launcher.Controls.GlassButton();
+            this.btnClose = new Launcher.Controls.GlassButton();
+            this.lblServerStatus = new Launcher.Controls.OutlineLabel();
+            this.lblServerStatusText = new Launcher.Controls.OutlineLabel();
+            ((System.ComponentModel.ISupportInitialize)(this.pctLinLogo)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pctVote)).BeginInit();
             this.SuspendLayout();
-            // 
-            // lblServerStatusText
-            // 
-            this.lblServerStatusText.AutoSize = true;
-            this.lblServerStatusText.BackColor = System.Drawing.Color.Transparent;
-            this.lblServerStatusText.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold);
-            this.lblServerStatusText.ForeColor = System.Drawing.Color.Black;
-            this.lblServerStatusText.ImeMode = System.Windows.Forms.ImeMode.NoControl;
-            this.lblServerStatusText.Location = new System.Drawing.Point(11, 353);
-            this.lblServerStatusText.Name = "lblServerStatusText";
-            this.lblServerStatusText.Size = new System.Drawing.Size(105, 16);
-            this.lblServerStatusText.TabIndex = 14;
-            this.lblServerStatusText.Text = "Server Status:";
-            // 
-            // lblServerStatus
-            // 
-            this.lblServerStatus.AutoSize = true;
-            this.lblServerStatus.BackColor = System.Drawing.Color.Transparent;
-            this.lblServerStatus.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold);
-            this.lblServerStatus.ForeColor = System.Drawing.Color.Khaki;
-            this.lblServerStatus.ImeMode = System.Windows.Forms.ImeMode.NoControl;
-            this.lblServerStatus.Location = new System.Drawing.Point(122, 353);
-            this.lblServerStatus.Name = "lblServerStatus";
-            this.lblServerStatus.Size = new System.Drawing.Size(72, 16);
-            this.lblServerStatus.TabIndex = 15;
-            this.lblServerStatus.Text = "Pinging...";
             // 
             // BannerBrowser
             // 
@@ -82,15 +58,17 @@
             this.BannerBrowser.Visible = false;
             this.BannerBrowser.WebBrowserShortcutsEnabled = false;
             // 
-            // pictureBox2
+            // pctLinLogo
             // 
-            this.pictureBox2.BackColor = System.Drawing.Color.Transparent;
-            this.pictureBox2.Image = global::Launcher.Properties.Resources.lineage_logo;
-            this.pictureBox2.Location = new System.Drawing.Point(8, 5);
-            this.pictureBox2.Name = "pictureBox2";
-            this.pictureBox2.Size = new System.Drawing.Size(151, 53);
-            this.pictureBox2.TabIndex = 20;
-            this.pictureBox2.TabStop = false;
+            this.pctLinLogo.BackColor = System.Drawing.Color.Transparent;
+            this.pctLinLogo.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.pctLinLogo.Image = global::Launcher.Properties.Resources.lineage_logo;
+            this.pctLinLogo.Location = new System.Drawing.Point(8, 5);
+            this.pctLinLogo.Name = "pctLinLogo";
+            this.pctLinLogo.Size = new System.Drawing.Size(151, 53);
+            this.pctLinLogo.TabIndex = 20;
+            this.pctLinLogo.TabStop = false;
+            this.pctLinLogo.Click += new System.EventHandler(this.pctLinLogo_Click);
             // 
             // cmbServer
             // 
@@ -167,6 +145,36 @@
             this.btnClose.TabIndex = 22;
             this.btnClose.Click += new System.EventHandler(this.btnClose_Click);
             // 
+            // lblServerStatus
+            // 
+            this.lblServerStatus.AutoSize = true;
+            this.lblServerStatus.BackColor = System.Drawing.Color.Transparent;
+            this.lblServerStatus.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblServerStatus.ForeColor = System.Drawing.Color.Khaki;
+            this.lblServerStatus.ImeMode = System.Windows.Forms.ImeMode.NoControl;
+            this.lblServerStatus.Location = new System.Drawing.Point(181, 336);
+            this.lblServerStatus.Name = "lblServerStatus";
+            this.lblServerStatus.OutlineForeColor = System.Drawing.Color.Black;
+            this.lblServerStatus.OutlineWidth = 2F;
+            this.lblServerStatus.Size = new System.Drawing.Size(99, 20);
+            this.lblServerStatus.TabIndex = 15;
+            this.lblServerStatus.Text = "PINGING...";
+            // 
+            // lblServerStatusText
+            // 
+            this.lblServerStatusText.AutoSize = true;
+            this.lblServerStatusText.BackColor = System.Drawing.Color.Transparent;
+            this.lblServerStatusText.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblServerStatusText.ForeColor = System.Drawing.Color.White;
+            this.lblServerStatusText.ImeMode = System.Windows.Forms.ImeMode.NoControl;
+            this.lblServerStatusText.Location = new System.Drawing.Point(28, 336);
+            this.lblServerStatusText.Name = "lblServerStatusText";
+            this.lblServerStatusText.OutlineForeColor = System.Drawing.Color.Black;
+            this.lblServerStatusText.OutlineWidth = 2F;
+            this.lblServerStatusText.Size = new System.Drawing.Size(162, 20);
+            this.lblServerStatusText.TabIndex = 14;
+            this.lblServerStatusText.Text = "SERVER STATUS:";
+            // 
             // LauncherForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -179,7 +187,7 @@
             this.Controls.Add(this.btnClose);
             this.Controls.Add(this.lblServerStatus);
             this.Controls.Add(this.lblServerStatusText);
-            this.Controls.Add(this.pictureBox2);
+            this.Controls.Add(this.pctLinLogo);
             this.Controls.Add(this.BannerBrowser);
             this.Controls.Add(this.cmbServer);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
@@ -188,7 +196,7 @@
             this.Text = "Lineage Resurrection";
             this.Load += new System.EventHandler(this.LauncherForm_Load);
             this.Shown += new System.EventHandler(this.LauncherForm_Shown);
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pctLinLogo)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pctVote)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -197,16 +205,16 @@
 
         #endregion
 
-        private System.Windows.Forms.Label lblServerStatusText;
-        private System.Windows.Forms.Label lblServerStatus;
         private System.Windows.Forms.WebBrowser BannerBrowser;
-        private System.Windows.Forms.PictureBox pictureBox2;
+        private System.Windows.Forms.PictureBox pctLinLogo;
         private System.Windows.Forms.ComboBox cmbServer;
         private System.ComponentModel.BackgroundWorker processChecker;
         private GlassButton btnClose;
         private GlassButton btnSettings;
         private GlassButton btnPlay;
         private System.Windows.Forms.PictureBox pctVote;
+        private OutlineLabel lblServerStatusText;
+        private OutlineLabel lblServerStatus;
 
 
     }

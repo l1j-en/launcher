@@ -15,7 +15,7 @@ namespace Launcher
 {
     public partial class LauncherForm : Form
     {
-        private const string Version = "1.1";
+        private const string Version = "1.2";
         private VersionInfo _versionInfo;
 
         private readonly object _lockObject = new object();
@@ -160,7 +160,7 @@ namespace Launcher
 
         private void cmbServer_SelectedIndexChanged(object sender, EventArgs e)
         {
-            this.lblServerStatus.Text = @"Pinging...";
+            this.lblServerStatus.Text = @"PINGING...";
             this.lblServerStatus.ForeColor = Color.Khaki;
             
             var statusThread = new Thread(() => this.CheckServerStatus(true)) {  IsBackground = true };
@@ -205,19 +205,19 @@ namespace Launcher
 
                     if (!socket.Connected)
                     {
-                        Helpers.SetControlPropertyThreadSafe(this.lblServerStatus, "Text", "Offline");
+                        Helpers.SetControlPropertyThreadSafe(this.lblServerStatus, "Text", "OFFLINE");
                         Helpers.SetControlPropertyThreadSafe(this.lblServerStatus, "ForeColor", Color.Red);
                     }
                     else
                     {
                         returnValue = true;
-                        Helpers.SetControlPropertyThreadSafe(this.lblServerStatus, "Text", "Online");
+                        Helpers.SetControlPropertyThreadSafe(this.lblServerStatus, "Text", "ONLINE");
                         Helpers.SetControlPropertyThreadSafe(this.lblServerStatus, "ForeColor", Color.Green);
                     }
                 }
                 catch (Exception)
                 {
-                    Helpers.SetControlPropertyThreadSafe(this.lblServerStatus, "Text", "Offline");
+                    Helpers.SetControlPropertyThreadSafe(this.lblServerStatus, "Text", "OFFLINE");
                     Helpers.SetControlPropertyThreadSafe(this.lblServerStatus, "ForeColor", Color.Red);
                 }
                 finally
@@ -265,5 +265,11 @@ namespace Launcher
             var voteUrl = new ProcessStartInfo("http://lineage.extreme-gamerz.org/in.php?id=soren");
             Process.Start(voteUrl);
         } //end pctVote_Click
+
+        private void pctLinLogo_Click(object sender, EventArgs e)
+        {
+            var voteUrl = new ProcessStartInfo("https://zelgo.net");
+            Process.Start(voteUrl);
+        } //end pctLinLogo_Click
     } //end class
 } //end namespace

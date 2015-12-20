@@ -95,6 +95,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ComboBoxItem.cs" />
+    <Compile Include="Controls\OutlineLabel.cs">
+      <SubType>Component</SubType>
+    </Compile>
     <Compile Include="DllInjector.cs" />
     <Compile Include="ExtensionMethods.cs" />
     <Compile Include="Helpers.cs" />
@@ -104,7 +107,7 @@
     <Compile Include="Form1.Designer.cs">
       <DependentUpon>LauncherForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="GlassButton.cs">
+    <Compile Include="Controls\GlassButton.cs">
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Lineage.cs" />
@@ -129,7 +132,7 @@
     <Compile Include="WindowsAPI\Kernel32.cs" />
     <Compile Include="WindowsAPI\User32.cs" />
     <Compile Include="WindowStyling.cs" />
-    <EmbeddedResource Include="GlassButton.resx">
+    <EmbeddedResource Include="Controls\GlassButton.resx">
       <DependentUpon>GlassButton.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="LauncherForm.resx">

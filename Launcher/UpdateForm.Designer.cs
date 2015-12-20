@@ -1,4 +1,6 @@
-﻿namespace Launcher
+﻿using Launcher.Controls;
+
+namespace Launcher
 {
     partial class UpdateForm
     {
@@ -33,7 +35,7 @@
             this.lblUpdateVersion = new System.Windows.Forms.Label();
             this.grpDetails = new System.Windows.Forms.GroupBox();
             this.updateDetails = new System.Windows.Forms.WebBrowser();
-            this.btnClose = new Launcher.GlassButton();
+            this.btnClose = new Launcher.Controls.GlassButton();
             this.grpDetails.SuspendLayout();
             this.SuspendLayout();
             // 

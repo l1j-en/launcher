@@ -1,4 +1,6 @@
-﻿namespace Launcher
+﻿using Launcher.Controls;
+
+namespace Launcher
 {
     partial class SettingsForm
     {
@@ -28,10 +30,10 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.btnClose = new Launcher.GlassButton();
+            this.btnClose = new Launcher.Controls.GlassButton();
             this.lblSettings = new System.Windows.Forms.Label();
-            this.btnSave = new Launcher.GlassButton();
-            this.btnCancel = new Launcher.GlassButton();
+            this.btnSave = new Launcher.Controls.GlassButton();
+            this.btnCancel = new Launcher.Controls.GlassButton();
             this.grpWindowed = new System.Windows.Forms.GroupBox();
             this.grpResolution = new System.Windows.Forms.GroupBox();
             this.cmbResolution = new System.Windows.Forms.ComboBox();
