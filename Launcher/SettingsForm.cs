@@ -71,7 +71,7 @@ namespace Launcher
             this.chkDisableDark.Checked = savedSettings.DisableDark;
 
             if(savedSettings.Resolution != null)
-                this.cmbResolution.SelectedIndex = this.cmbResolution.FindString(savedSettings.Resolution.ToString());
+                this.cmbResolution.SelectedIndex = savedSettings.Resolution == null ? 0 : this.cmbResolution.FindString(savedSettings.Resolution.ToString());
 
             this.txtDirectory.Text = savedSettings.ClientDirectory ?? "";
 
