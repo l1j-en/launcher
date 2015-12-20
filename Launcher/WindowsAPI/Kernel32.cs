@@ -57,6 +57,44 @@ namespace Launcher.WindowsAPI
         }
         #endregion
 
+        /* PINVOKE  */
+        public struct Startupinfo
+        {
+            public uint Cb;
+            public string LpReserved;
+            public string LpDesktop;
+            public string LpTitle;
+            public uint DwX;
+            public uint DwY;
+            public uint DwXSize;
+            public uint DwYSize;
+            public uint DwXCountChars;
+            public uint DwYCountChars;
+            public uint DwFillAttribute;
+            public uint DwFlags;
+            public short WShowWindow;
+            public short CbReserved2;
+            public IntPtr LpReserved2;
+            public IntPtr HStdInput;
+            public IntPtr HStdOutput;
+            public IntPtr HStdError;
+        }
+
+        public struct ProcessInformation
+        {
+            public IntPtr HProcess;
+            public IntPtr HThread;
+            public uint DwProcessId;
+            public uint DwThreadId;
+        }
+
+        [Flags]
+        public enum ProcessCreationFlags : uint
+        {
+            CreateDefaultErrorMode = 0x04000000,
+            CreateSuspended = 0x00000004
+        }
+
         [DllImport("kernel32.dll", SetLastError = true)]
         public static extern IntPtr OpenProcess(uint dwDesiredAccess, int bInheritHandle, uint dwProcessId);
 
@@ -73,10 +111,28 @@ namespace Launcher.WindowsAPI
         public static extern IntPtr VirtualAllocEx(IntPtr hProcess, IntPtr lpAddress, IntPtr dwSize, uint flAllocationType, uint flProtect);
 
         [DllImport("kernel32.dll", SetLastError = true)]
+        public static extern bool ReadProcessMemory(IntPtr hProcess, IntPtr lpBaseAddress, byte[] buffer, uint size, int lpNumberOfBytesRead);
+
+        [DllImport("kernel32.dll", SetLastError = true)]
         public static extern int WriteProcessMemory(IntPtr hProcess, IntPtr lpBaseAddress, byte[] buffer, uint size, int lpNumberOfBytesWritten);
 
         [DllImport("kernel32.dll", SetLastError = true)]
         public static extern IntPtr CreateRemoteThread(IntPtr hProcess, IntPtr lpThreadAttribute, IntPtr dwStackSize, IntPtr lpStartAddress,
             IntPtr lpParameter, uint dwCreationFlags, IntPtr lpThreadId);
+
+        [DllImport("kernel32.dll")]
+        public static extern bool CreateProcess(string lpApplicationName,
+               string lpCommandLine, IntPtr lpProcessAttributes,
+               IntPtr lpThreadAttributes,
+               bool bInheritHandles, ProcessCreationFlags dwCreationFlags,
+               IntPtr lpEnvironment, string lpCurrentDirectory,
+               ref Startupinfo lpStartupInfo,
+               out ProcessInformation lpProcessInformation);
+
+        [DllImport("kernel32.dll")]
+        public static extern uint ResumeThread(IntPtr hThread);
+
+        [DllImport("kernel32.dll")]
+        public static extern uint SuspendThread(IntPtr hThread);
     }
 }
