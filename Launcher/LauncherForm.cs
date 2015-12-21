@@ -270,6 +270,25 @@ namespace Launcher
         {
             var voteUrl = new ProcessStartInfo("https://zelgo.net");
             Process.Start(voteUrl);
-        } //end pctLinLogo_Click
+        }//end pctLinLogo_Click
+
+        private void LauncherForm_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (!e.Control || !e.Shift || e.KeyCode != Keys.A)
+                return;
+
+            var addServerForm = new AddServerForm();
+
+            if (addServerForm.ShowDialog() == DialogResult.OK)
+            {
+                this._servers.Add(addServerForm.txtName.Text, new Server
+                {
+                    Ip = addServerForm.txtIpAddress.Text,
+                    Port = Convert.ToInt32(addServerForm.txtPort.Text)
+                });
+
+                this.cmbServer.Items.Add(addServerForm.txtName.Text);
+            } //end if
+        }  //end LauncherForm_KeyDown
     } //end class
 } //end namespace

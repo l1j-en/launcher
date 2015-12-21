@@ -191,11 +191,13 @@ namespace Launcher
             this.Controls.Add(this.BannerBrowser);
             this.Controls.Add(this.cmbServer);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
+            this.KeyPreview = true;
             this.Name = "LauncherForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Lineage Resurrection";
             this.Load += new System.EventHandler(this.LauncherForm_Load);
             this.Shown += new System.EventHandler(this.LauncherForm_Shown);
+            this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.LauncherForm_KeyDown);
             ((System.ComponentModel.ISupportInitialize)(this.pctLinLogo)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pctVote)).EndInit();
             this.ResumeLayout(false);
