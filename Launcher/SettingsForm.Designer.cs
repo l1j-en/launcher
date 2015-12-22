@@ -163,6 +163,7 @@ namespace Launcher
             // chkResize
             // 
             this.chkResize.AutoSize = true;
+            this.chkResize.Enabled = false;
             this.chkResize.Location = new System.Drawing.Point(18, 65);
             this.chkResize.Name = "chkResize";
             this.chkResize.Size = new System.Drawing.Size(126, 17);
@@ -174,6 +175,7 @@ namespace Launcher
             // chkCentre
             // 
             this.chkCentre.AutoSize = true;
+            this.chkCentre.Enabled = false;
             this.chkCentre.Location = new System.Drawing.Point(18, 42);
             this.chkCentre.Name = "chkCentre";
             this.chkCentre.Size = new System.Drawing.Size(99, 17);

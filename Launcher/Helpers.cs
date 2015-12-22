@@ -121,5 +121,13 @@ namespace Launcher
                 return null;
             }
         }
+
+        public static bool IsWin8Orhigher()
+        {
+            var win8Version = new Version(6, 2, 9200, 0);
+
+            return Environment.OSVersion.Platform == PlatformID.Win32NT &&
+                   Environment.OSVersion.Version >= win8Version;
+        } //end IsWin8OrHigher
     } //end class
 } //end namespace
