@@ -28,7 +28,7 @@ namespace Launcher
             return WindowStyling.ChangeDisplaySettings(mode.dmPelsWidth, mode.dmPelsHeight, mode.dmBitsPerPel);
         }
 
-        public static List<Resolution> GetResolutions()
+        public static List<Resolution> GetResolutions(bool isWin8OrHigher)
         {
             var currentResolution = new User32.DevMode();
             User32.EnumDisplaySettings(null, EnumCurrentSettings, ref currentResolution);
@@ -37,14 +37,16 @@ namespace Launcher
             var i = 0;
             var displayDevice = new User32.DevMode();
 
+            // if we are pre Win 8, then use 16 bit colours, otherwise we use 32 bit since 16 bit isn't supported
+            var colourBit = isWin8OrHigher ? 32 : 16;
+
             while (User32.EnumDisplaySettings(null, i, ref displayDevice))
             {
                 var colour = displayDevice.dmBitsPerPel;
                 var width = displayDevice.dmPelsWidth;
                 var height = displayDevice.dmPelsHeight;
 
-                // since windowed mode only supports 16 bit, only add 16 bit
-                if (colour == 16 && currentResolution.dmDisplayFrequency == displayDevice.dmDisplayFrequency
+                if (colour == colourBit && currentResolution.dmDisplayFrequency == displayDevice.dmDisplayFrequency
                     && displayDevice.dmDisplayFixedOutput == 0 && width >= 800 &&
                     (width != currentResolution.dmPelsWidth && height != currentResolution.dmPelsHeight))
                     returnValue.Add(new Resolution

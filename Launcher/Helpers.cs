@@ -34,7 +34,7 @@ namespace Launcher
             return DeserializeFromStream<Settings>(ms);
         }
 
-        public static void SaveSettings(Settings settings)
+        public static void SaveSettings(Settings settings, bool isWin8OrHigher)
         {
             var existingKey = Registry.CurrentUser.GetValue(@"Software\LineageLauncher");
 
@@ -44,6 +44,13 @@ namespace Launcher
             ((RegistryKey)existingKey).SetValue("AppSettings", Serialize(settings), RegistryValueKind.Binary);
 
             //set the windowed flag in the lineage.cfg file
+            if (isWin8OrHigher && settings.Windowed)
+            {
+                var compatRegKey = Registry.CurrentUser.CreateSubKey(@"Software\Microsoft\Windows NT\CurrentVersion\AppCompatFlags\Layers");
+                if (compatRegKey != null)
+                    ((RegistryKey)compatRegKey).SetValue(settings.ClientDirectory + "\\" + settings.ClientBin, "~ DWM8And16BitMitigation 16BITCOLOR WINXPSP3", RegistryValueKind.String);
+            }
+
             var lincfgPath = Path.Combine(settings.ClientDirectory, "lineage.cfg");
 
             if (!File.Exists(lincfgPath))

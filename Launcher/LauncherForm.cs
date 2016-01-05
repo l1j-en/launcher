@@ -15,8 +15,9 @@ namespace Launcher
 {
     public partial class LauncherForm : Form
     {
-        private const string Version = "1.2";
+        private const string Version = "1.3";
         private VersionInfo _versionInfo;
+        private readonly bool _isWin8OrHigher;
 
         private readonly object _lockObject = new object();
         private readonly Dictionary<string, Server> _servers = new Dictionary<string, Server>
@@ -55,6 +56,7 @@ namespace Launcher
                 };
             }
 
+            this._isWin8OrHigher = this._isWin8OrHigher = Helpers.IsWin8Orhigher();
             InitializeComponent();
         }
 
@@ -65,7 +67,7 @@ namespace Launcher
 
         private void btnSettings_Click(object sender, EventArgs e)
         {
-            var settingsForm = new SettingsForm();
+            var settingsForm = new SettingsForm(this._isWin8OrHigher);
             settingsForm.ShowDialog();
             settingsForm.Dispose();
         }
@@ -132,9 +134,9 @@ namespace Launcher
             var revertResolution = new User32.DevMode();
 
             if (settings.Resize)
-                revertResolution = WindowStyling.ChangeDisplaySettings(settings.Resolution.Width, settings.Resolution.Height, 16);
-            else if(settings.Windowed)
-                revertResolution = WindowStyling.ChangeDisplayColour(16);
+                revertResolution = WindowStyling.ChangeDisplaySettings(settings.Resolution.Width, settings.Resolution.Height, settings.Resolution.Colour);
+            else if (settings.Windowed)
+                revertResolution = WindowStyling.ChangeDisplayColour(this._isWin8OrHigher ? 32 : 16);
 
             Lineage.Run(settings, settings.ClientBin, ip, (ushort)selectedServer.Port);
 
