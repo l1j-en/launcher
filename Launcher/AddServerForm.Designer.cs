@@ -70,6 +70,7 @@
             this.txtName.Name = "txtName";
             this.txtName.Size = new System.Drawing.Size(154, 20);
             this.txtName.TabIndex = 3;
+            this.txtName.Text = "Testing Server";
             // 
             // txtIpAddress
             // 
@@ -77,6 +78,7 @@
             this.txtIpAddress.Name = "txtIpAddress";
             this.txtIpAddress.Size = new System.Drawing.Size(154, 20);
             this.txtIpAddress.TabIndex = 4;
+            this.txtIpAddress.Text = "127.0.0.1";
             // 
             // txtPort
             // 
@@ -84,6 +86,7 @@
             this.txtPort.Name = "txtPort";
             this.txtPort.Size = new System.Drawing.Size(154, 20);
             this.txtPort.TabIndex = 5;
+            this.txtPort.Text = "2000";
             // 
             // btnAdd
             // 

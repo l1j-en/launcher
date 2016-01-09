@@ -42,10 +42,9 @@ namespace Launcher
             this.chkWindowed = new System.Windows.Forms.CheckBox();
             this.tabSettings = new System.Windows.Forms.TabControl();
             this.tabGeneral = new System.Windows.Forms.TabPage();
-            this.grpLauncher = new System.Windows.Forms.GroupBox();
-            this.lblAutoNote = new System.Windows.Forms.Label();
-            this.chkAutoPlay = new System.Windows.Forms.CheckBox();
             this.tabInGame = new System.Windows.Forms.TabPage();
+            this.grpMobColours = new System.Windows.Forms.GroupBox();
+            this.chkMobColours = new System.Windows.Forms.CheckBox();
             this.grpMusic = new System.Windows.Forms.GroupBox();
             this.cmbMusic = new System.Windows.Forms.ComboBox();
             this.grpDisableDark = new System.Windows.Forms.GroupBox();
@@ -62,8 +61,8 @@ namespace Launcher
             this.grpResolution.SuspendLayout();
             this.tabSettings.SuspendLayout();
             this.tabGeneral.SuspendLayout();
-            this.grpLauncher.SuspendLayout();
             this.tabInGame.SuspendLayout();
+            this.grpMobColours.SuspendLayout();
             this.grpMusic.SuspendLayout();
             this.grpDisableDark.SuspendLayout();
             this.tabClient.SuspendLayout();
@@ -105,7 +104,7 @@ namespace Launcher
             this.btnSave.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnSave.GlowColor = System.Drawing.Color.Blue;
             this.btnSave.InnerBorderColor = System.Drawing.Color.Transparent;
-            this.btnSave.Location = new System.Drawing.Point(149, 284);
+            this.btnSave.Location = new System.Drawing.Point(153, 248);
             this.btnSave.Name = "btnSave";
             this.btnSave.OuterBorderColor = System.Drawing.Color.Transparent;
             this.btnSave.Size = new System.Drawing.Size(75, 23);
@@ -119,7 +118,7 @@ namespace Launcher
             this.btnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
             this.btnCancel.GlowColor = System.Drawing.Color.Red;
             this.btnCancel.InnerBorderColor = System.Drawing.Color.Transparent;
-            this.btnCancel.Location = new System.Drawing.Point(225, 284);
+            this.btnCancel.Location = new System.Drawing.Point(229, 248);
             this.btnCancel.Name = "btnCancel";
             this.btnCancel.OuterBorderColor = System.Drawing.Color.Transparent;
             this.btnCancel.Size = new System.Drawing.Size(75, 23);
@@ -199,70 +198,59 @@ namespace Launcher
             this.tabSettings.Controls.Add(this.tabGeneral);
             this.tabSettings.Controls.Add(this.tabInGame);
             this.tabSettings.Controls.Add(this.tabClient);
-            this.tabSettings.Location = new System.Drawing.Point(5, 30);
+            this.tabSettings.Location = new System.Drawing.Point(5, 27);
             this.tabSettings.Name = "tabSettings";
             this.tabSettings.SelectedIndex = 0;
-            this.tabSettings.Size = new System.Drawing.Size(295, 243);
+            this.tabSettings.Size = new System.Drawing.Size(295, 203);
             this.tabSettings.TabIndex = 7;
             // 
             // tabGeneral
             // 
             this.tabGeneral.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(206)))), ((int)(((byte)(203)))), ((int)(((byte)(203)))));
-            this.tabGeneral.Controls.Add(this.grpLauncher);
             this.tabGeneral.Controls.Add(this.grpWindowed);
             this.tabGeneral.Location = new System.Drawing.Point(4, 22);
             this.tabGeneral.Name = "tabGeneral";
             this.tabGeneral.Padding = new System.Windows.Forms.Padding(3);
-            this.tabGeneral.Size = new System.Drawing.Size(287, 217);
+            this.tabGeneral.Size = new System.Drawing.Size(287, 177);
             this.tabGeneral.TabIndex = 0;
             this.tabGeneral.Text = "General";
-            // 
-            // grpLauncher
-            // 
-            this.grpLauncher.Controls.Add(this.lblAutoNote);
-            this.grpLauncher.Controls.Add(this.chkAutoPlay);
-            this.grpLauncher.Location = new System.Drawing.Point(10, 152);
-            this.grpLauncher.Name = "grpLauncher";
-            this.grpLauncher.Size = new System.Drawing.Size(271, 59);
-            this.grpLauncher.TabIndex = 6;
-            this.grpLauncher.TabStop = false;
-            this.grpLauncher.Text = "Launcher Settings";
-            // 
-            // lblAutoNote
-            // 
-            this.lblAutoNote.AutoSize = true;
-            this.lblAutoNote.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblAutoNote.Location = new System.Drawing.Point(11, 39);
-            this.lblAutoNote.Name = "lblAutoNote";
-            this.lblAutoNote.Size = new System.Drawing.Size(240, 13);
-            this.lblAutoNote.TabIndex = 1;
-            this.lblAutoNote.Text = "Note*: Hold Ctrl down on launch to stop auto play";
-            // 
-            // chkAutoPlay
-            // 
-            this.chkAutoPlay.AutoSize = true;
-            this.chkAutoPlay.Location = new System.Drawing.Point(14, 19);
-            this.chkAutoPlay.Name = "chkAutoPlay";
-            this.chkAutoPlay.Size = new System.Drawing.Size(158, 17);
-            this.chkAutoPlay.TabIndex = 0;
-            this.chkAutoPlay.Text = "Automatically Launch Game";
-            this.chkAutoPlay.UseVisualStyleBackColor = true;
             // 
             // tabInGame
             // 
             this.tabInGame.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(206)))), ((int)(((byte)(203)))), ((int)(((byte)(203)))));
+            this.tabInGame.Controls.Add(this.grpMobColours);
             this.tabInGame.Controls.Add(this.grpMusic);
             this.tabInGame.Controls.Add(this.grpDisableDark);
             this.tabInGame.Location = new System.Drawing.Point(4, 22);
             this.tabInGame.Name = "tabInGame";
-            this.tabInGame.Size = new System.Drawing.Size(287, 217);
+            this.tabInGame.Size = new System.Drawing.Size(287, 177);
             this.tabInGame.TabIndex = 2;
             this.tabInGame.Text = "In-Game";
+            // 
+            // grpMobColours
+            // 
+            this.grpMobColours.Controls.Add(this.chkMobColours);
+            this.grpMobColours.Location = new System.Drawing.Point(6, 60);
+            this.grpMobColours.Name = "grpMobColours";
+            this.grpMobColours.Size = new System.Drawing.Size(278, 48);
+            this.grpMobColours.TabIndex = 1;
+            this.grpMobColours.TabStop = false;
+            this.grpMobColours.Text = "Mob Colours";
+            // 
+            // chkMobColours
+            // 
+            this.chkMobColours.AutoSize = true;
+            this.chkMobColours.Location = new System.Drawing.Point(26, 19);
+            this.chkMobColours.Name = "chkMobColours";
+            this.chkMobColours.Size = new System.Drawing.Size(121, 17);
+            this.chkMobColours.TabIndex = 0;
+            this.chkMobColours.Text = "Enable Mob Colours";
+            this.chkMobColours.UseVisualStyleBackColor = true;
             // 
             // grpMusic
             // 
             this.grpMusic.Controls.Add(this.cmbMusic);
-            this.grpMusic.Location = new System.Drawing.Point(6, 60);
+            this.grpMusic.Location = new System.Drawing.Point(6, 114);
             this.grpMusic.Name = "grpMusic";
             this.grpMusic.Size = new System.Drawing.Size(278, 52);
             this.grpMusic.TabIndex = 1;
@@ -308,7 +296,7 @@ namespace Launcher
             this.tabClient.Location = new System.Drawing.Point(4, 22);
             this.tabClient.Name = "tabClient";
             this.tabClient.Padding = new System.Windows.Forms.Padding(3);
-            this.tabClient.Size = new System.Drawing.Size(287, 217);
+            this.tabClient.Size = new System.Drawing.Size(287, 177);
             this.tabClient.TabIndex = 1;
             this.tabClient.Text = "Client Settings";
             // 
@@ -380,7 +368,7 @@ namespace Launcher
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(206)))), ((int)(((byte)(203)))), ((int)(((byte)(203)))));
             this.CancelButton = this.btnCancel;
-            this.ClientSize = new System.Drawing.Size(309, 315);
+            this.ClientSize = new System.Drawing.Size(309, 279);
             this.Controls.Add(this.tabSettings);
             this.Controls.Add(this.btnCancel);
             this.Controls.Add(this.btnSave);
@@ -388,6 +376,7 @@ namespace Launcher
             this.Controls.Add(this.btnClose);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
             this.Name = "SettingsForm";
+            this.ShowInTaskbar = false;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "Settings";
             this.Load += new System.EventHandler(this.SettingsForm_Load);
@@ -396,9 +385,9 @@ namespace Launcher
             this.grpResolution.ResumeLayout(false);
             this.tabSettings.ResumeLayout(false);
             this.tabGeneral.ResumeLayout(false);
-            this.grpLauncher.ResumeLayout(false);
-            this.grpLauncher.PerformLayout();
             this.tabInGame.ResumeLayout(false);
+            this.grpMobColours.ResumeLayout(false);
+            this.grpMobColours.PerformLayout();
             this.grpMusic.ResumeLayout(false);
             this.grpDisableDark.ResumeLayout(false);
             this.grpDisableDark.PerformLayout();
@@ -432,14 +421,13 @@ namespace Launcher
         private System.Windows.Forms.TextBox txtDirectory;
         private System.Windows.Forms.Label lblDirectory;
         private System.Windows.Forms.FolderBrowserDialog folderBrowserDialog;
-        private System.Windows.Forms.GroupBox grpLauncher;
-        private System.Windows.Forms.CheckBox chkAutoPlay;
-        private System.Windows.Forms.Label lblAutoNote;
         private System.Windows.Forms.TabPage tabInGame;
         private System.Windows.Forms.GroupBox grpMusic;
         private System.Windows.Forms.ComboBox cmbMusic;
         private System.Windows.Forms.GroupBox grpDisableDark;
         private System.Windows.Forms.CheckBox chkDisableDark;
+        private System.Windows.Forms.GroupBox grpMobColours;
+        private System.Windows.Forms.CheckBox chkMobColours;
 
     }
 }

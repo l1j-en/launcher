@@ -176,7 +176,6 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Lineage.ico" />
-    <Content Include="RequiredFiles\closenp.dll" />
     <None Include="Resources\vote.jpg" />
     <None Include="Resources\close1.png" />
     <None Include="Resources\lineage_logo.png" />
@@ -193,6 +192,9 @@
       <ProductName>.NET Framework 3.5 SP1</ProductName>
       <Install>true</Install>
     </BootstrapperPackage>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="RequiredFiles\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

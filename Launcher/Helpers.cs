@@ -48,14 +48,15 @@ namespace Launcher
             {
                 var compatRegKey = Registry.CurrentUser.CreateSubKey(@"Software\Microsoft\Windows NT\CurrentVersion\AppCompatFlags\Layers");
                 if (compatRegKey != null)
-                    ((RegistryKey)compatRegKey).SetValue(settings.ClientDirectory + "\\" + settings.ClientBin, "~ DWM8And16BitMitigation 16BITCOLOR WINXPSP3", RegistryValueKind.String);
+                    ((RegistryKey)compatRegKey).SetValue(Path.Combine(settings.ClientDirectory, settings.ClientBin),
+                        "~ DWM8And16BitMitigation 16BITCOLOR WINXPSP3", RegistryValueKind.String);
             }
 
             var lincfgPath = Path.Combine(settings.ClientDirectory, "lineage.cfg");
 
             if (!File.Exists(lincfgPath))
             {
-                MessageBox.Show("Lineage.cfg file not found. Unable to update Windowed settings.");
+                MessageBox.Show(@"Lineage.cfg file not found. Unable to update Windowed settings.");
                 return;
             }
 
@@ -98,12 +99,13 @@ namespace Launcher
         {
             try
             {
-                const string pubKey = "<RSAKeyValue><Modulus>l5mJTTO/MHTnaLbzkr0bfbOvY6qC9jWa39IIOtujP1mAPqhdEG2dIbtx20QEZ5P/9hg0KP16RvYj6BSwU4/Ees90mKpXV/7PzTp9uSRZuKNo+uoku7oqar4ruWmpcpPErKVGqD0i7908C/833VzSxdBxnqFqgF1nAk1iRJsnjxC8hseimjfe/E1EvO+Uk/NcA9VFR7YRPknuMLWMoLyl0EN6lJ4z5xLZKhPqGpMdIjDRmW2PdQxSFs5FIsVK9jYnqW/M6o+PiL1uj1py3EaBgIOkOMSUhEAHlgNkqdYlXHkqQ4W3HTuNkQmVLL8oZd6NXrflcF3PDEr1JtbTd+X+DQ==</Modulus><Exponent>JQ==</Exponent></RSAKeyValue>";
+                const string pubKey =
+                    "<RSAKeyValue><Modulus>l5mJTTO/MHTnaLbzkr0bfbOvY6qC9jWa39IIOtujP1mAPqhdEG2dIbtx20QEZ5P/9hg0KP16RvYj6BSwU4/Ees90mKpXV/7PzTp9uSRZuKNo+uoku7oqar4ruWmpcpPErKVGqD0i7908C/833VzSxdBxnqFqgF1nAk1iRJsnjxC8hseimjfe/E1EvO+Uk/NcA9VFR7YRPknuMLWMoLyl0EN6lJ4z5xLZKhPqGpMdIjDRmW2PdQxSFs5FIsVK9jYnqW/M6o+PiL1uj1py3EaBgIOkOMSUhEAHlgNkqdYlXHkqQ4W3HTuNkQmVLL8oZd6NXrflcF3PDEr1JtbTd+X+DQ==</Modulus><Exponent>JQ==</Exponent></RSAKeyValue>";
 
                 var rsa = new RSACryptoServiceProvider();
                 rsa.FromXmlString(pubKey);
 
-                var request = (HttpWebRequest)WebRequest.Create("http://launcher.travis-smith.ca/Version.php");
+                var request = (HttpWebRequest) WebRequest.Create("http://launcher.travis-smith.ca/VersionInfo.php");
                 request.Timeout = 2000;
                 request.Proxy = null;
                 request.UserAgent = "L1J Launcher";
@@ -116,9 +118,9 @@ namespace Launcher
                 using (var sr = new StreamReader(data))
                     json = sr.ReadToEnd();
 
-                var result = rsa.VerifyData(Encoding.UTF8.GetBytes(json), CryptoConfig.MapNameToOID("SHA512"), signature);
-
-                if(result)
+                //needed to drop this to SHA1 because WinXP doesn't always support higher by default
+                var result = rsa.VerifyData(Encoding.UTF8.GetBytes(json), CryptoConfig.MapNameToOID("SHA1"), signature); 
+                if (result)
                     return json.JsonDeserialize<VersionInfo>();
 
                 return null;
@@ -127,6 +129,16 @@ namespace Launcher
             {
                 return null;
             }
+        }
+
+        public static string GetChecksum(string file)
+        {
+            if (!File.Exists(file))
+                return "";
+
+            using (var stream = File.OpenRead(file))
+                using (var md5 = MD5.Create())
+                    return BitConverter.ToString(md5.ComputeHash(stream)).Replace("-", "").ToUpper();
         }
 
         public static bool IsWin8Orhigher()

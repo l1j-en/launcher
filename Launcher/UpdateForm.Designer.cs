@@ -30,34 +30,15 @@ namespace Launcher
         /// </summary>
         private void InitializeComponent()
         {
-            this.lblUpdate = new System.Windows.Forms.Label();
-            this.lblLink = new System.Windows.Forms.LinkLabel();
             this.lblUpdateVersion = new System.Windows.Forms.Label();
             this.grpDetails = new System.Windows.Forms.GroupBox();
             this.updateDetails = new System.Windows.Forms.WebBrowser();
+            this.lblNote = new System.Windows.Forms.Label();
+            this.btnLater = new Launcher.Controls.GlassButton();
+            this.btnUpdate = new Launcher.Controls.GlassButton();
             this.btnClose = new Launcher.Controls.GlassButton();
             this.grpDetails.SuspendLayout();
             this.SuspendLayout();
-            // 
-            // lblUpdate
-            // 
-            this.lblUpdate.AutoSize = true;
-            this.lblUpdate.Location = new System.Drawing.Point(43, 206);
-            this.lblUpdate.Name = "lblUpdate";
-            this.lblUpdate.Size = new System.Drawing.Size(166, 13);
-            this.lblUpdate.TabIndex = 0;
-            this.lblUpdate.Text = "You can get the latest version at: ";
-            // 
-            // lblLink
-            // 
-            this.lblLink.AutoSize = true;
-            this.lblLink.Location = new System.Drawing.Point(204, 206);
-            this.lblLink.Name = "lblLink";
-            this.lblLink.Size = new System.Drawing.Size(230, 13);
-            this.lblLink.TabIndex = 1;
-            this.lblLink.TabStop = true;
-            this.lblLink.Text = "https://github.com/smith-j-travis/Launcher/wiki";
-            this.lblLink.LinkClicked += new System.Windows.Forms.LinkLabelLinkClickedEventHandler(this.lblLink_LinkClicked);
             // 
             // lblUpdateVersion
             // 
@@ -92,6 +73,51 @@ namespace Launcher
             this.updateDetails.TabIndex = 0;
             this.updateDetails.WebBrowserShortcutsEnabled = false;
             // 
+            // lblNote
+            // 
+            this.lblNote.AutoSize = true;
+            this.lblNote.Font = new System.Drawing.Font("Microsoft Sans Serif", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblNote.Location = new System.Drawing.Point(40, 200);
+            this.lblNote.Name = "lblNote";
+            this.lblNote.Size = new System.Drawing.Size(416, 32);
+            this.lblNote.TabIndex = 27;
+            this.lblNote.Text = "Note*: Updates to the launcher itself will close the launcher.\r\nIt will re-open w" +
+    "hen the update is complete!";
+            this.lblNote.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
+            // 
+            // btnLater
+            // 
+            this.btnLater.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.btnLater.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnLater.GlowColor = System.Drawing.Color.Red;
+            this.btnLater.InnerBorderColor = System.Drawing.Color.Transparent;
+            this.btnLater.Location = new System.Drawing.Point(392, 243);
+            this.btnLater.Name = "btnLater";
+            this.btnLater.OuterBorderColor = System.Drawing.Color.Transparent;
+            this.btnLater.ShineColor = System.Drawing.Color.Transparent;
+            this.btnLater.Size = new System.Drawing.Size(93, 32);
+            this.btnLater.SpecialSymbolColor = System.Drawing.Color.Transparent;
+            this.btnLater.TabIndex = 26;
+            this.btnLater.Text = "LATER";
+            this.btnLater.Click += new System.EventHandler(this.btnLater_Click);
+            // 
+            // btnUpdate
+            // 
+            this.btnUpdate.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.btnUpdate.DialogResult = System.Windows.Forms.DialogResult.OK;
+            this.btnUpdate.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnUpdate.GlowColor = System.Drawing.Color.Lime;
+            this.btnUpdate.InnerBorderColor = System.Drawing.Color.Transparent;
+            this.btnUpdate.Location = new System.Drawing.Point(296, 243);
+            this.btnUpdate.Name = "btnUpdate";
+            this.btnUpdate.OuterBorderColor = System.Drawing.Color.Transparent;
+            this.btnUpdate.ShineColor = System.Drawing.Color.Transparent;
+            this.btnUpdate.Size = new System.Drawing.Size(93, 32);
+            this.btnUpdate.SpecialSymbolColor = System.Drawing.Color.Transparent;
+            this.btnUpdate.TabIndex = 25;
+            this.btnUpdate.Text = "UPDATE";
+            this.btnUpdate.Click += new System.EventHandler(this.btnUpdate_Click);
+            // 
             // btnClose
             // 
             this.btnClose.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Center;
@@ -115,14 +141,16 @@ namespace Launcher
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(206)))), ((int)(((byte)(203)))), ((int)(((byte)(203)))));
-            this.ClientSize = new System.Drawing.Size(497, 228);
+            this.ClientSize = new System.Drawing.Size(497, 287);
+            this.Controls.Add(this.lblNote);
+            this.Controls.Add(this.btnLater);
+            this.Controls.Add(this.btnUpdate);
             this.Controls.Add(this.grpDetails);
             this.Controls.Add(this.lblUpdateVersion);
             this.Controls.Add(this.btnClose);
-            this.Controls.Add(this.lblLink);
-            this.Controls.Add(this.lblUpdate);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
             this.Name = "UpdateForm";
+            this.ShowInTaskbar = false;
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "Update Available!";
             this.grpDetails.ResumeLayout(false);
@@ -133,11 +161,12 @@ namespace Launcher
 
         #endregion
 
-        private System.Windows.Forms.Label lblUpdate;
-        private System.Windows.Forms.LinkLabel lblLink;
         private GlassButton btnClose;
         private System.Windows.Forms.Label lblUpdateVersion;
         private System.Windows.Forms.GroupBox grpDetails;
         private System.Windows.Forms.WebBrowser updateDetails;
+        private GlassButton btnUpdate;
+        private GlassButton btnLater;
+        private System.Windows.Forms.Label lblNote;
     }
 }

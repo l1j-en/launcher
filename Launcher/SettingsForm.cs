@@ -31,10 +31,10 @@ namespace Launcher
             var settings = new Settings
             {
                 Resize = this.chkResize.Checked,
-                AutoPlay = this.chkAutoPlay.Checked,
                 ClientDirectory = this.txtDirectory.Text,
                 ClientBin = this.cmbBin.Text,
                 DisableDark = this.chkDisableDark.Checked,
+                EnableMobColours = this.chkMobColours.Checked,
                 MusicType = this.cmbMusic.SelectedItem.ToString()
             };
 
@@ -75,8 +75,8 @@ namespace Launcher
             if (savedSettings.Resolution != null)
                 this.cmbResolution.SelectedIndex = savedSettings.Resolution == null ? 0 : this.cmbResolution.FindString(savedSettings.Resolution.ToString());
                 
-            this.chkAutoPlay.Checked = savedSettings.AutoPlay;
             this.chkDisableDark.Checked = savedSettings.DisableDark;
+            this.chkMobColours.Checked = savedSettings.EnableMobColours;
             this.txtDirectory.Text = savedSettings.ClientDirectory ?? "";
 
             if (this.txtDirectory.Text != string.Empty)

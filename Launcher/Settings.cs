@@ -8,8 +8,8 @@ namespace Launcher
         public bool Windowed { get; set; }
         public bool Centred { get; set; }
         public bool Resize { get; set; }
-        public bool AutoPlay { get; set; }
         public bool DisableDark { get; set; }
+        public bool EnableMobColours { get; set; }
 
         public Resolution Resolution { get; set; }
 

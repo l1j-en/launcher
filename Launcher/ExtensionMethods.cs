@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Net;
 using System.Runtime.Serialization.Json;
 using System.Text;
 
@@ -18,6 +19,12 @@ namespace Launcher
             }
 
             return retVal;
+        }
+
+        public static void DownloadFileAsyncSync(this WebClient client, Uri uri, string location)
+        {
+            client.DownloadFileAsync(uri, location);
+            while (client.IsBusy) { System.Windows.Forms.Application.DoEvents(); }
         }
 
         public static T JsonDeserialize<T>(this string json)

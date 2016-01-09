@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Diagnostics;
+using System.IO;
 using System.Windows.Forms;
 
 namespace Launcher
 {
     public partial class UpdateForm : Form
-    {public UpdateForm(VersionInfo versionInfo)
+    {
+        public UpdateForm(VersionInfo versionInfo)
         {
             InitializeComponent();
 
@@ -18,10 +20,14 @@ namespace Launcher
             this.Close();
         }
 
-        private void lblLink_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        private void btnUpdate_Click(object sender, EventArgs e)
         {
-            var voteUrl = new ProcessStartInfo(this.lblLink.Text);
-            Process.Start(voteUrl);
+            this.Close();
         }
+
+        private void btnLater_Click(object sender, EventArgs e)
+        {
+            this.Close();
+        } 
     }
 }

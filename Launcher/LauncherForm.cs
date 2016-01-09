@@ -10,13 +10,13 @@ using System.Net.Sockets;
 using System.Threading;
 using System.Windows.Forms;
 using Launcher.WindowsAPI;
+using Microsoft.Win32;
 
 namespace Launcher
 {
     public partial class LauncherForm : Form
     {
-        private const string Version = "1.3";
-        private VersionInfo _versionInfo;
+        private const string Version = "1.4";
         private readonly bool _isWin8OrHigher;
 
         private readonly object _lockObject = new object();
@@ -72,42 +72,32 @@ namespace Launcher
             settingsForm.Dispose();
         }
 
-        private void LauncherForm_Load(object sender, EventArgs e)
+        private void LauncherForm_Shown(object sender, EventArgs e)
         {
-            //TODO -- maybe I want to thread this in the future to stop the UI freeze?
-            //TODO -- 2 seconds doesn't seem too bad so far
-            this._versionInfo = Helpers.GetVersionInfo();
+            var settings = Helpers.LoadSettings();
+
+            if (string.IsNullOrEmpty(settings.ClientDirectory))
+            {
+                var settingsDialog = new SettingsForm(this._isWin8OrHigher);
+                var dialogResult = settingsDialog.ShowDialog();
+
+                if (dialogResult != DialogResult.OK)
+                {
+                    settings = Helpers.LoadSettings();
+
+                    if (string.IsNullOrEmpty(settings.ClientDirectory))
+                    {
+                        MessageBox.Show("You must configure your settings before continuing. Closing launcher.");
+                        Application.Exit();
+                    } //end if
+                } //end if
+            } //end if
+
+            this.updateChecker.RunWorkerAsync();
 
             cmbServer.Items.AddRange(this._servers.Keys.ToArray());
             cmbServer.SelectedIndex = 0;
-            
-            var settings = Helpers.LoadSettings();
-            var serverOnline = this.CheckServerStatus(false);
-
-            if (!settings.AutoPlay || ModifierKeys == Keys.Control
-                || (this._versionInfo != null && Version != this._versionInfo.Version))
-                return;
-
-            if (!serverOnline)
-            {
-                MessageBox.Show("Did not auto play because server is offline.");
-                return;
-            }
-
-            this.WindowState = FormWindowState.Minimized;
-            this.ShowInTaskbar = false;
-
-            this.Launch();
         }
-
-        private void LauncherForm_Shown(object sender, EventArgs e)
-        {
-            if (this._versionInfo != null && Version != this._versionInfo.Version)
-                new UpdateForm(this._versionInfo).ShowDialog();
-
-            if (this._versionInfo != null && this._versionInfo.Required)
-                Application.Exit();
-        } 
 
         private void playButton_Click(object sender, EventArgs e)
         {
@@ -180,7 +170,7 @@ namespace Launcher
             //like it isn't trying to check
             if (threaded)
             {
-                Thread.Sleep(1000);
+                Thread.Sleep(500);
                 cmbServer.Invoke(new Action(
                     () =>
                     {
@@ -290,7 +280,121 @@ namespace Launcher
                 });
 
                 this.cmbServer.Items.Add(addServerForm.txtName.Text);
+                this.cmbServer.SelectedIndex = cmbServer.Items.Count - 1;
             } //end if
-        }  //end LauncherForm_KeyDown
+        } //end LauncherForm_KeyDown
+
+        private void updateChecker_DoWork(object sender, DoWorkEventArgs e)
+        {
+            try
+            {
+                var force = e.Argument != null && (bool) e.Argument;
+                var versionInfo = Helpers.GetVersionInfo();
+                var launcherKey = Registry.CurrentUser.OpenSubKey(@"Software\LineageLauncher", true);
+                var lastUpdatedCheck = launcherKey.GetValue("LastUpdated");
+                var updatesLastRun = (int?) lastUpdatedCheck ?? 0;
+
+                if (versionInfo == null)
+                    return;
+
+                var settings = Helpers.LoadSettings();
+                var applicationPath = Application.ExecutablePath;
+                var appDataPath = Directory.GetParent(Application.UserAppDataPath).ToString();
+                var updaterLocation = Path.Combine(appDataPath, "Updater.exe");
+                var updaterChecksum = Helpers.GetChecksum(updaterLocation);
+
+                if (!File.Exists(updaterLocation) || updaterChecksum != versionInfo.FileChecksums["Updater.exe"])
+                {
+                    using (var client = new WebClient())
+                    {
+                        client.DownloadProgressChanged += client_DownloadProgressChanged;
+                        client.DownloadFileAsyncSync(new Uri("http://launcher.travis-smith.ca/Updater.exe"),
+                            updaterLocation);
+                    }
+
+                    this.updateChecker.ReportProgress(1);
+                } //end if
+
+                if (versionInfo.Version != Version)
+                {
+                    var result = DialogResult.Cancel;
+                    
+                    // push to the UI thread to actually display the dialog... ugly hack
+                    var dialog = this.BeginInvoke(new MethodInvoker(delegate
+                    {
+                        result = new UpdateForm(versionInfo).ShowDialog();
+                    }));
+
+                    this.EndInvoke(dialog);
+
+                    if (result == DialogResult.OK)
+                    {
+                        var info = new ProcessStartInfo(updaterLocation);
+                        info.Arguments = "\"" + applicationPath + "\"";
+
+                        if (Environment.OSVersion.Version.Major >= 6)
+                            info.Verb = "runas";
+
+                        Process.Start(info); 
+                    } //end if
+                } //end if
+
+                if (versionInfo.LastUpdated < updatesLastRun && !force)
+                    return;
+
+                // checks for > 1 because the Updater.exe is always present.
+                if (versionInfo.FileChecksums != null && versionInfo.FileChecksums.Count > 1)
+                {
+                    Helpers.SetControlPropertyThreadSafe(this.prgUpdates, "Maximum", versionInfo.FileChecksums.Count);
+
+                    for (var i = 1; i < versionInfo.FileChecksums.Count; i++)
+                    {
+                        var file = versionInfo.FileChecksums.ElementAt(i).Key;
+                        var checksum = versionInfo.FileChecksums.ElementAt(i).Value;
+                        var filePath = Path.Combine(settings.ClientDirectory, file);
+
+                        if (!File.Exists(filePath) || Helpers.GetChecksum(filePath) != checksum)
+                            using (var client = new WebClient())
+                            {
+                                client.DownloadProgressChanged += client_DownloadProgressChanged;
+                                client.DownloadFileAsyncSync(new Uri("http://launcher.travis-smith.ca/Files/" + file.Replace("\\","/")),
+                                    filePath);
+                            }
+
+                        this.updateChecker.ReportProgress(i);
+                    } //end for
+
+                    var currentTime = DateTime.UtcNow - new DateTime(1970, 1, 1);
+                    launcherKey.SetValue("LastUpdated", (int) currentTime.TotalSeconds, RegistryValueKind.DWord);
+                } //end if
+            }
+            finally
+            {
+                this.updateChecker.ReportProgress(this.prgUpdates.Maximum);
+            } //end try/finally
+        } //end updateChecker
+
+        private void client_DownloadProgressChanged(object sender, DownloadProgressChangedEventArgs e)
+        {
+            Helpers.SetControlPropertyThreadSafe(this.prgUpdateCurrent, "Maximum" , (int)e.TotalBytesToReceive / 100);
+            Helpers.SetControlPropertyThreadSafe(this.prgUpdateCurrent, "Value", (int)e.BytesReceived / 100);
+        } //end client_DownloadProgressChanged
+
+        private void updateChecker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            this.btnPlay.Enabled = true;
+            this.btnCheck.Enabled = true;
+        } //end updateChecker_RunWorkerCompleted
+
+        private void updateChecker_ProgressChanged(object sender, ProgressChangedEventArgs e)
+        {
+            this.prgUpdates.Value = e.ProgressPercentage;
+        } //end updateChecker_updateChecker_ProgressChanged
+
+        private void btnCheck_Click(object sender, EventArgs e)
+        {
+            this.btnCheck.Enabled = false;
+            this.updateChecker.RunWorkerAsync(true);
+        } //end btnCheck_Click
     } //end class
 } //end namespace
