@@ -16,7 +16,7 @@ namespace Launcher
 {
     public partial class LauncherForm : Form
     {
-        private const string Version = "1.4";
+        private const string Version = "1.4.1";
         private readonly bool _isWin8OrHigher;
         private User32.DevMode _revertResolution;
 
