@@ -22,7 +22,7 @@ namespace Launcher
             base.Dispose(disposing);
         }
 
-        #region Windows Form Designer generated code
+        #region Clients Form Designer generated code
 
         /// <summary>
         /// Required method for Designer support - do not modify
@@ -30,11 +30,11 @@ namespace Launcher
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(LauncherForm));
             this.BannerBrowser = new System.Windows.Forms.WebBrowser();
             this.pctLinLogo = new System.Windows.Forms.PictureBox();
             this.cmbServer = new System.Windows.Forms.ComboBox();
-            this.processChecker = new System.ComponentModel.BackgroundWorker();
             this.pctVote = new System.Windows.Forms.PictureBox();
             this.prgUpdates = new System.Windows.Forms.ProgressBar();
             this.updateChecker = new System.ComponentModel.BackgroundWorker();
@@ -47,6 +47,7 @@ namespace Launcher
             this.btnClose = new Launcher.Controls.GlassButton();
             this.lblServerStatus = new Launcher.Controls.OutlineLabel();
             this.lblServerStatusText = new Launcher.Controls.OutlineLabel();
+            this.tmrCheckProcess = new System.Windows.Forms.Timer(this.components);
             ((System.ComponentModel.ISupportInitialize)(this.pctLinLogo)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pctVote)).BeginInit();
             this.SuspendLayout();
@@ -86,10 +87,6 @@ namespace Launcher
             this.cmbServer.Size = new System.Drawing.Size(158, 21);
             this.cmbServer.TabIndex = 21;
             this.cmbServer.SelectedIndexChanged += new System.EventHandler(this.cmbServer_SelectedIndexChanged);
-            // 
-            // processChecker
-            // 
-            this.processChecker.DoWork += new System.ComponentModel.DoWorkEventHandler(this.processChecker_DoWork);
             // 
             // pctVote
             // 
@@ -251,6 +248,11 @@ namespace Launcher
             this.lblServerStatusText.TabIndex = 14;
             this.lblServerStatusText.Text = "SERVER STATUS:";
             // 
+            // tmrCheckProcess
+            // 
+            this.tmrCheckProcess.Interval = 500;
+            this.tmrCheckProcess.Tick += new System.EventHandler(this.tmrCheckProcess_Tick);
+            // 
             // LauncherForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -291,7 +293,6 @@ namespace Launcher
         private System.Windows.Forms.WebBrowser BannerBrowser;
         private System.Windows.Forms.PictureBox pctLinLogo;
         private System.Windows.Forms.ComboBox cmbServer;
-        private System.ComponentModel.BackgroundWorker processChecker;
         private GlassButton btnClose;
         private GlassButton btnSettings;
         private GlassButton btnPlay;
@@ -304,6 +305,7 @@ namespace Launcher
         private System.Windows.Forms.ProgressBar prgUpdateCurrent;
         private OutlineLabel lvlUpdateCurrent;
         private GlassButton btnCheck;
+        private System.Windows.Forms.Timer tmrCheckProcess;
 
 
     }

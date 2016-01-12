@@ -67,7 +67,7 @@ namespace Launcher
         {
             var savedSettings = Helpers.LoadSettings();
 
-            this.cmbResolution.Items.AddRange(WindowStyling.GetResolutions(this._isWin8OrHigher).ToArray());
+            this.cmbResolution.Items.AddRange(LineageClient.GetResolutions(this._isWin8OrHigher).ToArray());
             this.chkResize.Checked = savedSettings.Resize;
             this.chkWindowed.Checked = savedSettings.Windowed;
             this.chkCentre.Checked = savedSettings.Centred;

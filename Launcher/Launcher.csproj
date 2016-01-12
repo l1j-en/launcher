@@ -137,7 +137,7 @@
     </Compile>
     <Compile Include="WindowsAPI\Kernel32.cs" />
     <Compile Include="WindowsAPI\User32.cs" />
-    <Compile Include="WindowStyling.cs" />
+    <Compile Include="LineageClient.cs" />
     <EmbeddedResource Include="AddServerForm.resx">
       <DependentUpon>AddServerForm.cs</DependentUpon>
     </EmbeddedResource>

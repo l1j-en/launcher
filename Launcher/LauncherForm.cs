@@ -18,6 +18,7 @@ namespace Launcher
     {
         private const string Version = "1.4";
         private readonly bool _isWin8OrHigher;
+        private User32.DevMode _revertResolution;
 
         private readonly object _lockObject = new object();
         private readonly Dictionary<string, Server> _servers = new Dictionary<string, Server>
@@ -40,7 +41,7 @@ namespace Launcher
             }
         };
 
-        private static readonly List<int> HookedProcIds = new List<int>(); 
+        private static readonly List<LineageClient> Clients = new List<LineageClient>(); 
 
         public LauncherForm()
         {
@@ -124,30 +125,29 @@ namespace Launcher
             var revertResolution = new User32.DevMode();
 
             if (settings.Resize)
-                revertResolution = WindowStyling.ChangeDisplaySettings(settings.Resolution.Width, settings.Resolution.Height, settings.Resolution.Colour);
+                revertResolution = LineageClient.ChangeDisplaySettings(settings.Resolution.Width, settings.Resolution.Height, settings.Resolution.Colour);
             else if (settings.Windowed)
-                revertResolution = WindowStyling.ChangeDisplayColour(this._isWin8OrHigher ? 32 : 16);
+                revertResolution = LineageClient.ChangeDisplayColour(this._isWin8OrHigher ? 32 : 16);
 
             Lineage.Run(settings, settings.ClientBin, ip, (ushort)selectedServer.Port);
 
-            var hookedProcId = -1;
-
-            if (settings.Windowed)
-                lock (this._lockObject)
-                    hookedProcId = WindowStyling.SetWindowed(binFile, HookedProcIds);
+            var client = new LineageClient(binFile, settings.ClientDirectory, Clients);
+            client.Initialize();
                 
             if (settings.Centred)
             {
                 var windowSize = Screen.PrimaryScreen.WorkingArea;
-                hookedProcId = WindowStyling.SetCentred(binFile, windowSize.Width, windowSize.Height, hookedProcId);
+                client.SetCentred(windowSize.Width, windowSize.Height);
             }
 
-            if(hookedProcId != -1)
-                lock (this._lockObject)
-                    HookedProcIds.Add(hookedProcId);
+            lock (this._lockObject)
+                Clients.Add(client);
 
-            if(!this.processChecker.IsBusy)
-                this.processChecker.RunWorkerAsync(revertResolution);
+            if (!tmrCheckProcess.Enabled)
+            {
+                this._revertResolution = revertResolution;
+                this.tmrCheckProcess.Enabled = true;
+            }
         }
 
         private void cmbServer_SelectedIndexChanged(object sender, EventArgs e)
@@ -220,37 +220,6 @@ namespace Launcher
 
             return returnValue;
         } //end checkServerStatus
-
-        private void processChecker_DoWork(object sender, DoWorkEventArgs e)
-        {
-            var revertResolution = (User32.DevMode)e.Argument;
-            
-            while (true)
-            {
-                lock (this._lockObject)
-                {
-                    for (var i = HookedProcIds.Count - 1; i >= 0; i--)
-                    {
-                        try
-                        {
-                            var runningProcess = Process.GetProcessById(HookedProcIds[i]);
-                        }
-                        catch (Exception)
-                        {
-                            WindowStyling.Listeners.Remove(HookedProcIds[i]);
-                            HookedProcIds.RemoveAt(i);
-                        }
-                    }
-
-                    if (HookedProcIds.Count == 0)
-                    {
-                        e.Cancel = true;
-                        WindowStyling.ChangeDisplaySettings(revertResolution);
-                        return;
-                    }
-                }
-            }
-        } //end processChecker_DoWork
 
         private void pctVote_Click(object sender, EventArgs e)
         {
@@ -396,5 +365,31 @@ namespace Launcher
             this.btnCheck.Enabled = false;
             this.updateChecker.RunWorkerAsync(true);
         } //end btnCheck_Click
+
+        private void tmrCheckProcess_Tick(object sender, EventArgs e)
+        {
+            var revertResolution = this._revertResolution;
+            lock (this._lockObject)
+            {
+                for (var i = Clients.Count - 1; i >= 0; i--)
+                {
+                    try
+                    {
+                        var runningProcess = Process.GetProcessById(Clients[i].Process.Id);
+                    }
+                    catch (Exception)
+                    {
+                        Clients.RemoveAt(i);
+                    }
+                }
+
+                if (Clients.Count == 0)
+                {
+                    this.tmrCheckProcess.Enabled = false;
+                    LineageClient.ChangeDisplaySettings(revertResolution);
+                    return;
+                }
+            }
+        } 
     } //end class
 } //end namespace

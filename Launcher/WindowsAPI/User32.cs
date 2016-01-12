@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.InteropServices;
+using System.Text;
 using System.Windows.Forms;
 
 namespace Launcher.WindowsAPI
@@ -185,6 +186,36 @@ namespace Launcher.WindowsAPI
             EventAiaEnd = 0xAFFF,
         }
 
+        public struct Rect
+        {
+            public int Left;        // x position of upper-left corner
+            public int Top;         // y position of upper-left corner
+            public int Right;       // x position of lower-right corner
+            public int Bottom;      // y position of lower-right corner
+        }
+
+        public struct KbDllHookStruct
+        {
+            public int vkCode;
+            int scanCode;
+            public int flags;
+            int time;
+            int dwExtraInfo;
+        }
+
+        public enum KeyboardHooks
+        {
+            //Keyboard API constants
+            WH_KEYBOARD_LL = 13,
+            WM_KEYUP = 0x0101
+        }
+
+        public enum Keys
+        {
+            //Modifier key constants
+            VK_PRINT = 0x2C
+        } 
+
         //Sets window attributes
         [DllImport("user32.dll")]
         public static extern int SetWindowLong(IntPtr hWnd, int nIndex, int dwNewLong);
@@ -230,5 +261,29 @@ namespace Launcher.WindowsAPI
 
         [DllImport("user32.dll")]
         public static extern bool AllowSetForegroundWindow(int dwProcessId);
+
+        [DllImport("user32.dll", SetLastError = true)]
+        public static extern bool GetWindowRect(IntPtr hwnd, out Rect lpRect);
+
+        [DllImport("user32.dll", SetLastError = true)]
+        public static extern bool GetClientRect(IntPtr hwnd, out Rect lpRect);
+
+        public delegate IntPtr KeyboardHookDelegate(int nCode, IntPtr wParam, ref KbDllHookStruct lParam);
+        [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+        public static extern IntPtr SetWindowsHookEx(int idHook, KeyboardHookDelegate lpfn, IntPtr hMod, int dwThreadId);
+
+        [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+        public static extern IntPtr CallNextHookEx(IntPtr hhk, int nCode, IntPtr wParam, ref KbDllHookStruct lParam);
+
+        [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        public static extern bool UnhookWindowsHookEx(IntPtr hhk);
+
+        [DllImport("user32.dll")]
+        public static extern IntPtr GetForegroundWindow();
+
+        [DllImport("user32.dll")]
+        public static extern int GetWindowText(IntPtr hWnd, StringBuilder text, int count);
+
     }
 }
