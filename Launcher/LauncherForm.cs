@@ -9,6 +9,8 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using System.Windows.Forms;
+using Launcher.Models;
+using Launcher.Utilities;
 using Launcher.WindowsAPI;
 using Microsoft.Win32;
 
@@ -16,7 +18,7 @@ namespace Launcher
 {
     public partial class LauncherForm : Form
     {
-        private const string Version = "1.4.1";
+        private const string Version = "1.5";
         private readonly bool _isWin8OrHigher;
         private User32.DevMode _revertResolution;
 
@@ -77,6 +79,13 @@ namespace Launcher
         {
             var settings = Helpers.LoadSettings();
 
+            if (settings == null)
+            {
+                MessageBox.Show(@"There was an error loading your settings. If this was after an update, it may be intentional, however, " +
+                @"if it happens often please file a bug report.", @"Error Loading Settings", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                settings = new Settings();
+            }
+                
             if (string.IsNullOrEmpty(settings.ClientDirectory))
             {
                 var settingsDialog = new SettingsForm(this._isWin8OrHigher);
@@ -86,7 +95,7 @@ namespace Launcher
                 {
                     settings = Helpers.LoadSettings();
 
-                    if (string.IsNullOrEmpty(settings.ClientDirectory))
+                    if (settings == null || string.IsNullOrEmpty(settings.ClientDirectory))
                     {
                         MessageBox.Show("You must configure your settings before continuing. Closing launcher.");
                         Application.Exit();
@@ -287,7 +296,7 @@ namespace Launcher
                 if (versionInfo.Version != Version)
                 {
                     var result = DialogResult.Cancel;
-                    
+
                     // push to the UI thread to actually display the dialog... ugly hack
                     var dialog = this.BeginInvoke(new MethodInvoker(delegate
                     {
@@ -304,7 +313,7 @@ namespace Launcher
                         if (Environment.OSVersion.Version.Major >= 6)
                             info.Verb = "runas";
 
-                        Process.Start(info); 
+                        Process.Start(info);
                     } //end if
                 } //end if
 
@@ -323,12 +332,29 @@ namespace Launcher
                         var filePath = Path.Combine(settings.ClientDirectory, file);
 
                         if (!File.Exists(filePath) || Helpers.GetChecksum(filePath) != checksum)
+                        {
+                            var extension = Path.GetExtension(file);
                             using (var client = new WebClient())
                             {
                                 client.DownloadProgressChanged += client_DownloadProgressChanged;
-                                client.DownloadFileAsyncSync(new Uri("http://launcher.travis-smith.ca/Files/" + file.Replace("\\","/")),
-                                    filePath);
+
+                                if (File.Exists(filePath) && extension != null
+                                    && extension.Equals(".pak", StringComparison.CurrentCultureIgnoreCase) &&
+                                    !file.Contains("zelgo"))
+                                {
+                                    var idxFile = filePath.Replace(".pak", ".idx");
+                                    var pakIndex = PakTools.RebuildPak(filePath, versionInfo.PakFiles[file], true);
+
+                                    PakTools.RebuildIndex(idxFile, pakIndex, true);
+                                }
+                                else
+                                {
+                                    client.DownloadFileAsyncSync(
+                                        new Uri("http://launcher.travis-smith.ca/Files/" + file.Replace("\\", "/")),
+                                        filePath);
+                                }
                             }
+                        }
 
                         this.updateChecker.ReportProgress(i);
                     } //end for

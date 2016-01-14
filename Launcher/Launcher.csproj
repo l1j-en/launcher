@@ -117,12 +117,13 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Lineage.cs" />
-    <Compile Include="VersionInfo.cs" />
+    <Compile Include="Models\PakFile.cs" />
+    <Compile Include="Models\VersionInfo.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Resolution.cs" />
-    <Compile Include="Server.cs" />
-    <Compile Include="Settings.cs" />
+    <Compile Include="Models\Resolution.cs" />
+    <Compile Include="Models\Server.cs" />
+    <Compile Include="Models\Settings.cs" />
     <Compile Include="SettingsForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -135,6 +136,7 @@
     <Compile Include="UpdateForm.Designer.cs">
       <DependentUpon>UpdateForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="Utilities\PakTools.cs" />
     <Compile Include="WindowsAPI\Kernel32.cs" />
     <Compile Include="WindowsAPI\User32.cs" />
     <Compile Include="LineageClient.cs" />

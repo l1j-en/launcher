@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using Launcher.Models;
 using Launcher.WindowsAPI;
 
 namespace Launcher

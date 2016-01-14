@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Launcher
+namespace Launcher.Models
 {
     [Serializable]
     public class Resolution

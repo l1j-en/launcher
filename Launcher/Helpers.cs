@@ -7,6 +7,7 @@ using System.Runtime.Serialization.Formatters.Binary;
 using System.Security.Cryptography;
 using System.Text;
 using System.Windows.Forms;
+using Launcher.Models;
 using Microsoft.Win32;
 
 namespace Launcher
@@ -25,13 +26,20 @@ namespace Launcher
 
         public static Settings LoadSettings()
         {
-            var settingsKey = Registry.CurrentUser.OpenSubKey(@"Software\LineageLauncher", true);
+            try
+            {
+                var settingsKey = Registry.CurrentUser.OpenSubKey(@"Software\LineageLauncher", true);
 
-            if (settingsKey == null)
-                return new Settings();
+                if (settingsKey == null)
+                    return new Settings();
 
-            var ms = new MemoryStream((byte[])((RegistryKey)settingsKey).GetValue("AppSettings"));
-            return DeserializeFromStream<Settings>(ms);
+                var ms = new MemoryStream((byte[])((RegistryKey)settingsKey).GetValue("AppSettings"));
+                return DeserializeFromStream<Settings>(ms);
+            }
+            catch (Exception)
+            {
+                return null;
+            }
         }
 
         public static void SaveSettings(Settings settings, bool isWin8OrHigher)

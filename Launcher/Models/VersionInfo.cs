@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Runtime.Serialization;
 
-namespace Launcher
+namespace Launcher.Models
 {
     [DataContract]
     public class VersionInfo
@@ -20,5 +20,8 @@ namespace Launcher
 
         [DataMember]
         public Dictionary<string, string> FileChecksums { get; set; } 
+
+        [DataMember]
+        public Dictionary<string, List<PakFile>> PakFiles { get; set; }
     }
 }

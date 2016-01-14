@@ -99,5 +99,45 @@ namespace Launcher.Properties {
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
+
+        public static byte[] Map1
+        {
+            get
+            {
+                return (byte[])Resources.ResourceManager.GetObject("Map1", Resources.resourceCulture);
+            }
+        }
+
+        public static byte[] Map2
+        {
+            get
+            {
+                return (byte[])Resources.ResourceManager.GetObject("Map2", Resources.resourceCulture);
+            }
+        }
+
+        public static byte[] Map3
+        {
+            get
+            {
+                return (byte[])Resources.ResourceManager.GetObject("Map3", Resources.resourceCulture);
+            }
+        }
+
+        public static byte[] Map4
+        {
+            get
+            {
+                return (byte[])Resources.ResourceManager.GetObject("Map4", Resources.resourceCulture);
+            }
+        }
+
+        public static byte[] Map5
+        {
+            get
+            {
+                return (byte[])Resources.ResourceManager.GetObject("Map5", Resources.resourceCulture);
+            }
+        }
     }
 }

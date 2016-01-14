@@ -1,4 +1,4 @@
-﻿namespace Launcher
+﻿namespace Launcher.Models
 {
     public class Server
     {

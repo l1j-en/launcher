@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Runtime.Serialization.Json;
 using System.Text;
+using Launcher.Models;
 
 namespace Launcher
 {
@@ -32,7 +34,7 @@ namespace Launcher
             var obj = Activator.CreateInstance<T>();
             using (var ms = new MemoryStream(Encoding.Unicode.GetBytes(json)))
             {
-                var serializer = new DataContractJsonSerializer(obj.GetType());
+                var serializer = new DataContractJsonSerializer(obj.GetType(), new List<Type> { typeof(PakFile) });
                 obj = (T)serializer.ReadObject(ms);
             }
 

@@ -2,6 +2,7 @@
 using System.IO;
 using System.Linq;
 using System.Windows.Forms;
+using Launcher.Models;
 
 namespace Launcher
 {
@@ -65,7 +66,7 @@ namespace Launcher
 
         private void SettingsForm_Load(object sender, EventArgs e)
         {
-            var savedSettings = Helpers.LoadSettings();
+            var savedSettings = Helpers.LoadSettings() ?? new Settings();
 
             this.cmbResolution.Items.AddRange(LineageClient.GetResolutions(this._isWin8OrHigher).ToArray());
             this.chkResize.Checked = savedSettings.Resize;
