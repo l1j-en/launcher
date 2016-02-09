@@ -356,7 +356,6 @@ namespace Launcher
 
                         if (!File.Exists(filePath) || Helpers.GetChecksum(filePath) != checksum)
                         {
-                            MessageBox.Show("Downloading File: " + filePath);
                             var extension = Path.GetExtension(file);
                             using (var client = new WebClient())
                             {
