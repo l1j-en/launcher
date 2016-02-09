@@ -12,30 +12,21 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
-using System.Collections.Generic;
-using System.Runtime.Serialization;
+using System.Diagnostics;
+using System.Windows.Forms;
 
-namespace Launcher.Models
+namespace Launcher
 {
-    [DataContract]
-    public class VersionInfo
+    public partial class CaptureMouseDialog : Form
     {
-        [DataMember]
-        public string Version { get; set; }
+        public CaptureMouseDialog()
+        {
+            InitializeComponent();
+        }
 
-        [DataMember]
-        public bool Required { get; set; }
-
-        [DataMember]
-        public string VersionDetails { get; set; }
-
-        [DataMember]
-        public long LastUpdated { get; set; }
-
-        [DataMember]
-        public Dictionary<string, string> FileChecksums { get; set; } 
-
-        [DataMember]
-        public Dictionary<string, List<PakFile>> PakFiles { get; set; }
+        private void lnkLbl_VM_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            Process.Start("https://github.com/smith-j-travis/Launcher/blob/master/VM_Mouse_capture.md");
+        }
     }
 }

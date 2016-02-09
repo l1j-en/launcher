@@ -1,4 +1,18 @@
-﻿using System;
+﻿/* This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -59,7 +73,7 @@ namespace Launcher
                 };
             }
 
-            this._isWin8OrHigher = this._isWin8OrHigher = Helpers.IsWin8Orhigher();
+            this._isWin8OrHigher = Helpers.IsWin8Orhigher();
             InitializeComponent();
         }
 
@@ -148,6 +162,9 @@ namespace Launcher
                 var windowSize = Screen.PrimaryScreen.WorkingArea;
                 client.SetCentred(windowSize.Width, windowSize.Height);
             }
+
+            if (settings.CaptureMouse)
+                client.SetAllowCapture();
 
             lock (this._lockObject)
                 Clients.Add(client);
@@ -251,6 +268,12 @@ namespace Launcher
 
             if (addServerForm.ShowDialog() == DialogResult.OK)
             {
+                if (this._servers.ContainsKey(addServerForm.txtName.Text))
+                {
+                    MessageBox.Show("A server with that name has already been added.");
+                    return;
+                }
+
                 this._servers.Add(addServerForm.txtName.Text, new Server
                 {
                     Ip = addServerForm.txtIpAddress.Text,
@@ -333,6 +356,7 @@ namespace Launcher
 
                         if (!File.Exists(filePath) || Helpers.GetChecksum(filePath) != checksum)
                         {
+                            MessageBox.Show("Downloading File: " + filePath);
                             var extension = Path.GetExtension(file);
                             using (var client = new WebClient())
                             {
@@ -361,6 +385,20 @@ namespace Launcher
 
                     var currentTime = DateTime.UtcNow - new DateTime(1970, 1, 1);
                     launcherKey.SetValue("LastUpdated", (int) currentTime.TotalSeconds, RegistryValueKind.DWord);
+
+                    string versionName;
+                    var isWin8OrHigher = Helpers.IsWin8OrHigher(out versionName);
+
+                    if (isWin8OrHigher && versionName == "Windows 10" && settings.ClientBin.ToLower() != "s3ep1u.bin")
+                    {
+                        settings.ClientBin = "S3EP1U.bin";
+                        Helpers.SaveSettings(settings, true);
+
+                        MessageBox.Show(
+                            "You're running Windows 10, but aren't using the S3EP1U.bin file. It has now been automatically set.\n\n" +
+                            "If you want to use the normal S3EP1.bin file, you can update it under Settings -> Client Settings.", "Windows 10 Detected",
+                            MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    } //end if
                 } //end if
             }
             finally
@@ -413,7 +451,7 @@ namespace Launcher
                 {
                     this.tmrCheckProcess.Enabled = false;
                     LineageClient.ChangeDisplaySettings(revertResolution);
-                    return;
+                    tmrCheckProcess.Stop();
                 }
             }
         } 

@@ -1,4 +1,18 @@
-﻿using System;
+﻿/* This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
@@ -25,7 +39,9 @@ namespace Launcher
         private static User32.KeyboardHookDelegate _keyboardListener = null;
         private static IntPtr _keyboardHookId = IntPtr.Zero;
         private static readonly Dictionary<int, User32.WinEventProc> WindowListeners = new Dictionary<int, User32.WinEventProc>();
+        private static readonly Dictionary<int, User32.WinEventProc> FocusListeners = new Dictionary<int, User32.WinEventProc>();
         private const int MaxRetries = 10;
+        private static Settings _appSettings = null;
 
         public Process Process { get; private set; }
 
@@ -34,6 +50,7 @@ namespace Launcher
             this._processName = processName;
             this._captureDirectory = Path.Combine(clientDirectory, @"Capture\Launcher\");
             _hookedWindows = hookedWindows;
+            _appSettings = Helpers.LoadSettings();
         }
 
         public static User32.DevMode ChangeDisplayColour(int bitCount)
@@ -126,7 +143,7 @@ namespace Launcher
 
                     var pFoundWindow = proc.MainWindowHandle;
                     var procHandleId = pFoundWindow.ToInt32();
-                    if (procHandleId > 0)
+                    if (procHandleId > 0 && !WindowListeners.ContainsKey(proc.Id) && !FocusListeners.ContainsKey(proc.Id))
                     {
                         this.Process = proc;
 
@@ -143,10 +160,17 @@ namespace Launcher
                         User32.SetWindowLong(pFoundWindow, (int)User32.WindowLongFlags.GwlStyle, (style & ~(int)User32.WindowLongFlags.WsSysmenu));
 
                         WindowListeners.Add(proc.Id, MoveWindowCallback);
+                        FocusListeners.Add(proc.Id, FocusWindowCallback);
 
                         User32.SetWinEventHook((uint)User32.WinEventDelegateFlags.EventSystemMovesizeend, 
                             (uint)User32.WinEventDelegateFlags.EventSystemMovesizeend, IntPtr.Zero, WindowListeners[proc.Id], proc.Id, 0,
                             (uint)User32.WinEventDelegateFlags.WineventOutofcontext);
+
+                        if(_appSettings.CaptureMouse)
+                            User32.SetWinEventHook((uint)User32.WinEventDelegateFlags.EventSystemForeground,
+                                (uint)User32.WinEventDelegateFlags.EventSystemForeground, IntPtr.Zero, FocusListeners[proc.Id], proc.Id, 0,
+                                (uint)User32.WinEventDelegateFlags.WineventOutofcontext);
+                        
 
                         if (_keyboardListener == null)
                             _keyboardListener = KeyboardInputCallback;
@@ -158,7 +182,7 @@ namespace Launcher
                         if (_keyboardHookId == IntPtr.Zero)
                             _keyboardHookId = User32.SetWindowsHookEx((int)User32.KeyboardHooks.WH_KEYBOARD_LL, _keyboardListener, 
                                 Marshal.GetHINSTANCE(Assembly.GetExecutingAssembly().GetModules()[0]), 0);
-
+                       
                         if (!Directory.Exists(this._captureDirectory))
                             Directory.CreateDirectory((this._captureDirectory));
 
@@ -179,14 +203,14 @@ namespace Launcher
                 var windowTitle = new StringBuilder(256);
                 User32.GetWindowText(windowHandle, windowTitle, 256);
 
-                if (nCode >= 0 && windowTitle.ToString() == "Lineage Windows Client")
+                if (windowTitle.ToString() == "Lineage Windows Client")
                 {
-                    if (wParam == (IntPtr) User32.KeyboardHooks.WM_KEYUP)
+                    if (nCode >= 0 && wParam == (IntPtr) User32.KeyboardHooks.WM_KEYUP)
                     {
                         //if is print screen
-                        if (lParam.vkCode == (int)User32.Keys.VK_PRINT)
+                        if (lParam.vkCode == (int) User32.Keys.VK_PRINT)
                         {
-                            
+
                             User32.Rect windowRect, clientRect;
                             User32.GetWindowRect(windowHandle, out windowRect);
                             User32.GetClientRect(windowHandle, out clientRect);
@@ -210,21 +234,36 @@ namespace Launcher
                                 new Size(clientWidth - borderSize, clientHeight - borderSize),
                                 CopyPixelOperation.SourceCopy);
 
-                            var outputFileName = Path.Combine(this._captureDirectory, DateTime.Now.ToString("yyyy-MM-dd HH-mm-ss") + ".png");
-                            using (var memory = new MemoryStream())
-                            {
-                                using (var fs = new FileStream(outputFileName, FileMode.Create, FileAccess.ReadWrite))
-                                {
-                                    screenshot.Save(memory, ImageFormat.Png);
-                                    var bytes = memory.ToArray();
-                                    fs.Write(bytes, 0, bytes.Length);
-                                }
-                            }
+                            var datetimestamp = DateTime.Now.ToString("yyyy-MM-dd HH-mm-ss");
 
-                            //Return a dummy value to trap the keystroke
-                            return User32.CallNextHookEx(_keyboardHookId, nCode, IntPtr.Zero, ref lParam);
-                        } //end if printscreen
-                    } //end if keyup
+                            var outputFileName = Path.Combine(this._captureDirectory,
+                                datetimestamp + ".png");
+
+                            var blurOutputFileName = Path.Combine(this._captureDirectory,
+                                datetimestamp + "-blurred.png");
+
+                            if (_appSettings.BlurImage())
+                            {
+                                var blurredScreenshot = Helpers.BlurImage(screenshot, _appSettings.BlurLevel, _appSettings.BlurHpMp,
+                                    _appSettings.BlurAc, _appSettings.BlurHotKeys, _appSettings.BlurChat);
+
+                                if (_appSettings.BlurSaveSetting != "Only Save Blurred Version")
+                                    Helpers.SaveScreenshot(blurOutputFileName, blurredScreenshot);
+                                else
+                                    screenshot = blurredScreenshot;
+                            } //end if
+                               
+                            Helpers.SaveScreenshot(outputFileName, screenshot);
+                        } //end if print screen
+                    }
+                    else if (nCode == 0)
+                    {
+                        if ((lParam.vkCode == 0x09) && (lParam.flags == 0x20)) //alt + esc
+                        {
+                            Gdi32.ClipCursor(null);
+                            return new IntPtr(-1);
+                        }
+                    }
                 } //end if client check
             }
             catch (Exception){} //just in case so we don't crash if the screenshot fails
@@ -237,13 +276,62 @@ namespace Launcher
         {
             User32.InvalidateRect(IntPtr.Zero, IntPtr.Zero, true);
             User32.RedrawWindow(hWinEventHook, IntPtr.Zero, IntPtr.Zero, User32.RedrawWindowFlags.UpdateNow);
+            CaptureMouse(hWnd);
         } //end MoveWindowCallback
+
+        private static void FocusWindowCallback(IntPtr hWinEventHook, uint iEvent, IntPtr hWnd, int idObject, int idChild,
+            int dwEventThread, int dwmsEventTime)
+        {
+            if (iEvent != 3)
+                return;
+
+            CaptureMouse(hWnd);
+        } //end FocusWindowCallback
 
         public void SetCentred(int screenWidth, int screenHeight)
         {
-            var startPointX = (screenWidth / 2) - 320;
-            var startPointY = (screenHeight / 2) - 240;
-            User32.SetWindowPosPtr(this.Process.MainWindowHandle, (IntPtr)0, startPointX, startPointY, 646, 508, (int)User32.SetWindowPosFlags.FrameChanged);
+            User32.Rect windowRect, clientRect;
+            User32.GetWindowRect(this.Process.MainWindowHandle, out windowRect);
+            User32.GetClientRect(this.Process.MainWindowHandle, out clientRect);
+
+            var startPointX = (screenWidth / 2) - (windowRect.Right / 2);
+            var startPointY = (screenHeight / 2) - (windowRect.Bottom / 2);
+
+            var windowHeight = windowRect.Bottom - windowRect.Top;
+            var windowWidth = windowRect.Right - windowRect.Left;
+
+            User32.SetWindowPosPtr(this.Process.MainWindowHandle, (IntPtr)0, startPointX, startPointY, windowWidth, windowHeight, (int)User32.SetWindowPosFlags.FrameChanged);
         } //end SetCentred
+
+        public void SetAllowCapture()
+        {
+            CaptureMouse(this.Process.MainWindowHandle);
+        } //end SetAllowCapture
+
+        private static void CaptureMouse(IntPtr hWnd)
+        {
+            User32.Rect windowRect, clientRect;
+            User32.GetWindowRect(hWnd, out windowRect);
+            User32.GetClientRect(hWnd, out clientRect);
+
+            var windowHeight = windowRect.Bottom - windowRect.Top;
+            var windowWidth = windowRect.Right - windowRect.Left;
+
+            // get the windowrect again after we have moved it so we know where to clip
+            User32.GetWindowRect(hWnd, out windowRect);
+
+            var clientWidth = clientRect.Right - clientRect.Left;
+            var clientHeight = clientRect.Bottom - clientRect.Top;
+
+            var heightDiff = windowHeight - clientHeight;
+            var widthDiff = windowWidth - clientWidth;
+
+            var borderSize = widthDiff / 2;
+
+            User32.GetWindowRect(hWnd, out clientRect);
+            var rect = new Gdi32.Rect(windowRect.Left + borderSize, windowRect.Top + heightDiff - borderSize, windowRect.Right - borderSize, windowRect.Bottom - borderSize);
+
+            Gdi32.ClipCursor(rect);
+        } //end CaptureMouse
     } //end class
 } //end namespace

@@ -100,6 +100,12 @@
     <Compile Include="AddServerForm.Designer.cs">
       <DependentUpon>AddServerForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="CaptureMouseDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="CaptureMouseDialog.Designer.cs">
+      <DependentUpon>CaptureMouseDialog.cs</DependentUpon>
+    </Compile>
     <Compile Include="ComboBoxItem.cs" />
     <Compile Include="Controls\OutlineLabel.cs">
       <SubType>Component</SubType>
@@ -137,11 +143,15 @@
       <DependentUpon>UpdateForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Utilities\PakTools.cs" />
+    <Compile Include="WindowsAPI\Gdi32.cs" />
     <Compile Include="WindowsAPI\Kernel32.cs" />
     <Compile Include="WindowsAPI\User32.cs" />
     <Compile Include="LineageClient.cs" />
     <EmbeddedResource Include="AddServerForm.resx">
       <DependentUpon>AddServerForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="CaptureMouseDialog.resx">
+      <DependentUpon>CaptureMouseDialog.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Controls\GlassButton.resx">
       <DependentUpon>GlassButton.cs</DependentUpon>
@@ -152,6 +162,7 @@
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
     </EmbeddedResource>
     <EmbeddedResource Include="SettingsForm.resx">
       <DependentUpon>SettingsForm.cs</DependentUpon>
@@ -178,6 +189,9 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Lineage.ico" />
+    <None Include="Resources\Help_Big1.png" />
+    <None Include="Resources\Help_Big.png" />
+    <None Include="Resources\Help.png" />
     <None Include="Resources\vote.jpg" />
     <None Include="Resources\close1.png" />
     <None Include="Resources\lineage_logo.png" />

@@ -1,4 +1,18 @@
-﻿using System;
+﻿/* This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+using System;
 using System.IO;
 using Launcher.Models;
 using Launcher.WindowsAPI;
@@ -59,7 +73,7 @@ namespace Launcher
             
             Kernel32.SuspendThread(hndProc);
             Kernel32.WriteProcessMemory(hndProc, (IntPtr)0x00504538, zelgoPak, (uint)zelgoPak.Length - 1, 0);
-            System.Threading.Thread.Sleep(1500);
+            System.Threading.Thread.Sleep(1000);
             Kernel32.ResumeThread(hndProc);
 
             Kernel32.SuspendThread(hndProc);
@@ -67,6 +81,8 @@ namespace Launcher
             Kernel32.ResumeThread(hndProc);
 
             Kernel32.CloseHandle(hndProc);
+
+            System.Threading.Thread.Sleep(1000);
         }
     }
 }

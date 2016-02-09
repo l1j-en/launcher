@@ -1,4 +1,18 @@
-﻿using System;
+﻿/* This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+using System;
 using System.IO;
 using System.Linq;
 using System.Windows.Forms;
@@ -35,6 +49,13 @@ namespace Launcher
                 ClientDirectory = this.txtDirectory.Text,
                 ClientBin = this.cmbBin.Text,
                 DisableDark = this.chkDisableDark.Checked,
+                BlurAc = this.chkBlurAc.Checked,
+                BlurChat =  this.chkBlurChat.Checked,
+                BlurHotKeys = this.chkBlurHotKeys.Checked,
+                BlurHpMp = this.chkBlurHpMp.Checked,
+                BlurLevel = this.chkBlurLevel.Checked,
+                BlurSaveSetting = this.cmbBlurOptions.SelectedItem.ToString(),
+                CaptureMouse = this.chkCaptureMouse.Checked,
                 EnableMobColours = this.chkMobColours.Checked,
                 MusicType = this.cmbMusic.SelectedItem.ToString()
             };
@@ -68,14 +89,23 @@ namespace Launcher
         {
             var savedSettings = Helpers.LoadSettings() ?? new Settings();
 
+            this.chkBlurAc.Checked = savedSettings.BlurAc;
+            this.chkBlurChat.Checked = savedSettings.BlurChat;
+            this.chkBlurHotKeys.Checked = savedSettings.BlurHotKeys;
+            this.chkBlurHpMp.Checked = savedSettings.BlurHpMp;
+            this.chkBlurLevel.Checked = savedSettings.BlurLevel;
+
+            this.cmbBlurOptions.SelectedIndex = savedSettings.BlurSaveSetting == null ? 0 : this.cmbBlurOptions.FindString(savedSettings.BlurSaveSetting);
+
+            this.chkCaptureMouse.Checked = savedSettings.CaptureMouse;
+
             this.cmbResolution.Items.AddRange(LineageClient.GetResolutions(this._isWin8OrHigher).ToArray());
             this.chkResize.Checked = savedSettings.Resize;
             this.chkWindowed.Checked = savedSettings.Windowed;
             this.chkCentre.Checked = savedSettings.Centred;
 
-            if (savedSettings.Resolution != null)
-                this.cmbResolution.SelectedIndex = savedSettings.Resolution == null ? 0 : this.cmbResolution.FindString(savedSettings.Resolution.ToString());
-                
+            this.cmbResolution.SelectedIndex = savedSettings.Resolution == null ? 0 : this.cmbResolution.FindString(savedSettings.Resolution.ToString());
+
             this.chkDisableDark.Checked = savedSettings.DisableDark;
             this.chkMobColours.Checked = savedSettings.EnableMobColours;
             this.txtDirectory.Text = savedSettings.ClientDirectory ?? "";
@@ -137,6 +167,19 @@ namespace Launcher
             
             this.chkResize.Enabled = this.chkWindowed.Checked;
             this.chkCentre.Enabled = this.chkWindowed.Checked;
+        }
+
+        private void pctMouseHelp_Click(object sender, EventArgs e)
+        {
+            new CaptureMouseDialog().ShowDialog();
+        }
+
+        private void chkBlur_CheckedChanged(object sender, EventArgs e)
+        {
+            var blurEnabled = this.chkBlurAc.Checked || this.chkBlurChat.Checked || this.chkBlurHotKeys.Checked ||
+                              this.chkBlurHpMp.Checked || this.chkBlurLevel.Checked;
+
+            this.cmbBlurOptions.Enabled = blurEnabled;
         }
     }
 }

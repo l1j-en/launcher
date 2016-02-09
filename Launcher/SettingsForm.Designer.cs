@@ -30,7 +30,7 @@ namespace Launcher
         /// </summary>
         private void InitializeComponent()
         {
-            this.btnClose = new Launcher.Controls.GlassButton();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(SettingsForm));
             this.lblSettings = new System.Windows.Forms.Label();
             this.btnSave = new Launcher.Controls.GlassButton();
             this.btnCancel = new Launcher.Controls.GlassButton();
@@ -42,6 +42,17 @@ namespace Launcher
             this.chkWindowed = new System.Windows.Forms.CheckBox();
             this.tabSettings = new System.Windows.Forms.TabControl();
             this.tabGeneral = new System.Windows.Forms.TabPage();
+            this.grpScreenshot = new System.Windows.Forms.GroupBox();
+            this.chkBlurLevel = new System.Windows.Forms.CheckBox();
+            this.cmbBlurOptions = new System.Windows.Forms.ComboBox();
+            this.chkBlurChat = new System.Windows.Forms.CheckBox();
+            this.chkBlurHotKeys = new System.Windows.Forms.CheckBox();
+            this.chkBlurHpMp = new System.Windows.Forms.CheckBox();
+            this.chkBlurAc = new System.Windows.Forms.CheckBox();
+            this.grpMouse = new System.Windows.Forms.GroupBox();
+            this.pctMouseHelp = new System.Windows.Forms.PictureBox();
+            this.chkCaptureMouse = new System.Windows.Forms.CheckBox();
+            this.tabWindow = new System.Windows.Forms.TabPage();
             this.tabInGame = new System.Windows.Forms.TabPage();
             this.grpMobColours = new System.Windows.Forms.GroupBox();
             this.chkMobColours = new System.Windows.Forms.CheckBox();
@@ -57,10 +68,15 @@ namespace Launcher
             this.txtDirectory = new System.Windows.Forms.TextBox();
             this.lblDirectory = new System.Windows.Forms.Label();
             this.folderBrowserDialog = new System.Windows.Forms.FolderBrowserDialog();
+            this.btnClose = new Launcher.Controls.GlassButton();
             this.grpWindowed.SuspendLayout();
             this.grpResolution.SuspendLayout();
             this.tabSettings.SuspendLayout();
             this.tabGeneral.SuspendLayout();
+            this.grpScreenshot.SuspendLayout();
+            this.grpMouse.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pctMouseHelp)).BeginInit();
+            this.tabWindow.SuspendLayout();
             this.tabInGame.SuspendLayout();
             this.grpMobColours.SuspendLayout();
             this.grpMusic.SuspendLayout();
@@ -68,24 +84,6 @@ namespace Launcher
             this.tabClient.SuspendLayout();
             this.grpClient.SuspendLayout();
             this.SuspendLayout();
-            // 
-            // btnClose
-            // 
-            this.btnClose.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Center;
-            this.btnClose.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.btnClose.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.5F);
-            this.btnClose.ForeColor = System.Drawing.Color.Transparent;
-            this.btnClose.GlowColor = System.Drawing.Color.FromArgb(((int)(((byte)(184)))), ((int)(((byte)(184)))), ((int)(((byte)(184)))));
-            this.btnClose.Image = global::Launcher.Properties.Resources.close;
-            this.btnClose.InnerBorderColor = System.Drawing.Color.Transparent;
-            this.btnClose.Location = new System.Drawing.Point(284, 5);
-            this.btnClose.Name = "btnClose";
-            this.btnClose.OuterBorderColor = System.Drawing.Color.Silver;
-            this.btnClose.ShineColor = System.Drawing.Color.Transparent;
-            this.btnClose.Size = new System.Drawing.Size(20, 22);
-            this.btnClose.TabIndex = 1;
-            this.btnClose.TabStop = false;
-            this.btnClose.Click += new System.EventHandler(this.btnClose_Click);
             // 
             // lblSettings
             // 
@@ -196,24 +194,153 @@ namespace Launcher
             // tabSettings
             // 
             this.tabSettings.Controls.Add(this.tabGeneral);
+            this.tabSettings.Controls.Add(this.tabWindow);
             this.tabSettings.Controls.Add(this.tabInGame);
             this.tabSettings.Controls.Add(this.tabClient);
             this.tabSettings.Location = new System.Drawing.Point(5, 27);
             this.tabSettings.Name = "tabSettings";
             this.tabSettings.SelectedIndex = 0;
-            this.tabSettings.Size = new System.Drawing.Size(295, 203);
+            this.tabSettings.Size = new System.Drawing.Size(295, 215);
             this.tabSettings.TabIndex = 7;
             // 
             // tabGeneral
             // 
             this.tabGeneral.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(206)))), ((int)(((byte)(203)))), ((int)(((byte)(203)))));
-            this.tabGeneral.Controls.Add(this.grpWindowed);
+            this.tabGeneral.Controls.Add(this.grpScreenshot);
+            this.tabGeneral.Controls.Add(this.grpMouse);
             this.tabGeneral.Location = new System.Drawing.Point(4, 22);
             this.tabGeneral.Name = "tabGeneral";
-            this.tabGeneral.Padding = new System.Windows.Forms.Padding(3);
-            this.tabGeneral.Size = new System.Drawing.Size(287, 177);
-            this.tabGeneral.TabIndex = 0;
+            this.tabGeneral.Size = new System.Drawing.Size(287, 189);
+            this.tabGeneral.TabIndex = 3;
             this.tabGeneral.Text = "General";
+            // 
+            // grpScreenshot
+            // 
+            this.grpScreenshot.Controls.Add(this.chkBlurLevel);
+            this.grpScreenshot.Controls.Add(this.cmbBlurOptions);
+            this.grpScreenshot.Controls.Add(this.chkBlurChat);
+            this.grpScreenshot.Controls.Add(this.chkBlurHotKeys);
+            this.grpScreenshot.Controls.Add(this.chkBlurHpMp);
+            this.grpScreenshot.Controls.Add(this.chkBlurAc);
+            this.grpScreenshot.Location = new System.Drawing.Point(6, 52);
+            this.grpScreenshot.Name = "grpScreenshot";
+            this.grpScreenshot.Size = new System.Drawing.Size(278, 130);
+            this.grpScreenshot.TabIndex = 1;
+            this.grpScreenshot.TabStop = false;
+            this.grpScreenshot.Text = "Screenshots";
+            // 
+            // chkBlurLevel
+            // 
+            this.chkBlurLevel.AutoSize = true;
+            this.chkBlurLevel.Location = new System.Drawing.Point(19, 16);
+            this.chkBlurLevel.Name = "chkBlurLevel";
+            this.chkBlurLevel.Size = new System.Drawing.Size(98, 17);
+            this.chkBlurLevel.TabIndex = 8;
+            this.chkBlurLevel.Text = "Auto-Blur Level";
+            this.chkBlurLevel.UseVisualStyleBackColor = true;
+            this.chkBlurLevel.CheckedChanged += new System.EventHandler(this.chkBlur_CheckedChanged);
+            // 
+            // cmbBlurOptions
+            // 
+            this.cmbBlurOptions.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.cmbBlurOptions.Enabled = false;
+            this.cmbBlurOptions.FormattingEnabled = true;
+            this.cmbBlurOptions.Items.AddRange(new object[] {
+            "Only Save Blurred Version",
+            "Save Blurred and Unblurred Versions"});
+            this.cmbBlurOptions.Location = new System.Drawing.Point(19, 102);
+            this.cmbBlurOptions.Name = "cmbBlurOptions";
+            this.cmbBlurOptions.Size = new System.Drawing.Size(240, 21);
+            this.cmbBlurOptions.TabIndex = 7;
+            // 
+            // chkBlurChat
+            // 
+            this.chkBlurChat.AutoSize = true;
+            this.chkBlurChat.Location = new System.Drawing.Point(19, 83);
+            this.chkBlurChat.Name = "chkBlurChat";
+            this.chkBlurChat.Size = new System.Drawing.Size(94, 17);
+            this.chkBlurChat.TabIndex = 6;
+            this.chkBlurChat.Text = "Auto-Blur Chat";
+            this.chkBlurChat.UseVisualStyleBackColor = true;
+            this.chkBlurChat.CheckedChanged += new System.EventHandler(this.chkBlur_CheckedChanged);
+            // 
+            // chkBlurHotKeys
+            // 
+            this.chkBlurHotKeys.AutoSize = true;
+            this.chkBlurHotKeys.Location = new System.Drawing.Point(19, 66);
+            this.chkBlurHotKeys.Name = "chkBlurHotKeys";
+            this.chkBlurHotKeys.Size = new System.Drawing.Size(112, 17);
+            this.chkBlurHotKeys.TabIndex = 5;
+            this.chkBlurHotKeys.Text = "Auto-Blur HotKeys";
+            this.chkBlurHotKeys.UseVisualStyleBackColor = true;
+            this.chkBlurHotKeys.CheckedChanged += new System.EventHandler(this.chkBlur_CheckedChanged);
+            // 
+            // chkBlurHpMp
+            // 
+            this.chkBlurHpMp.AutoSize = true;
+            this.chkBlurHpMp.Location = new System.Drawing.Point(19, 48);
+            this.chkBlurHpMp.Name = "chkBlurHpMp";
+            this.chkBlurHpMp.Size = new System.Drawing.Size(106, 17);
+            this.chkBlurHpMp.TabIndex = 4;
+            this.chkBlurHpMp.Text = "Auto-Blur Hp/Mp";
+            this.chkBlurHpMp.UseVisualStyleBackColor = true;
+            this.chkBlurHpMp.CheckedChanged += new System.EventHandler(this.chkBlur_CheckedChanged);
+            // 
+            // chkBlurAc
+            // 
+            this.chkBlurAc.AutoSize = true;
+            this.chkBlurAc.Location = new System.Drawing.Point(19, 32);
+            this.chkBlurAc.Name = "chkBlurAc";
+            this.chkBlurAc.Size = new System.Drawing.Size(86, 17);
+            this.chkBlurAc.TabIndex = 3;
+            this.chkBlurAc.Text = "Auto-Blur AC";
+            this.chkBlurAc.UseVisualStyleBackColor = true;
+            this.chkBlurAc.CheckedChanged += new System.EventHandler(this.chkBlur_CheckedChanged);
+            // 
+            // grpMouse
+            // 
+            this.grpMouse.Controls.Add(this.pctMouseHelp);
+            this.grpMouse.Controls.Add(this.chkCaptureMouse);
+            this.grpMouse.Location = new System.Drawing.Point(6, 6);
+            this.grpMouse.Name = "grpMouse";
+            this.grpMouse.Size = new System.Drawing.Size(278, 40);
+            this.grpMouse.TabIndex = 0;
+            this.grpMouse.TabStop = false;
+            this.grpMouse.Text = "Mouse";
+            // 
+            // pctMouseHelp
+            // 
+            this.pctMouseHelp.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
+            this.pctMouseHelp.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.pctMouseHelp.Image = ((System.Drawing.Image)(resources.GetObject("pctMouseHelp.Image")));
+            this.pctMouseHelp.Location = new System.Drawing.Point(114, 16);
+            this.pctMouseHelp.Name = "pctMouseHelp";
+            this.pctMouseHelp.Size = new System.Drawing.Size(15, 15);
+            this.pctMouseHelp.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+            this.pctMouseHelp.TabIndex = 2;
+            this.pctMouseHelp.TabStop = false;
+            this.pctMouseHelp.Click += new System.EventHandler(this.pctMouseHelp_Click);
+            // 
+            // chkCaptureMouse
+            // 
+            this.chkCaptureMouse.AutoSize = true;
+            this.chkCaptureMouse.Location = new System.Drawing.Point(19, 16);
+            this.chkCaptureMouse.Name = "chkCaptureMouse";
+            this.chkCaptureMouse.Size = new System.Drawing.Size(98, 17);
+            this.chkCaptureMouse.TabIndex = 1;
+            this.chkCaptureMouse.Text = "Capture Mouse";
+            this.chkCaptureMouse.UseVisualStyleBackColor = true;
+            // 
+            // tabWindow
+            // 
+            this.tabWindow.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(206)))), ((int)(((byte)(203)))), ((int)(((byte)(203)))));
+            this.tabWindow.Controls.Add(this.grpWindowed);
+            this.tabWindow.Location = new System.Drawing.Point(4, 22);
+            this.tabWindow.Name = "tabWindow";
+            this.tabWindow.Padding = new System.Windows.Forms.Padding(3);
+            this.tabWindow.Size = new System.Drawing.Size(287, 189);
+            this.tabWindow.TabIndex = 0;
+            this.tabWindow.Text = "Window";
             // 
             // tabInGame
             // 
@@ -223,7 +350,7 @@ namespace Launcher
             this.tabInGame.Controls.Add(this.grpDisableDark);
             this.tabInGame.Location = new System.Drawing.Point(4, 22);
             this.tabInGame.Name = "tabInGame";
-            this.tabInGame.Size = new System.Drawing.Size(287, 177);
+            this.tabInGame.Size = new System.Drawing.Size(287, 189);
             this.tabInGame.TabIndex = 2;
             this.tabInGame.Text = "In-Game";
             // 
@@ -296,7 +423,7 @@ namespace Launcher
             this.tabClient.Location = new System.Drawing.Point(4, 22);
             this.tabClient.Name = "tabClient";
             this.tabClient.Padding = new System.Windows.Forms.Padding(3);
-            this.tabClient.Size = new System.Drawing.Size(287, 177);
+            this.tabClient.Size = new System.Drawing.Size(287, 189);
             this.tabClient.TabIndex = 1;
             this.tabClient.Text = "Client Settings";
             // 
@@ -361,6 +488,24 @@ namespace Launcher
             this.lblDirectory.TabIndex = 0;
             this.lblDirectory.Text = "Directory";
             // 
+            // btnClose
+            // 
+            this.btnClose.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Center;
+            this.btnClose.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.btnClose.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.5F);
+            this.btnClose.ForeColor = System.Drawing.Color.Transparent;
+            this.btnClose.GlowColor = System.Drawing.Color.FromArgb(((int)(((byte)(184)))), ((int)(((byte)(184)))), ((int)(((byte)(184)))));
+            this.btnClose.Image = global::Launcher.Properties.Resources.close;
+            this.btnClose.InnerBorderColor = System.Drawing.Color.Transparent;
+            this.btnClose.Location = new System.Drawing.Point(284, 5);
+            this.btnClose.Name = "btnClose";
+            this.btnClose.OuterBorderColor = System.Drawing.Color.Silver;
+            this.btnClose.ShineColor = System.Drawing.Color.Transparent;
+            this.btnClose.Size = new System.Drawing.Size(20, 22);
+            this.btnClose.TabIndex = 1;
+            this.btnClose.TabStop = false;
+            this.btnClose.Click += new System.EventHandler(this.btnClose_Click);
+            // 
             // SettingsForm
             // 
             this.AcceptButton = this.btnSave;
@@ -385,6 +530,12 @@ namespace Launcher
             this.grpResolution.ResumeLayout(false);
             this.tabSettings.ResumeLayout(false);
             this.tabGeneral.ResumeLayout(false);
+            this.grpScreenshot.ResumeLayout(false);
+            this.grpScreenshot.PerformLayout();
+            this.grpMouse.ResumeLayout(false);
+            this.grpMouse.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pctMouseHelp)).EndInit();
+            this.tabWindow.ResumeLayout(false);
             this.tabInGame.ResumeLayout(false);
             this.grpMobColours.ResumeLayout(false);
             this.grpMobColours.PerformLayout();
@@ -412,7 +563,7 @@ namespace Launcher
         private System.Windows.Forms.CheckBox chkWindowed;
         private System.Windows.Forms.ComboBox cmbResolution;
         private System.Windows.Forms.TabControl tabSettings;
-        private System.Windows.Forms.TabPage tabGeneral;
+        private System.Windows.Forms.TabPage tabWindow;
         private System.Windows.Forms.TabPage tabClient;
         private System.Windows.Forms.GroupBox grpClient;
         private System.Windows.Forms.ComboBox cmbBin;
@@ -428,6 +579,17 @@ namespace Launcher
         private System.Windows.Forms.CheckBox chkDisableDark;
         private System.Windows.Forms.GroupBox grpMobColours;
         private System.Windows.Forms.CheckBox chkMobColours;
+        private System.Windows.Forms.TabPage tabGeneral;
+        private System.Windows.Forms.GroupBox grpMouse;
+        private System.Windows.Forms.CheckBox chkCaptureMouse;
+        private System.Windows.Forms.GroupBox grpScreenshot;
+        private System.Windows.Forms.PictureBox pctMouseHelp;
+        private System.Windows.Forms.CheckBox chkBlurChat;
+        private System.Windows.Forms.CheckBox chkBlurHotKeys;
+        private System.Windows.Forms.CheckBox chkBlurHpMp;
+        private System.Windows.Forms.CheckBox chkBlurAc;
+        private System.Windows.Forms.ComboBox cmbBlurOptions;
+        private System.Windows.Forms.CheckBox chkBlurLevel;
 
     }
 }

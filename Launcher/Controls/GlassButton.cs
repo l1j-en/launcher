@@ -6,7 +6,6 @@
  *                                                                                              *
  * Feel free to use this control in your application or to improve it in any way!               *
  ***********************************************************************************************/
-
 using System;
 using System.ComponentModel;
 using System.Drawing;

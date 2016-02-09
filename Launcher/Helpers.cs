@@ -1,4 +1,19 @@
-﻿using System;
+﻿/* This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License along
+ * with this program; if not, write to the Free Software Foundation, Inc.,
+ * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+ */
+using System;
+using System.Drawing;
 using System.IO;
 using System.Net;
 using System.Reflection;
@@ -137,7 +152,7 @@ namespace Launcher
             {
                 return null;
             }
-        }
+        } //end GetVersionInfo
 
         public static string GetChecksum(string file)
         {
@@ -147,14 +162,79 @@ namespace Launcher
             using (var stream = File.OpenRead(file))
                 using (var md5 = MD5.Create())
                     return BitConverter.ToString(md5.ComputeHash(stream)).Replace("-", "").ToUpper();
-        }
+        } //end GetChecksum
 
-        public static bool IsWin8Orhigher()
+        public static bool IsWin8OrHigher(out string versionName)
         {
             var win8Version = new Version(6, 2, 9200, 0);
+            versionName = "Windows 8";
+
+            if (Environment.OSVersion.Version.Major >= 10)
+                versionName = "Windows 10";
 
             return Environment.OSVersion.Platform == PlatformID.Win32NT &&
                    Environment.OSVersion.Version >= win8Version;
         } //end IsWin8OrHigher
+
+        public static bool IsWin8Orhigher()
+        {
+            string versionName;
+            return IsWin8OrHigher(out versionName);
+        } //end IsWin8OrHigher
+
+        public static Bitmap BlurImage(Bitmap imageToBlur, bool level, bool hpmp, bool ac, bool hotkeys, bool chat)
+        {
+            var screenshot = (Bitmap)imageToBlur.Clone();
+
+            using (var g = Graphics.FromImage(screenshot))
+            {
+                if(level)
+                    g.FillRectangle(new SolidBrush(Color.Black), new Rectangle(33, 387, 78, 9));
+
+                if (hpmp)
+                {
+                    g.FillRectangle(new SolidBrush(Color.Black), new Rectangle(33, 404, 78, 12)); //hp
+                    g.FillRectangle(new SolidBrush(Color.Black), new Rectangle(33, 423, 78, 12)); //mp 
+                }
+                
+                if(ac)
+                    g.FillRectangle(new SolidBrush(Color.Black), new Rectangle(30, 445, 24, 9));
+
+                if(hotkeys)
+                    g.FillRectangle(new SolidBrush(Color.Black), new Rectangle(500, 386, 136, 67));
+
+                if (chat)
+                {
+                    var checkColor = Color.FromArgb(231, 219, 222);
+                    var level2 = screenshot.GetPixel(325, 333) == checkColor;
+                    var level3 = screenshot.GetPixel(325, 299) == checkColor;
+                    var level4 = screenshot.GetPixel(325, 265) == checkColor;
+
+                    if (level4)
+                        g.FillRectangle(new SolidBrush(Color.Black), new Rectangle(136, 283, 332, 177));
+                    else if (level3)
+                        g.FillRectangle(new SolidBrush(Color.Black), new Rectangle(136, 318, 332, 141));
+                    else if (level2)
+                        g.FillRectangle(new SolidBrush(Color.Black), new Rectangle(136, 354, 332, 105));
+                    else
+                        g.FillRectangle(new SolidBrush(Color.Black), new Rectangle(136, 389, 332, 71));                    
+                }  
+            }
+
+            return screenshot;
+        } //end BlurImage
+
+        public static void SaveScreenshot(string fileName, Bitmap screenshot)
+        {
+            using (var memory = new MemoryStream())
+            {
+                using (var fs = new FileStream(fileName, FileMode.Create, FileAccess.ReadWrite))
+                {
+                    screenshot.Save(memory, System.Drawing.Imaging.ImageFormat.Png);
+                    var bytes = memory.ToArray();
+                    fs.Write(bytes, 0, bytes.Length);
+                }
+            }
+        } //end SaveScreenshot
     } //end class
 } //end namespace

@@ -73,6 +73,26 @@ namespace Launcher.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap Help {
+            get {
+                object obj = ResourceManager.GetObject("Help", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap Help_Big {
+            get {
+                object obj = ResourceManager.GetObject("Help_Big", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap launcherBg {
             get {
                 object obj = ResourceManager.GetObject("launcherBg", resourceCulture);
@@ -91,52 +111,62 @@ namespace Launcher.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] Map1 {
+            get {
+                object obj = ResourceManager.GetObject("Map1", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] Map2 {
+            get {
+                object obj = ResourceManager.GetObject("Map2", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] Map3 {
+            get {
+                object obj = ResourceManager.GetObject("Map3", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] Map4 {
+            get {
+                object obj = ResourceManager.GetObject("Map4", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] Map5 {
+            get {
+                object obj = ResourceManager.GetObject("Map5", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
         internal static System.Drawing.Bitmap vote {
             get {
                 object obj = ResourceManager.GetObject("vote", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
-            }
-        }
-
-        public static byte[] Map1
-        {
-            get
-            {
-                return (byte[])Resources.ResourceManager.GetObject("Map1", Resources.resourceCulture);
-            }
-        }
-
-        public static byte[] Map2
-        {
-            get
-            {
-                return (byte[])Resources.ResourceManager.GetObject("Map2", Resources.resourceCulture);
-            }
-        }
-
-        public static byte[] Map3
-        {
-            get
-            {
-                return (byte[])Resources.ResourceManager.GetObject("Map3", Resources.resourceCulture);
-            }
-        }
-
-        public static byte[] Map4
-        {
-            get
-            {
-                return (byte[])Resources.ResourceManager.GetObject("Map4", Resources.resourceCulture);
-            }
-        }
-
-        public static byte[] Map5
-        {
-            get
-            {
-                return (byte[])Resources.ResourceManager.GetObject("Map5", Resources.resourceCulture);
             }
         }
     }
