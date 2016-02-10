@@ -160,17 +160,19 @@ namespace Launcher
                         User32.SetWindowLong(pFoundWindow, (int)User32.WindowLongFlags.GwlStyle, (style & ~(int)User32.WindowLongFlags.WsSysmenu));
 
                         WindowListeners.Add(proc.Id, MoveWindowCallback);
-                        FocusListeners.Add(proc.Id, FocusWindowCallback);
+                           
 
                         User32.SetWinEventHook((uint)User32.WinEventDelegateFlags.EventSystemMovesizeend, 
                             (uint)User32.WinEventDelegateFlags.EventSystemMovesizeend, IntPtr.Zero, WindowListeners[proc.Id], proc.Id, 0,
                             (uint)User32.WinEventDelegateFlags.WineventOutofcontext);
 
-                        if(_appSettings.CaptureMouse)
+                        if (_appSettings.CaptureMouse)
+                        {
+                            FocusListeners.Add(proc.Id, FocusWindowCallback);
                             User32.SetWinEventHook((uint)User32.WinEventDelegateFlags.EventSystemForeground,
                                 (uint)User32.WinEventDelegateFlags.EventSystemForeground, IntPtr.Zero, FocusListeners[proc.Id], proc.Id, 0,
                                 (uint)User32.WinEventDelegateFlags.WineventOutofcontext);
-                        
+                        }
 
                         if (_keyboardListener == null)
                             _keyboardListener = KeyboardInputCallback;
@@ -276,7 +278,9 @@ namespace Launcher
         {
             User32.InvalidateRect(IntPtr.Zero, IntPtr.Zero, true);
             User32.RedrawWindow(hWinEventHook, IntPtr.Zero, IntPtr.Zero, User32.RedrawWindowFlags.UpdateNow);
-            CaptureMouse(hWnd);
+
+            if(_appSettings.CaptureMouse)
+                CaptureMouse(hWnd);
         } //end MoveWindowCallback
 
         private static void FocusWindowCallback(IntPtr hWinEventHook, uint iEvent, IntPtr hWnd, int idObject, int idChild,
