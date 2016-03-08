@@ -24,10 +24,12 @@ namespace Launcher
     {
         private readonly bool _isWin8OrHigher;
         private bool _initialLoad = true;
+        private readonly LauncherConfig _config;
 
-        public SettingsForm(bool isWin8OrHigher)
+        public SettingsForm(LauncherConfig config, bool isWin8OrHigher)
         {
             InitializeComponent();
+            this._config = config;
             this._isWin8OrHigher = isWin8OrHigher;
         }
 
@@ -46,7 +48,6 @@ namespace Launcher
             var settings = new Settings
             {
                 Resize = this.chkResize.Checked,
-                ClientDirectory = this.txtDirectory.Text,
                 ClientBin = this.cmbBin.Text,
                 DisableDark = this.chkDisableDark.Checked,
                 BlurAc = this.chkBlurAc.Checked,
@@ -73,7 +74,7 @@ namespace Launcher
                 return;
             }
                 
-            Helpers.SaveSettings(settings, this._isWin8OrHigher);
+            Helpers.SaveSettings(this._config.KeyName, settings, this._config.InstallDir, this._isWin8OrHigher);
             this.Close();
         }
 
@@ -87,7 +88,7 @@ namespace Launcher
 
         private void SettingsForm_Load(object sender, EventArgs e)
         {
-            var savedSettings = Helpers.LoadSettings() ?? new Settings();
+            var savedSettings = Helpers.LoadSettings(this._config.KeyName) ?? new Settings();
 
             this.chkBlurAc.Checked = savedSettings.BlurAc;
             this.chkBlurChat.Checked = savedSettings.BlurChat;
@@ -108,16 +109,16 @@ namespace Launcher
 
             this.chkDisableDark.Checked = savedSettings.DisableDark;
             this.chkMobColours.Checked = savedSettings.EnableMobColours;
-            this.txtDirectory.Text = savedSettings.ClientDirectory ?? "";
 
-            if (this.txtDirectory.Text != string.Empty)
+            if (!string.IsNullOrEmpty(savedSettings.ClientBin))
             {
                 FindBins();
 
                 this.cmbBin.Text = savedSettings.ClientBin;
             }
             else
-                this.cmbBin.SelectedIndex = 0;
+                FindBins();
+                
                 
             if (string.IsNullOrEmpty(savedSettings.MusicType))
                 this.cmbMusic.SelectedIndex = 0;
@@ -127,20 +128,9 @@ namespace Launcher
             this._initialLoad = false;
         }
 
-        private void btnDirectory_Click(object sender, EventArgs e)
-        {
-            var result = folderBrowserDialog.ShowDialog();
-
-            if (result != DialogResult.OK)
-                return;
-
-            this.txtDirectory.Text = folderBrowserDialog.SelectedPath;
-            this.FindBins();
-        }
-
         private void FindBins()
         {
-            var binFiles = Directory.GetFiles(this.txtDirectory.Text, "*.bin");
+            var binFiles = Directory.GetFiles(this._config.InstallDir, "*.bin");
             this.cmbBin.Items.Clear();
             this.cmbBin.Items.AddRange(binFiles.Select(b => new ComboBoxItem { Text = Path.GetFileName(b), Value = b }).ToArray());
 

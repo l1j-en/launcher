@@ -64,9 +64,6 @@ namespace Launcher
             this.grpClient = new System.Windows.Forms.GroupBox();
             this.cmbBin = new System.Windows.Forms.ComboBox();
             this.lblBin = new System.Windows.Forms.Label();
-            this.btnDirectory = new System.Windows.Forms.Button();
-            this.txtDirectory = new System.Windows.Forms.TextBox();
-            this.lblDirectory = new System.Windows.Forms.Label();
             this.folderBrowserDialog = new System.Windows.Forms.FolderBrowserDialog();
             this.btnClose = new Launcher.Controls.GlassButton();
             this.grpWindowed.SuspendLayout();
@@ -431,12 +428,9 @@ namespace Launcher
             // 
             this.grpClient.Controls.Add(this.cmbBin);
             this.grpClient.Controls.Add(this.lblBin);
-            this.grpClient.Controls.Add(this.btnDirectory);
-            this.grpClient.Controls.Add(this.txtDirectory);
-            this.grpClient.Controls.Add(this.lblDirectory);
             this.grpClient.Location = new System.Drawing.Point(5, 6);
             this.grpClient.Name = "grpClient";
-            this.grpClient.Size = new System.Drawing.Size(279, 110);
+            this.grpClient.Size = new System.Drawing.Size(279, 63);
             this.grpClient.TabIndex = 7;
             this.grpClient.TabStop = false;
             this.grpClient.Text = "Client Settings";
@@ -447,7 +441,7 @@ namespace Launcher
             this.cmbBin.FormattingEnabled = true;
             this.cmbBin.Items.AddRange(new object[] {
             "No Client Directory Selected"});
-            this.cmbBin.Location = new System.Drawing.Point(9, 80);
+            this.cmbBin.Location = new System.Drawing.Point(9, 32);
             this.cmbBin.Name = "cmbBin";
             this.cmbBin.Size = new System.Drawing.Size(233, 21);
             this.cmbBin.TabIndex = 4;
@@ -455,38 +449,11 @@ namespace Launcher
             // lblBin
             // 
             this.lblBin.AutoSize = true;
-            this.lblBin.Location = new System.Drawing.Point(6, 64);
+            this.lblBin.Location = new System.Drawing.Point(6, 16);
             this.lblBin.Name = "lblBin";
             this.lblBin.Size = new System.Drawing.Size(41, 13);
             this.lblBin.TabIndex = 3;
             this.lblBin.Text = "Bin File";
-            // 
-            // btnDirectory
-            // 
-            this.btnDirectory.Location = new System.Drawing.Point(248, 30);
-            this.btnDirectory.Name = "btnDirectory";
-            this.btnDirectory.Size = new System.Drawing.Size(26, 23);
-            this.btnDirectory.TabIndex = 2;
-            this.btnDirectory.Text = "...";
-            this.btnDirectory.UseVisualStyleBackColor = true;
-            this.btnDirectory.Click += new System.EventHandler(this.btnDirectory_Click);
-            // 
-            // txtDirectory
-            // 
-            this.txtDirectory.Enabled = false;
-            this.txtDirectory.Location = new System.Drawing.Point(8, 32);
-            this.txtDirectory.Name = "txtDirectory";
-            this.txtDirectory.Size = new System.Drawing.Size(234, 20);
-            this.txtDirectory.TabIndex = 1;
-            // 
-            // lblDirectory
-            // 
-            this.lblDirectory.AutoSize = true;
-            this.lblDirectory.Location = new System.Drawing.Point(6, 16);
-            this.lblDirectory.Name = "lblDirectory";
-            this.lblDirectory.Size = new System.Drawing.Size(49, 13);
-            this.lblDirectory.TabIndex = 0;
-            this.lblDirectory.Text = "Directory";
             // 
             // btnClose
             // 
@@ -568,9 +535,6 @@ namespace Launcher
         private System.Windows.Forms.GroupBox grpClient;
         private System.Windows.Forms.ComboBox cmbBin;
         private System.Windows.Forms.Label lblBin;
-        private System.Windows.Forms.Button btnDirectory;
-        private System.Windows.Forms.TextBox txtDirectory;
-        private System.Windows.Forms.Label lblDirectory;
         private System.Windows.Forms.FolderBrowserDialog folderBrowserDialog;
         private System.Windows.Forms.TabPage tabInGame;
         private System.Windows.Forms.GroupBox grpMusic;

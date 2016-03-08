@@ -13,6 +13,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Net;
@@ -39,11 +40,71 @@ namespace Launcher
                 control.GetType().InvokeMember(propertyName, BindingFlags.SetProperty, null, control, new[] { propertyValue });
         }//end SetControlPropertyThreadSafe
 
-        public static Settings LoadSettings()
+        public static bool LauncherInLineageDirectory(string directory)
+        {
+            return File.Exists(Path.Combine(directory, "Login.dll"));
+        }
+
+        public static LauncherConfig GetLauncherConfig(string keyName, string appPath)
         {
             try
             {
-                var settingsKey = Registry.CurrentUser.OpenSubKey(@"Software\LineageLauncher", true);
+                var config = new LauncherConfig(keyName, appPath);
+                var configKey = Registry.CurrentUser.OpenSubKey(@"Software\" + keyName, true);
+
+                if (configKey == null)
+                    return null;
+
+                var servers = configKey.GetValue("Servers").ToString().Split(',');
+                config.Servers = new Dictionary<string, Server>();
+
+                foreach (var server in servers)
+                {
+                    var serverInfo = server.Split(':');
+
+                    config.Servers.Add(serverInfo[0].Trim(), new Server
+                    {
+                        Ip = serverInfo[1],
+                        Port = int.Parse(serverInfo[2])
+                    });
+                }
+
+                config.UpdaterFilesRoot = new Uri(configKey.GetValue("UpdaterFilesRoot").ToString());
+                config.UpdaterUrl = new Uri(configKey.GetValue("UpdaterUrl").ToString());
+                config.VersionInfoUrl = new Uri(configKey.GetValue("VersionInfoUrl").ToString());
+                config.VoteUrl = new Uri(configKey.GetValue("VoteUrl").ToString());
+                config.WebsiteUrl = new Uri(configKey.GetValue("WebsiteUrl").ToString());
+                config.PublicKey = configKey.GetValue("PublicKey").ToString();
+
+                return config;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+                return null;
+            }
+        }
+
+        public static List<string> GetAssociatedLaunchers(string appPath)
+        {
+            var associatedLaunchers = new List<string>();
+            var settingsKey = Registry.CurrentUser.OpenSubKey(@"Software\LineageLauncher", true);
+
+            if (settingsKey == null)
+                return associatedLaunchers;
+
+            foreach(var valueName in settingsKey.GetValueNames())
+                if (string.Equals(settingsKey.GetValue(valueName).ToString(), appPath, StringComparison.CurrentCultureIgnoreCase))
+                    associatedLaunchers.Add(valueName);
+
+            return associatedLaunchers;
+        }
+
+        public static Settings LoadSettings(string keyName)
+        {
+            try
+            {
+                var settingsKey = Registry.CurrentUser.OpenSubKey(@"Software\" + keyName, true);
 
                 if (settingsKey == null)
                     return new Settings();
@@ -57,12 +118,12 @@ namespace Launcher
             }
         }
 
-        public static void SaveSettings(Settings settings, bool isWin8OrHigher)
+        public static void SaveSettings(string keyName, Settings settings, string clientDirectory, bool isWin8OrHigher)
         {
-            var existingKey = Registry.CurrentUser.GetValue(@"Software\LineageLauncher");
+            var existingKey = Registry.CurrentUser.GetValue(@"Software\" + keyName);
 
             if (existingKey == null)
-                existingKey = Registry.CurrentUser.CreateSubKey(@"Software\LineageLauncher");
+                existingKey = Registry.CurrentUser.CreateSubKey(@"Software\" + keyName);
 
             ((RegistryKey)existingKey).SetValue("AppSettings", Serialize(settings), RegistryValueKind.Binary);
 
@@ -71,11 +132,11 @@ namespace Launcher
             {
                 var compatRegKey = Registry.CurrentUser.CreateSubKey(@"Software\Microsoft\Windows NT\CurrentVersion\AppCompatFlags\Layers");
                 if (compatRegKey != null)
-                    ((RegistryKey)compatRegKey).SetValue(Path.Combine(settings.ClientDirectory, settings.ClientBin),
+                    ((RegistryKey)compatRegKey).SetValue(Path.Combine(clientDirectory, settings.ClientBin),
                         "~ DWM8And16BitMitigation 16BITCOLOR WINXPSP3", RegistryValueKind.String);
             }
 
-            var lincfgPath = Path.Combine(settings.ClientDirectory, "lineage.cfg");
+            var lincfgPath = Path.Combine(clientDirectory, "lineage.cfg");
 
             if (!File.Exists(lincfgPath))
             {
@@ -91,8 +152,8 @@ namespace Launcher
                 cfgFile.WriteByte(windowedByte);
                 cfgFile.Close();
             }
-           
-            var musicFilePath = Path.Combine(settings.ClientDirectory, "music.cfg");
+
+            var musicFilePath = Path.Combine(clientDirectory, "music.cfg");
 
             if (!File.Exists(musicFilePath))
                 using (File.Create(musicFilePath)){ }
@@ -118,17 +179,14 @@ namespace Launcher
             return (T)formatter.Deserialize(stream);
         } //end DeserializeFromStream
 
-        public static VersionInfo GetVersionInfo()
+        public static VersionInfo GetVersionInfo(Uri versionInfoUrl, string pubKey)
         {
             try
             {
-                const string pubKey =
-                    "<RSAKeyValue><Modulus>l5mJTTO/MHTnaLbzkr0bfbOvY6qC9jWa39IIOtujP1mAPqhdEG2dIbtx20QEZ5P/9hg0KP16RvYj6BSwU4/Ees90mKpXV/7PzTp9uSRZuKNo+uoku7oqar4ruWmpcpPErKVGqD0i7908C/833VzSxdBxnqFqgF1nAk1iRJsnjxC8hseimjfe/E1EvO+Uk/NcA9VFR7YRPknuMLWMoLyl0EN6lJ4z5xLZKhPqGpMdIjDRmW2PdQxSFs5FIsVK9jYnqW/M6o+PiL1uj1py3EaBgIOkOMSUhEAHlgNkqdYlXHkqQ4W3HTuNkQmVLL8oZd6NXrflcF3PDEr1JtbTd+X+DQ==</Modulus><Exponent>JQ==</Exponent></RSAKeyValue>";
-
                 var rsa = new RSACryptoServiceProvider();
                 rsa.FromXmlString(pubKey);
 
-                var request = (HttpWebRequest) WebRequest.Create("http://launcher.travis-smith.ca/VersionInfo.php");
+                var request = (HttpWebRequest) WebRequest.Create(versionInfoUrl);
                 request.Timeout = 2000;
                 request.Proxy = null;
                 request.UserAgent = "L1J Launcher";

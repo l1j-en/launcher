@@ -27,7 +27,11 @@ namespace Launcher
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new LauncherForm());
+            try
+            {
+                Application.Run(new LauncherForm());
+            }
+            catch (ObjectDisposedException){}
         }
     }
 }

@@ -35,7 +35,6 @@ namespace Launcher.Models
         public Resolution Resolution { get; set; }
 
         public string MusicType { get; set; }
-        public string ClientDirectory { get; set; }
         public string ClientBin { get; set; }
 
         public bool BlurImage()

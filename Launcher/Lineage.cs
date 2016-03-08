@@ -21,9 +21,9 @@ namespace Launcher
 {
     class Lineage
     {
-        public static void Run(Settings settings, string bin, long ip, ushort port)
+        public static void Run(Settings settings, string clientDirectory, string bin, long ip, ushort port)
         {
-            var binpath = Path.Combine(settings.ClientDirectory, bin);
+            var binpath = Path.Combine(clientDirectory, bin);
 
             var startupInfo = new Kernel32.Startupinfo();
             var processInfo = new Kernel32.ProcessInformation();
@@ -37,7 +37,7 @@ namespace Launcher
             var tHandle = processInfo.HThread;
             const int bytesWrite = 0;
 
-            DllInjector.GetInstance.BInject(processInfo.DwProcessId, Path.Combine(settings.ClientDirectory, "login.dll"));
+            DllInjector.GetInstance.BInject(processInfo.DwProcessId, Path.Combine(clientDirectory, "login.dll"));
             Kernel32.ResumeThread(tHandle);
             System.Threading.Thread.Sleep(1000);
 
@@ -66,7 +66,7 @@ namespace Launcher
                 
             // Don't know if the constant suspend/resume is needed, but WinXP was being funnky and this works
             // Needed to get the lance master poly working properly
-            var zelgoPak = File.ReadAllBytes(Path.Combine(settings.ClientDirectory, "zelgo.pak"));
+            var zelgoPak = File.ReadAllBytes(Path.Combine(clientDirectory, "zelgo.pak"));
             Kernel32.SuspendThread(hndProc);
             Kernel32.WriteProcessMemory(hndProc, (IntPtr)0x004B6CE0, new byte[] { 0xEB }, 1, 0);
             Kernel32.ResumeThread(hndProc);

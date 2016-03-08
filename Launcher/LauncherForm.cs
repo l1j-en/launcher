@@ -21,6 +21,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Reflection;
 using System.Threading;
 using System.Windows.Forms;
 using Launcher.Models;
@@ -32,36 +33,43 @@ namespace Launcher
 {
     public partial class LauncherForm : Form
     {
-        private const string Version = "1.6.1";
+        private const string Version = "2.0";
         private readonly bool _isWin8OrHigher;
         private User32.DevMode _revertResolution;
 
         private readonly object _lockObject = new object();
-        private readonly Dictionary<string, Server> _servers = new Dictionary<string, Server>
-        {
-           {
-                "Resurrection", 
-                new Server
-                {
-                    Ip = "198.58.107.60",
-                    Port = 46838
-                }
-            },
-            {
-                "Resurrection Test", 
-                new Server
-                {
-                    Ip = "24.99.243.145",
-                    Port = 46838
-                }
-            }
-        };
+        private readonly LauncherConfig _config;
 
         private static readonly List<LineageClient> Clients = new List<LineageClient>(); 
 
         public LauncherForm()
         {
-            if (this._servers == null || this._servers.Count == 0)
+            var appLocation = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            var associatedLaunchers = Helpers.GetAssociatedLaunchers(appLocation);
+
+            if (!Helpers.LauncherInLineageDirectory(appLocation))
+            {
+                MessageBox.Show("The launcher must be installed in your Lineage directory!\n\n Please reinstall.", @"Invalid Directory", MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
+                this.Close();
+                return;
+            }
+
+            if (associatedLaunchers.Count > 1)
+                MessageBox.Show("More than one launcher associated with this folder! Using the first one found.");
+
+            var launcherConfig = Helpers.GetLauncherConfig(associatedLaunchers[0], appLocation);
+
+            if (launcherConfig == null)
+            {
+                MessageBox.Show("There was an error loading the config. Please re-install the launcher.");
+                this.Close();
+                return;
+            }
+
+            this._config = launcherConfig;
+
+            if (this._config == null || this._config.Servers == null || this._config.Servers.Count == 0)
             {
                 MessageBox.Show(@"No servers configured, contact your server admin. Closing launcher.", @"No Servers Found", MessageBoxButtons.OK,
                     MessageBoxIcon.Error);
@@ -84,14 +92,14 @@ namespace Launcher
 
         private void btnSettings_Click(object sender, EventArgs e)
         {
-            var settingsForm = new SettingsForm(this._isWin8OrHigher);
+            var settingsForm = new SettingsForm(this._config, this._isWin8OrHigher);
             settingsForm.ShowDialog();
             settingsForm.Dispose();
         }
 
         private void LauncherForm_Shown(object sender, EventArgs e)
         {
-            var settings = Helpers.LoadSettings();
+            var settings = Helpers.LoadSettings(this._config.KeyName);
 
             if (settings == null)
             {
@@ -100,16 +108,16 @@ namespace Launcher
                 settings = new Settings();
             }
                 
-            if (string.IsNullOrEmpty(settings.ClientDirectory))
+            if (string.IsNullOrEmpty(settings.ClientBin))
             {
-                var settingsDialog = new SettingsForm(this._isWin8OrHigher);
+                var settingsDialog = new SettingsForm(this._config, this._isWin8OrHigher);
                 var dialogResult = settingsDialog.ShowDialog();
 
                 if (dialogResult != DialogResult.OK)
                 {
-                    settings = Helpers.LoadSettings();
+                    settings = Helpers.LoadSettings(this._config.KeyName);
 
-                    if (settings == null || string.IsNullOrEmpty(settings.ClientDirectory))
+                    if (settings == null || string.IsNullOrEmpty(settings.ClientBin))
                     {
                         MessageBox.Show("You must configure your settings before continuing. Closing launcher.");
                         Application.Exit();
@@ -119,7 +127,7 @@ namespace Launcher
 
             this.updateChecker.RunWorkerAsync();
 
-            cmbServer.Items.AddRange(this._servers.Keys.ToArray());
+            cmbServer.Items.AddRange(this._config.Servers.Keys.ToArray());
             cmbServer.SelectedIndex = 0;
         }
 
@@ -130,19 +138,11 @@ namespace Launcher
 
         private void Launch()
         {
-            var settings = Helpers.LoadSettings();
-
-            if (settings.ClientDirectory == string.Empty || settings.ClientBin == string.Empty)
-            {
-                MessageBox.Show(@"You must select your lineage directory under settings before continuing.",
-                   @"Cannot continue!", MessageBoxButtons.OK, MessageBoxIcon.Error);
-
-                return;
-            }
+            var settings = Helpers.LoadSettings(this._config.KeyName);
 
             var binFile = Path.GetFileNameWithoutExtension(settings.ClientBin);
 
-            var selectedServer = this._servers[this.cmbServer.SelectedItem.ToString()];
+            var selectedServer = this._config.Servers[this.cmbServer.SelectedItem.ToString()];
             var ip = (uint)IPAddress.NetworkToHostOrder(BitConverter.ToInt32(IPAddress.Parse(selectedServer.Ip).GetAddressBytes(), 0));
 
             var revertResolution = new User32.DevMode();
@@ -152,9 +152,9 @@ namespace Launcher
             else if (settings.Windowed)
                 revertResolution = LineageClient.ChangeDisplayColour(this._isWin8OrHigher ? 32 : 16);
 
-            Lineage.Run(settings, settings.ClientBin, ip, (ushort)selectedServer.Port);
+            Lineage.Run(settings, this._config.InstallDir, settings.ClientBin, ip, (ushort)selectedServer.Port);
 
-            var client = new LineageClient(binFile, settings.ClientDirectory, Clients);
+            var client = new LineageClient(this._config.KeyName, binFile, this._config.InstallDir, Clients);
             client.Initialize();
                 
             if (settings.Centred)
@@ -200,14 +200,14 @@ namespace Launcher
                 cmbServer.Invoke(new Action(
                     () =>
                     {
-                        host = this._servers[this.cmbServer.Text].Ip;
-                        port = this._servers[this.cmbServer.Text].Port;
+                        host = this._config.Servers[this.cmbServer.Text].Ip;
+                        port = this._config.Servers[this.cmbServer.Text].Port;
                     }));
             }
             else
             {
-                host = this._servers[this.cmbServer.Text].Ip;
-                port = this._servers[this.cmbServer.Text].Port;
+                host = this._config.Servers[this.cmbServer.Text].Ip;
+                port = this._config.Servers[this.cmbServer.Text].Port;
             }
 
             //should never happen, but let's handle it just in case
@@ -249,13 +249,13 @@ namespace Launcher
 
         private void pctVote_Click(object sender, EventArgs e)
         {
-            var voteUrl = new ProcessStartInfo("http://lineage.extreme-gamerz.org/in.php?id=soren");
+            var voteUrl = new ProcessStartInfo(this._config.VoteUrl.ToString());
             Process.Start(voteUrl);
         } //end pctVote_Click
 
         private void pctLinLogo_Click(object sender, EventArgs e)
         {
-            var voteUrl = new ProcessStartInfo("https://zelgo.net");
+            var voteUrl = new ProcessStartInfo(this._config.WebsiteUrl.ToString());
             Process.Start(voteUrl);
         }//end pctLinLogo_Click
 
@@ -268,13 +268,13 @@ namespace Launcher
 
             if (addServerForm.ShowDialog() == DialogResult.OK)
             {
-                if (this._servers.ContainsKey(addServerForm.txtName.Text))
+                if (this._config.Servers.ContainsKey(addServerForm.txtName.Text))
                 {
                     MessageBox.Show("A server with that name has already been added.");
                     return;
                 }
 
-                this._servers.Add(addServerForm.txtName.Text, new Server
+                this._config.Servers.Add(addServerForm.txtName.Text, new Server
                 {
                     Ip = addServerForm.txtIpAddress.Text,
                     Port = Convert.ToInt32(addServerForm.txtPort.Text)
@@ -290,15 +290,15 @@ namespace Launcher
             try
             {
                 var force = e.Argument != null && (bool) e.Argument;
-                var versionInfo = Helpers.GetVersionInfo();
-                var launcherKey = Registry.CurrentUser.OpenSubKey(@"Software\LineageLauncher", true);
+                var versionInfo = Helpers.GetVersionInfo(this._config.VersionInfoUrl, this._config.PublicKey);
+                var launcherKey = Registry.CurrentUser.OpenSubKey(@"Software\" + this._config.KeyName, true);
                 var lastUpdatedCheck = launcherKey.GetValue("LastUpdated");
                 var updatesLastRun = (int?) lastUpdatedCheck ?? 0;
 
                 if (versionInfo == null)
                     return;
 
-                var settings = Helpers.LoadSettings();
+                var settings = Helpers.LoadSettings(this._config.KeyName);
                 var applicationPath = Application.ExecutablePath;
                 var appDataPath = Directory.GetParent(Application.UserAppDataPath).ToString();
                 var updaterLocation = Path.Combine(appDataPath, "Updater.exe");
@@ -309,7 +309,7 @@ namespace Launcher
                     using (var client = new WebClient())
                     {
                         client.DownloadProgressChanged += client_DownloadProgressChanged;
-                        client.DownloadFileAsyncSync(new Uri("http://launcher.travis-smith.ca/Updater.exe"),
+                        client.DownloadFileAsyncSync(new Uri(this._config.UpdaterUrl.ToString()),
                             updaterLocation);
                     }
 
@@ -352,7 +352,7 @@ namespace Launcher
                     {
                         var file = versionInfo.FileChecksums.ElementAt(i).Key;
                         var checksum = versionInfo.FileChecksums.ElementAt(i).Value;
-                        var filePath = Path.Combine(settings.ClientDirectory, file);
+                        var filePath = Path.Combine(this._config.InstallDir, file);
 
                         if (!File.Exists(filePath) || Helpers.GetChecksum(filePath) != checksum)
                         {
@@ -373,7 +373,7 @@ namespace Launcher
                                 else
                                 {
                                     client.DownloadFileAsyncSync(
-                                        new Uri("http://launcher.travis-smith.ca/Files/" + file.Replace("\\", "/")),
+                                        new Uri(this._config.UpdaterFilesRoot + file.Replace("\\", "/")),
                                         filePath);
                                 }
                             }
@@ -391,11 +391,12 @@ namespace Launcher
                     if (isWin8OrHigher && versionName == "Windows 10" && settings.ClientBin.ToLower() != "s3ep1u.bin")
                     {
                         settings.ClientBin = "S3EP1U.bin";
-                        Helpers.SaveSettings(settings, true);
+                        Helpers.SaveSettings(this._config.KeyName, settings, this._config.InstallDir, true);
 
                         MessageBox.Show(
                             "You're running Windows 10, but aren't using the S3EP1U.bin file. It has now been automatically set.\n\n" +
-                            "If you want to use the normal S3EP1.bin file, you can update it under Settings -> Client Settings.", "Windows 10 Detected",
+                            "If you want to use the normal S3EP1.bin file, you can update it under Settings -> Client Settings.",
+                            "Windows 10 Detected",
                             MessageBoxButtons.OK, MessageBoxIcon.Information);
                     } //end if
                 } //end if

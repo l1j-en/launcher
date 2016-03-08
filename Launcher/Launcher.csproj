@@ -123,6 +123,7 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Lineage.cs" />
+    <Compile Include="Models\LauncherConfig.cs" />
     <Compile Include="Models\PakFile.cs" />
     <Compile Include="Models\VersionInfo.cs" />
     <Compile Include="Program.cs" />

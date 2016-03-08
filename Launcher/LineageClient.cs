@@ -45,12 +45,12 @@ namespace Launcher
 
         public Process Process { get; private set; }
 
-        public LineageClient(string processName, string clientDirectory, List<LineageClient> hookedWindows)
+        public LineageClient(string settingsKeyName, string processName, string clientDirectory, List<LineageClient> hookedWindows)
         {
             this._processName = processName;
             this._captureDirectory = Path.Combine(clientDirectory, @"Capture\Launcher\");
             _hookedWindows = hookedWindows;
-            _appSettings = Helpers.LoadSettings();
+            _appSettings = Helpers.LoadSettings(settingsKeyName);
         }
 
         public static User32.DevMode ChangeDisplayColour(int bitCount)
