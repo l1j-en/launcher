@@ -20,8 +20,10 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Reflection;
+using System.Text;
 using System.Threading;
 using System.Windows.Forms;
 using Launcher.Models;
@@ -33,7 +35,7 @@ namespace Launcher
 {
     public partial class LauncherForm : Form
     {
-        private const string Version = "2.0";
+        private const string Version = "2.1";
         private readonly bool _isWin8OrHigher;
         private User32.DevMode _revertResolution;
 
@@ -46,7 +48,7 @@ namespace Launcher
         {
             var appLocation = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             var associatedLaunchers = Helpers.GetAssociatedLaunchers(appLocation);
-
+            
             if (!Helpers.LauncherInLineageDirectory(appLocation))
             {
                 MessageBox.Show("The launcher must be installed in your Lineage directory!\n\n " +
@@ -183,14 +185,63 @@ namespace Launcher
 
         private void cmbServer_SelectedIndexChanged(object sender, EventArgs e)
         {
+            this.lblPing.Text = "";
+            this.lblPing.ForeColor = Color.Red;
+
             this.lblServerStatus.Text = @"PINGING...";
             this.lblServerStatus.ForeColor = Color.Khaki;
-            
+
             var statusThread = new Thread(() => this.CheckServerStatus(true)) {  IsBackground = true };
             statusThread.Start();
         }
 
-        private bool CheckServerStatus(bool threaded)
+        private void Ping(int statusLabelEdge)
+        {
+            var host = string.Empty;
+
+            cmbServer.Invoke(new Action(() =>
+                {
+                    host = this._config.Servers[this.cmbServer.Text].Ip;
+                }));
+
+            var pingSender = new Ping();
+
+            // Create a buffer of 32 bytes of data to be transmitted.
+            const string data = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
+            var buffer = Encoding.ASCII.GetBytes(data);
+
+            // Wait 2 seconds for a reply.
+            const int timeout = 1000;
+            const int pingAttempts = 5;
+            var options = new PingOptions(64, true);
+
+            long totalPing = 0;
+
+            for (var i = 1; i <= pingAttempts; i++)
+            {
+                var reply = pingSender.Send(host, timeout, buffer, options);
+                if (reply != null && reply.Status == IPStatus.Success)
+                    totalPing += reply.RoundtripTime;
+                else
+                    totalPing += 9999;
+            }
+
+            var averagePing = totalPing / pingAttempts;
+
+            if (averagePing < 80)
+            {
+                Helpers.SetControlPropertyThreadSafe(this.lblPing, "ForeColor", Color.Green);
+            }
+            else if (averagePing < 150)
+            {
+                Helpers.SetControlPropertyThreadSafe(this.lblPing, "ForeColor", Color.Khaki);
+            }
+
+            Helpers.SetControlPropertyThreadSafe(this.lblPing, "Location", new Point(statusLabelEdge - 10, 316));
+            Helpers.SetControlPropertyThreadSafe(this.lblPing, "Text", string.Format("({0} ms)", averagePing));
+        }
+
+        private bool CheckServerStatus(bool threaded)  
         {
             var returnValue = false;
 
@@ -245,7 +296,23 @@ namespace Launcher
                 }
                 finally
                 {
+                    var isConnected = socket.Connected;
+
                     socket.Close();
+                    var labelEdge = 487; // default loc just incase something screws up
+
+                    try
+                    {
+                        lblServerStatus.Invoke(new Action(
+                            () =>
+                            {
+                                labelEdge = this.lblServerStatus.Location.X + this.lblServerStatus.Width;
+                            }));
+                    }
+                    catch{ }
+
+                    if (isConnected)
+                        Ping(labelEdge);
                 } //end try/catch/finally
             } //end using
 
