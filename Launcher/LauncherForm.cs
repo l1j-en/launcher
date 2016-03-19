@@ -49,11 +49,16 @@ namespace Launcher
 
             if (!Helpers.LauncherInLineageDirectory(appLocation))
             {
-                MessageBox.Show("The launcher must be installed in your Lineage directory!\n\n Please reinstall.", @"Invalid Directory", MessageBoxButtons.OK,
+                MessageBox.Show("The launcher must be installed in your Lineage directory!\n\n " +
+                    "Please reinstall if you used the installer, or move this file to your lineage directory.", @"Invalid Directory", MessageBoxButtons.OK,
                     MessageBoxIcon.Error);
                 this.Close();
                 return;
             }
+
+            // If no launchers are available, let's assume resurrection
+            if (associatedLaunchers.Count == 0)
+                associatedLaunchers.Add("Lineage Resurrection");
 
             if (associatedLaunchers.Count > 1)
                 MessageBox.Show("More than one launcher associated with this folder! Using the first one found.");
@@ -299,6 +304,15 @@ namespace Launcher
                     return;
 
                 var settings = Helpers.LoadSettings(this._config.KeyName);
+
+                if (Helpers.UpdateConfig(versionInfo))
+                {
+                    MessageBox.Show("Configuration information was updated from the server.\n\nThe launcher will close. Please re-launch.",
+                        "Configuration Updated", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    this.Close();
+                    return;
+                }
+
                 var applicationPath = Application.ExecutablePath;
                 var appDataPath = Directory.GetParent(Application.UserAppDataPath).ToString();
                 var updaterLocation = Path.Combine(appDataPath, "Updater.exe");

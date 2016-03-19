@@ -45,6 +45,42 @@ namespace Launcher
             return File.Exists(Path.Combine(directory, "Login.dll"));
         }
 
+        public static bool UpdateConfig(VersionInfo versionInfo)
+        {
+            var actuallyUpdated = false;
+
+            var configKey = Registry.CurrentUser.OpenSubKey(@"Software\" + versionInfo.ServerName, true);
+
+            if (configKey == null)
+            {
+                actuallyUpdated = true;
+                configKey = Registry.CurrentUser.CreateSubKey(@"Software\" + versionInfo.ServerName);
+            }
+
+            if (!actuallyUpdated)
+            {
+                actuallyUpdated = configKey.GetValue("Servers").ToString() != versionInfo.Servers ||
+                                  configKey.GetValue("VersionInfoUrl").ToString() != versionInfo.VersionInfoUrl ||
+                                  configKey.GetValue("VoteUrl").ToString() != versionInfo.VoteUrl ||
+                                  configKey.GetValue("WebsiteUrl").ToString() != versionInfo.WebsiteUrl ||
+                                  configKey.GetValue("UpdaterUrl").ToString() != versionInfo.UpdaterUrl ||
+                                  configKey.GetValue("LauncherUrl").ToString() != versionInfo.LauncherUrl ||
+                                  configKey.GetValue("UpdaterFilesRoot").ToString() != versionInfo.UpdaterFilesRoot ||
+                                  configKey.GetValue("PublicKey").ToString() != versionInfo.PublicKey;
+            }
+
+            configKey.SetValue("Servers", versionInfo.Servers, RegistryValueKind.String);
+            configKey.SetValue("VersionInfoUrl", versionInfo.VersionInfoUrl, RegistryValueKind.String);
+            configKey.SetValue("VoteUrl", versionInfo.VoteUrl, RegistryValueKind.String);
+            configKey.SetValue("WebsiteUrl", versionInfo.WebsiteUrl, RegistryValueKind.String);
+            configKey.SetValue("UpdaterUrl", versionInfo.UpdaterUrl, RegistryValueKind.String);
+            configKey.SetValue("LauncherUrl", versionInfo.LauncherUrl, RegistryValueKind.String);
+            configKey.SetValue("UpdaterFilesRoot", versionInfo.UpdaterFilesRoot, RegistryValueKind.String);
+            configKey.SetValue("PublicKey", versionInfo.PublicKey, RegistryValueKind.String);
+
+            return actuallyUpdated;
+        }
+
         public static LauncherConfig GetLauncherConfig(string keyName, string appPath)
         {
             try
@@ -53,8 +89,28 @@ namespace Launcher
                 var configKey = Registry.CurrentUser.OpenSubKey(@"Software\" + keyName, true);
 
                 if (configKey == null)
-                    return null;
+                {
+                    // if the config key is null and not equal to the default of "Lineage Resurrection"
+                    // then return null, otherwise lets try pulling it from the default URL and public key
+                    if (keyName != "Lineage Resurrection")
+                        return null;
+                    else
+                    {
+                        var versionInfo = GetVersionInfo(new Uri("http://launcher.travis-smith.ca/VersionInfo.php"), "<RSAKeyValue><Modulus>l5mJTTO/MHTnaLbzkr0bfbOvY6qC9jWa39IIOtujP1mAPqhdEG2dIbtx20QEZ5P/9hg0KP16RvYj6BSwU4/Ees90mKpXV/7PzTp9uSRZuKNo+uoku7oqar4ruWmpcpPErKVGqD0i7908C/833VzSxdBxnqFqgF1nAk1iRJsnjxC8hseimjfe/E1EvO+Uk/NcA9VFR7YRPknuMLWMoLyl0EN6lJ4z5xLZKhPqGpMdIjDRmW2PdQxSFs5FIsVK9jYnqW/M6o+PiL1uj1py3EaBgIOkOMSUhEAHlgNkqdYlXHkqQ4W3HTuNkQmVLL8oZd6NXrflcF3PDEr1JtbTd+X+DQ==</Modulus><Exponent>JQ==</Exponent></RSAKeyValue>");
 
+                        configKey = Registry.CurrentUser.CreateSubKey(@"Software\" + versionInfo.ServerName);
+
+                        UpdateConfig(versionInfo);
+
+                        var settingsKey = Registry.CurrentUser.OpenSubKey(@"Software\LineageLauncher", true);
+
+                        if(settingsKey == null)
+                            settingsKey = Registry.CurrentUser.CreateSubKey(@"Software\LineageLauncher");
+
+                        settingsKey.SetValue(versionInfo.ServerName, appPath, RegistryValueKind.String);
+                    }
+                }
+                    
                 var servers = configKey.GetValue("Servers").ToString().Split(',');
                 config.Servers = new Dictionary<string, Server>();
 

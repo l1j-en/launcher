@@ -37,5 +37,32 @@ namespace Launcher.Models
 
         [DataMember]
         public Dictionary<string, List<PakFile>> PakFiles { get; set; }
+
+        [DataMember]
+        public string ServerName { get; set; }
+
+        [DataMember]
+        public string Servers { get; set; }
+
+        [DataMember]
+        public string VersionInfoUrl { get; set; }
+
+        [DataMember]
+        public string VoteUrl { get; set; }
+
+        [DataMember]
+        public string WebsiteUrl { get; set; }
+
+        [DataMember]
+        public string UpdaterUrl { get; set; }
+
+        [DataMember]
+        public string LauncherUrl { get; set; }
+
+        [DataMember]
+        public string UpdaterFilesRoot { get; set; }
+
+        [DataMember]
+        public string PublicKey { get; set; }
     }
 }
