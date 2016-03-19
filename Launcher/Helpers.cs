@@ -59,14 +59,14 @@ namespace Launcher
 
             if (!actuallyUpdated)
             {
-                actuallyUpdated = configKey.GetValue("Servers").ToString() != versionInfo.Servers ||
-                                  configKey.GetValue("VersionInfoUrl").ToString() != versionInfo.VersionInfoUrl ||
-                                  configKey.GetValue("VoteUrl").ToString() != versionInfo.VoteUrl ||
-                                  configKey.GetValue("WebsiteUrl").ToString() != versionInfo.WebsiteUrl ||
-                                  configKey.GetValue("UpdaterUrl").ToString() != versionInfo.UpdaterUrl ||
-                                  configKey.GetValue("LauncherUrl").ToString() != versionInfo.LauncherUrl ||
-                                  configKey.GetValue("UpdaterFilesRoot").ToString() != versionInfo.UpdaterFilesRoot ||
-                                  configKey.GetValue("PublicKey").ToString() != versionInfo.PublicKey;
+                actuallyUpdated = (configKey.GetValue("Servers") == null || configKey.GetValue("Servers").ToString() != versionInfo.Servers) ||
+                                  (configKey.GetValue("VersionInfoUrl") == null || configKey.GetValue("VersionInfoUrl").ToString() != versionInfo.VersionInfoUrl) ||
+                                  (configKey.GetValue("VoteUrl") == null || configKey.GetValue("VoteUrl").ToString() != versionInfo.VoteUrl) ||
+                                  (configKey.GetValue("WebsiteUrl") == null || configKey.GetValue("WebsiteUrl").ToString() != versionInfo.WebsiteUrl) ||
+                                  (configKey.GetValue("UpdaterUrl") == null || configKey.GetValue("UpdaterUrl").ToString() != versionInfo.UpdaterUrl) ||
+                                  (configKey.GetValue("LauncherUrl") == null || configKey.GetValue("LauncherUrl").ToString() != versionInfo.LauncherUrl) ||
+                                  (configKey.GetValue("UpdaterFilesRoot") == null || configKey.GetValue("UpdaterFilesRoot").ToString() != versionInfo.UpdaterFilesRoot) ||
+                                  (configKey.GetValue("PublicKey") == null || configKey.GetValue("PublicKey").ToString() != versionInfo.PublicKey);
             }
 
             configKey.SetValue("Servers", versionInfo.Servers, RegistryValueKind.String);
@@ -88,7 +88,7 @@ namespace Launcher
                 var config = new LauncherConfig(keyName, appPath);
                 var configKey = Registry.CurrentUser.OpenSubKey(@"Software\" + keyName, true);
 
-                if (configKey == null)
+                if (configKey == null || configKey.GetValue("Servers") == null)
                 {
                     // if the config key is null and not equal to the default of "Lineage Resurrection"
                     // then return null, otherwise lets try pulling it from the default URL and public key
@@ -134,9 +134,8 @@ namespace Launcher
 
                 return config;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                MessageBox.Show(ex.Message);
                 return null;
             }
         }
