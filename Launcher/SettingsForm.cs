@@ -100,12 +100,26 @@ namespace Launcher
 
             this.chkCaptureMouse.Checked = savedSettings.CaptureMouse;
 
-            this.cmbResolution.Items.AddRange(LineageClient.GetResolutions(this._isWin8OrHigher).ToArray());
+            var resolutions = LineageClient.GetResolutions(this._isWin8OrHigher);
+
+            if (resolutions.Count > 0)
+            {
+                this.cmbResolution.Items.AddRange(resolutions.ToArray());
+                this.cmbResolution.SelectedIndex = savedSettings.Resolution == null
+                    ? 0
+                    : this.cmbResolution.FindString(savedSettings.Resolution.ToString());
+            }
+            else
+            {
+                MessageBox.Show("Unable to load screen resolutions. Screen resize is not available.", "No Resolutions Found", 
+                    MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+                this.chkResize.Enabled = false;
+            }
+                
             this.chkResize.Checked = savedSettings.Resize;
             this.chkWindowed.Checked = savedSettings.Windowed;
             this.chkCentre.Checked = savedSettings.Centred;
-
-            this.cmbResolution.SelectedIndex = savedSettings.Resolution == null ? 0 : this.cmbResolution.FindString(savedSettings.Resolution.ToString());
 
             this.chkDisableDark.Checked = savedSettings.DisableDark;
             this.chkMobColours.Checked = savedSettings.EnableMobColours;
@@ -155,7 +169,9 @@ namespace Launcher
                     this.chkWindowed.Checked = false;
             }
             
-            this.chkResize.Enabled = this.chkWindowed.Checked;
+            if(this.cmbResolution.Items.Count > 0)
+                this.chkResize.Enabled = this.chkWindowed.Checked;
+
             this.chkCentre.Enabled = this.chkWindowed.Checked;
         }
 
