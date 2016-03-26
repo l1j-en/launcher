@@ -20,10 +20,8 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Net;
-using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Reflection;
-using System.Text;
 using System.Threading;
 using System.Windows.Forms;
 using Launcher.Models;
@@ -35,7 +33,7 @@ namespace Launcher
 {
     public partial class LauncherForm : Form
     {
-        private const string Version = "2.1";
+        private const string Version = "2.2";
         private readonly bool _isWin8OrHigher;
         private User32.DevMode _revertResolution;
 
@@ -52,7 +50,7 @@ namespace Launcher
             if (!Helpers.LauncherInLineageDirectory(appLocation))
             {
                 MessageBox.Show("The launcher must be installed in your Lineage directory!\n\n " +
-                    "Please reinstall if you used the installer, or move this file to your lineage directory.", @"Invalid Directory", MessageBoxButtons.OK,
+                    @"Please reinstall if you used the installer, or move this file to your lineage directory.", @"Invalid Directory", MessageBoxButtons.OK,
                     MessageBoxIcon.Error);
                 this.Close();
                 return;
@@ -134,8 +132,9 @@ namespace Launcher
 
             this.updateChecker.RunWorkerAsync();
 
-            cmbServer.Items.AddRange(this._config.Servers.Keys.ToArray());
-            cmbServer.SelectedIndex = 0;
+            this.lblVersion.Text = Version;
+            this.cmbServer.Items.AddRange(this._config.Servers.Keys.ToArray());
+            this.cmbServer.SelectedIndex = 0;
         }
 
         private void playButton_Click(object sender, EventArgs e)
@@ -150,7 +149,23 @@ namespace Launcher
             var binFile = Path.GetFileNameWithoutExtension(settings.ClientBin);
 
             var selectedServer = this._config.Servers[this.cmbServer.SelectedItem.ToString()];
-            var ip = (uint)IPAddress.NetworkToHostOrder(BitConverter.ToInt32(IPAddress.Parse(selectedServer.Ip).GetAddressBytes(), 0));
+
+            IPAddress[] ipOrDns;
+
+            try
+            {
+                ipOrDns = Dns.GetHostAddresses(selectedServer.IpOrDns);
+            }
+            catch (SocketException)
+            {
+                MessageBox.Show(@"There was an error connecting to the server. Check the forums for any issues.",
+                    @"Error Connecting!",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+                this.CheckServerStatus(false);
+                return;
+            }
+
+            var ip = (uint)IPAddress.NetworkToHostOrder(BitConverter.ToInt32(ipOrDns[0].GetAddressBytes(), 0));
 
             var revertResolution = new User32.DevMode();
 
@@ -185,60 +200,11 @@ namespace Launcher
 
         private void cmbServer_SelectedIndexChanged(object sender, EventArgs e)
         {
-            this.lblPing.Text = "";
-            this.lblPing.ForeColor = Color.Red;
-
             this.lblServerStatus.Text = @"PINGING...";
             this.lblServerStatus.ForeColor = Color.Khaki;
 
-            var statusThread = new Thread(() => this.CheckServerStatus(true)) {  IsBackground = true };
+            var statusThread = new Thread(() => this.CheckServerStatus(true)) { IsBackground = true };
             statusThread.Start();
-        }
-
-        private void Ping(int statusLabelEdge)
-        {
-            var host = string.Empty;
-
-            cmbServer.Invoke(new Action(() =>
-                {
-                    host = this._config.Servers[this.cmbServer.Text].Ip;
-                }));
-
-            var pingSender = new Ping();
-
-            // Create a buffer of 32 bytes of data to be transmitted.
-            const string data = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
-            var buffer = Encoding.ASCII.GetBytes(data);
-
-            // Wait 2 seconds for a reply.
-            const int timeout = 1000;
-            const int pingAttempts = 5;
-            var options = new PingOptions(64, true);
-
-            long totalPing = 0;
-
-            for (var i = 1; i <= pingAttempts; i++)
-            {
-                var reply = pingSender.Send(host, timeout, buffer, options);
-                if (reply != null && reply.Status == IPStatus.Success)
-                    totalPing += reply.RoundtripTime;
-                else
-                    totalPing += 9999;
-            }
-
-            var averagePing = totalPing / pingAttempts;
-
-            if (averagePing < 80)
-            {
-                Helpers.SetControlPropertyThreadSafe(this.lblPing, "ForeColor", Color.Green);
-            }
-            else if (averagePing < 150)
-            {
-                Helpers.SetControlPropertyThreadSafe(this.lblPing, "ForeColor", Color.Khaki);
-            }
-
-            Helpers.SetControlPropertyThreadSafe(this.lblPing, "Location", new Point(statusLabelEdge - 10, 316));
-            Helpers.SetControlPropertyThreadSafe(this.lblPing, "Text", string.Format("({0} ms)", averagePing));
         }
 
         private bool CheckServerStatus(bool threaded)  
@@ -252,17 +218,19 @@ namespace Launcher
             //like it isn't trying to check
             if (threaded)
             {
+                Helpers.SetControlPropertyThreadSafe(this.btnPlay, "Enabled", false);
                 Thread.Sleep(500);
                 cmbServer.Invoke(new Action(
                     () =>
                     {
-                        host = this._config.Servers[this.cmbServer.Text].Ip;
+                        host = this._config.Servers[this.cmbServer.Text].IpOrDns;
                         port = this._config.Servers[this.cmbServer.Text].Port;
                     }));
             }
             else
             {
-                host = this._config.Servers[this.cmbServer.Text].Ip;
+                this.btnPlay.Enabled = false;
+                host = this._config.Servers[this.cmbServer.Text].IpOrDns;
                 port = this._config.Servers[this.cmbServer.Text].Port;
             }
 
@@ -287,6 +255,16 @@ namespace Launcher
                         returnValue = true;
                         Helpers.SetControlPropertyThreadSafe(this.lblServerStatus, "Text", "ONLINE");
                         Helpers.SetControlPropertyThreadSafe(this.lblServerStatus, "ForeColor", Color.Green);
+
+                        var updateCheckComplete = false;
+
+                        prgUpdates.Invoke(new Action(() =>
+                        {
+                            updateCheckComplete = prgUpdates.Value == prgUpdates.Maximum;
+                        }));
+
+                        if (updateCheckComplete)
+                            Helpers.SetControlPropertyThreadSafe(this.btnPlay, "Enabled", true);
                     }
                 }
                 catch (Exception)
@@ -296,23 +274,7 @@ namespace Launcher
                 }
                 finally
                 {
-                    var isConnected = socket.Connected;
-
                     socket.Close();
-                    var labelEdge = 487; // default loc just incase something screws up
-
-                    try
-                    {
-                        lblServerStatus.Invoke(new Action(
-                            () =>
-                            {
-                                labelEdge = this.lblServerStatus.Location.X + this.lblServerStatus.Width;
-                            }));
-                    }
-                    catch{ }
-
-                    if (isConnected)
-                        Ping(labelEdge);
                 } //end try/catch/finally
             } //end using
 
@@ -348,7 +310,7 @@ namespace Launcher
 
                 this._config.Servers.Add(addServerForm.txtName.Text, new Server
                 {
-                    Ip = addServerForm.txtIpAddress.Text,
+                    IpOrDns = addServerForm.txtIpAddress.Text,
                     Port = Convert.ToInt32(addServerForm.txtPort.Text)
                 });
 
@@ -375,7 +337,7 @@ namespace Launcher
                 if (Helpers.UpdateConfig(versionInfo))
                 {
                     MessageBox.Show("Configuration information was updated from the server.\n\nThe launcher will close. Please re-launch.",
-                        "Configuration Updated", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        @"Configuration Updated", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     this.Close();
                     return;
                 }
@@ -476,8 +438,8 @@ namespace Launcher
 
                         MessageBox.Show(
                             "You're running Windows 10, but aren't using the S3EP1U.bin file. It has now been automatically set.\n\n" +
-                            "If you want to use the normal S3EP1.bin file, you can update it under Settings -> Client Settings.",
-                            "Windows 10 Detected",
+                            @"If you want to use the normal S3EP1.bin file, you can update it under Settings -> Client Settings.",
+                            @"Windows 10 Detected",
                             MessageBoxButtons.OK, MessageBoxIcon.Information);
                     } //end if
                 } //end if
@@ -496,7 +458,9 @@ namespace Launcher
 
         private void updateChecker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
-            this.btnPlay.Enabled = true;
+            if(this.lblServerStatus.Text.ToUpper() == "ONLINE")
+                this.btnPlay.Enabled = true;
+
             this.btnCheck.Enabled = true;
         } //end updateChecker_RunWorkerCompleted
 

@@ -120,7 +120,7 @@ namespace Launcher
 
                     config.Servers.Add(serverInfo[0].Trim(), new Server
                     {
-                        Ip = serverInfo[1],
+                        IpOrDns = serverInfo[1],
                         Port = int.Parse(serverInfo[2])
                     });
                 }

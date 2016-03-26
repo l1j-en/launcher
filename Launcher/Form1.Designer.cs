@@ -40,7 +40,6 @@ namespace Launcher
             this.updateChecker = new System.ComponentModel.BackgroundWorker();
             this.prgUpdateCurrent = new System.Windows.Forms.ProgressBar();
             this.tmrCheckProcess = new System.Windows.Forms.Timer(this.components);
-            this.lblPing = new Launcher.Controls.OutlineLabel();
             this.btnCheck = new Launcher.Controls.GlassButton();
             this.lvlUpdateCurrent = new Launcher.Controls.OutlineLabel();
             this.lblUpdates = new Launcher.Controls.OutlineLabel();
@@ -49,6 +48,8 @@ namespace Launcher
             this.btnClose = new Launcher.Controls.GlassButton();
             this.lblServerStatus = new Launcher.Controls.OutlineLabel();
             this.lblServerStatusText = new Launcher.Controls.OutlineLabel();
+            this.lblVersionText = new Launcher.Controls.OutlineLabel();
+            this.lblVersion = new Launcher.Controls.OutlineLabel();
             ((System.ComponentModel.ISupportInitialize)(this.pctLinLogo)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pctVote)).BeginInit();
             this.SuspendLayout();
@@ -125,20 +126,6 @@ namespace Launcher
             // 
             this.tmrCheckProcess.Interval = 500;
             this.tmrCheckProcess.Tick += new System.EventHandler(this.tmrCheckProcess_Tick);
-            // 
-            // lblPing
-            // 
-            this.lblPing.AutoSize = true;
-            this.lblPing.BackColor = System.Drawing.Color.Transparent;
-            this.lblPing.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblPing.ForeColor = System.Drawing.Color.Khaki;
-            this.lblPing.ImeMode = System.Windows.Forms.ImeMode.NoControl;
-            this.lblPing.Location = new System.Drawing.Point(470, 316);
-            this.lblPing.Name = "lblPing";
-            this.lblPing.OutlineForeColor = System.Drawing.Color.Black;
-            this.lblPing.OutlineWidth = 2F;
-            this.lblPing.Size = new System.Drawing.Size(0, 20);
-            this.lblPing.TabIndex = 31;
             // 
             // btnCheck
             // 
@@ -268,13 +255,43 @@ namespace Launcher
             this.lblServerStatusText.TabIndex = 14;
             this.lblServerStatusText.Text = "SERVER STATUS:";
             // 
+            // lblVersionText
+            // 
+            this.lblVersionText.AutoSize = true;
+            this.lblVersionText.BackColor = System.Drawing.Color.Transparent;
+            this.lblVersionText.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblVersionText.ForeColor = System.Drawing.Color.Red;
+            this.lblVersionText.ImeMode = System.Windows.Forms.ImeMode.NoControl;
+            this.lblVersionText.Location = new System.Drawing.Point(584, 29);
+            this.lblVersionText.Name = "lblVersionText";
+            this.lblVersionText.OutlineForeColor = System.Drawing.Color.Black;
+            this.lblVersionText.OutlineWidth = 2F;
+            this.lblVersionText.Size = new System.Drawing.Size(70, 13);
+            this.lblVersionText.TabIndex = 31;
+            this.lblVersionText.Text = "VERSION: ";
+            // 
+            // lblVersion
+            // 
+            this.lblVersion.AutoSize = true;
+            this.lblVersion.BackColor = System.Drawing.Color.Transparent;
+            this.lblVersion.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblVersion.ForeColor = System.Drawing.Color.Red;
+            this.lblVersion.ImeMode = System.Windows.Forms.ImeMode.NoControl;
+            this.lblVersion.Location = new System.Drawing.Point(642, 29);
+            this.lblVersion.Name = "lblVersion";
+            this.lblVersion.OutlineForeColor = System.Drawing.Color.Black;
+            this.lblVersion.OutlineWidth = 2F;
+            this.lblVersion.Size = new System.Drawing.Size(0, 13);
+            this.lblVersion.TabIndex = 32;
+            // 
             // LauncherForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackgroundImage = global::Launcher.Properties.Resources.launcherBg;
             this.ClientSize = new System.Drawing.Size(670, 389);
-            this.Controls.Add(this.lblPing);
+            this.Controls.Add(this.lblVersion);
+            this.Controls.Add(this.lblVersionText);
             this.Controls.Add(this.btnCheck);
             this.Controls.Add(this.prgUpdateCurrent);
             this.Controls.Add(this.lvlUpdateCurrent);
@@ -322,7 +339,8 @@ namespace Launcher
         private OutlineLabel lvlUpdateCurrent;
         private GlassButton btnCheck;
         private System.Windows.Forms.Timer tmrCheckProcess;
-        private OutlineLabel lblPing;
+        private OutlineLabel lblVersionText;
+        private OutlineLabel lblVersion;
 
 
     }

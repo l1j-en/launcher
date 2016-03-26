@@ -27,10 +27,15 @@ namespace Launcher
 
         private void btnAdd_Click(object sender, EventArgs e)
         {
-            IPAddress ip;
+            IPAddress ip = null;
             int port;
 
-            if(txtName.Text.Trim() != string.Empty && IPAddress.TryParse(txtIpAddress.Text, out ip)
+            try
+            {
+                ip = Dns.GetHostAddresses(txtIpAddress.Text)[0];
+            } catch (Exception){ }
+
+            if(txtName.Text.Trim() != string.Empty && ip != null
                 && int.TryParse(txtPort.Text, out port))
                 this.DialogResult = DialogResult.OK;
             else
