@@ -24,6 +24,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows.Forms;
 using Launcher.Models;
+using Launcher.Utilities.Proxy;
 using Launcher.WindowsAPI;
 
 namespace Launcher
@@ -44,10 +45,12 @@ namespace Launcher
         private static Settings _appSettings = null;
 
         public Process Process { get; private set; }
+        public ProxyServer ProxyServer { get; private set; }
 
-        public LineageClient(string settingsKeyName, string processName, string clientDirectory, List<LineageClient> hookedWindows)
+        public LineageClient(string settingsKeyName, string processName, string clientDirectory, ProxyServer proxyServer, List<LineageClient> hookedWindows)
         {
             this._processName = processName;
+            this.ProxyServer = proxyServer;
             this._captureDirectory = Path.Combine(clientDirectory, @"Capture\Launcher\");
             _hookedWindows = hookedWindows;
             _appSettings = Helpers.LoadSettings(settingsKeyName);
@@ -184,7 +187,7 @@ namespace Launcher
                         if (_keyboardHookId == IntPtr.Zero)
                             _keyboardHookId = User32.SetWindowsHookEx((int)User32.KeyboardHooks.WH_KEYBOARD_LL, _keyboardListener, 
                                 Marshal.GetHINSTANCE(Assembly.GetExecutingAssembly().GetModules()[0]), 0);
-                       
+
                         if (!Directory.Exists(this._captureDirectory))
                             Directory.CreateDirectory((this._captureDirectory));
 

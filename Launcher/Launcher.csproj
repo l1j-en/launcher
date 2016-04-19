@@ -75,6 +75,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
     <PlatformTarget>x86</PlatformTarget>
     <OutputPath>bin\x86\Debug\</OutputPath>
+    <DefineConstants>DEBUG</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
     <PlatformTarget>x86</PlatformTarget>
@@ -143,7 +144,12 @@
     <Compile Include="UpdateForm.Designer.cs">
       <DependentUpon>UpdateForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="Utilities\Encryption.cs" />
+    <Compile Include="Utilities\OpCodes.cs" />
+    <Compile Include="Utilities\PacketIO.cs" />
     <Compile Include="Utilities\PakTools.cs" />
+    <Compile Include="Utilities\Proxy\Client.cs" />
+    <Compile Include="Utilities\Proxy\ProxyServer.cs" />
     <Compile Include="WindowsAPI\Gdi32.cs" />
     <Compile Include="WindowsAPI\Kernel32.cs" />
     <Compile Include="WindowsAPI\User32.cs" />

@@ -70,7 +70,7 @@
             this.txtName.Name = "txtName";
             this.txtName.Size = new System.Drawing.Size(154, 20);
             this.txtName.TabIndex = 3;
-            this.txtName.Text = "Testing Server";
+            this.txtName.Text = "Testing ProxyServer";
             // 
             // txtIpAddress
             // 
@@ -114,7 +114,7 @@
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
             this.Name = "AddServerForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
-            this.Text = "Add Temporary Server";
+            this.Text = "Add Temporary ProxyServer";
             this.ResumeLayout(false);
             this.PerformLayout();
 
