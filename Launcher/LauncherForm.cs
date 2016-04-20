@@ -45,7 +45,7 @@ namespace Launcher
 
         public LauncherForm()
         {
-            var appLocation = @"C:\Program Files (x86)\Lineage Resurrection";//Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            var appLocation = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             var associatedLaunchers = Helpers.GetAssociatedLaunchers(appLocation);
             
             if (!Helpers.LauncherInLineageDirectory(appLocation))
