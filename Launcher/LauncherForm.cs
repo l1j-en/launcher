@@ -21,7 +21,6 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
-using System.Reflection;
 using System.Threading;
 using System.Windows.Forms;
 using Launcher.Models;
@@ -34,6 +33,7 @@ namespace Launcher
 {
     public partial class LauncherForm : Form
     {
+        private Process process;
         private const string Version = "2.2";
         private readonly bool _isWin8OrHigher;
         private User32.DevMode _revertResolution;
@@ -45,7 +45,7 @@ namespace Launcher
 
         public LauncherForm()
         {
-            var appLocation = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            var appLocation = @"C:\Program Files (x86)\Lineage Resurrection\";// Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             var associatedLaunchers = Helpers.GetAssociatedLaunchers(appLocation);
             
             if (!Helpers.LauncherInLineageDirectory(appLocation))
@@ -157,6 +157,8 @@ namespace Launcher
         {
             var settings = Helpers.LoadSettings(this._config.KeyName);
             var binFile = Path.GetFileNameWithoutExtension(settings.ClientBin);
+            var binpath = Path.Combine(this._config.InstallDir, binFile);
+
             var ip = (uint)IPAddress.NetworkToHostOrder(BitConverter.ToInt32(IPAddress.Parse("127.0.0.1").GetAddressBytes(), 0));
             var revertResolution = new User32.DevMode();
 
@@ -169,15 +171,6 @@ namespace Launcher
 
             var client = new LineageClient(this._config.KeyName, binFile, this._config.InstallDir, proxyServer, Clients);
             client.Initialize();
-                
-            if (settings.Centred)
-            {
-                var windowSize = Screen.PrimaryScreen.WorkingArea;
-                client.SetCentred(windowSize.Width, windowSize.Height);
-            }
-
-            if (settings.CaptureMouse)
-                client.SetAllowCapture();
 
             lock (this._lockObject)
                 Clients.Add(client);
@@ -483,7 +476,6 @@ namespace Launcher
                     catch (Exception)
                     {
                         Clients[i].ProxyServer.Stop();
-                        User32.UnhookWindowsHookEx(Clients[i].Process.MainWindowHandle);
                         Clients.RemoveAt(i);
                     }
                 }
@@ -506,12 +498,11 @@ namespace Launcher
             {
                 foreach (var client in Clients)
                 {
-                    
-                    // if it has been more than 5 minutes with no packet sent from the client
+                    // if it has been more than 30 minutes with no packet sent from the client
                     // then send a keepalive packet
                     var lastSent = client.ProxyServer.CheckLastSent();
 
-                    if (lastSent > -1 && currentEpoch - lastSent > 300)
+                    if (lastSent > -1 && currentEpoch - lastSent > 1800)
                         client.ProxyServer.SendKeepAlive();
                 }
             }

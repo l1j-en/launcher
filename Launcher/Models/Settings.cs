@@ -20,26 +20,13 @@ namespace Launcher.Models
     public class Settings
     {
         public bool Windowed { get; set; }
-        public bool Centred { get; set; }
         public bool Resize { get; set; }
         public bool DisableDark { get; set; }
         public bool EnableMobColours { get; set; }
-        public bool CaptureMouse { get; set; }
-        public bool BlurAc { get; set; }
-        public bool BlurHpMp { get; set; }
-        public bool BlurLevel { get; set; }
-        public bool BlurHotKeys { get; set; }
-        public bool BlurChat { get; set; }
-        public string BlurSaveSetting { get; set; }
 
         public Resolution Resolution { get; set; }
 
         public string MusicType { get; set; }
         public string ClientBin { get; set; }
-
-        public bool BlurImage()
-        {
-            return BlurAc || BlurHpMp || BlurLevel || BlurHotKeys || BlurChat;
-        }
     }
 }

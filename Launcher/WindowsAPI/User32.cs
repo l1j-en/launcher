@@ -21,6 +21,8 @@ namespace Launcher.WindowsAPI
 {
     public static class User32
     {
+        public const int HSHELL_WINDOWCREATED = 1;
+
         public struct DevMode
         {
             private const int CCHDEVICENAME = 0x20;
@@ -228,7 +230,14 @@ namespace Launcher.WindowsAPI
         {
             //Modifier key constants
             VK_PRINT = 0x2C
-        } 
+        }
+
+        public static string GetClassName(IntPtr hwnd)
+        {
+            var sb = new StringBuilder(1024);
+            GetClassName(hwnd, sb, sb.Capacity);
+            return sb.ToString();
+        }
 
         //Sets window attributes
         [DllImport("user32.dll")]
@@ -250,18 +259,11 @@ namespace Launcher.WindowsAPI
         [DllImport("user32.dll")]
         public static extern bool RemoveMenu(IntPtr hMenu, uint uPosition, uint uFlags);
 
-        [DllImport("user32.dll", EntryPoint = "SetWindowPos")]
-        public static extern IntPtr SetWindowPosPtr(IntPtr hWnd, IntPtr hMenu, int x, int y, int cx, int cy, uint uFlags);
-
         [DllImport("user32.dll")]
         public static extern bool EnumDisplaySettings(string lpszDeviceName, int iModeNum, ref DevMode lpDevMode);
 
         [DllImport("user32.dll")]
         public static extern int ChangeDisplaySettings([In, Out]ref DevMode lpDevMode, [param: MarshalAs(UnmanagedType.U4)] uint dwflags);
-
-        [DllImport("user32.dll", SetLastError = true)]
-        public static extern IntPtr SetWinEventHook(uint eventMin, uint eventMax, IntPtr hmodWinEventProc, WinEventProc lpfnWinEventProc, int idProcess, int idThread, uint dwflags);
-        public delegate void WinEventProc(IntPtr hWinEventHook, uint iEvent, IntPtr hWnd, int idObject, int idChild, int dwEventThread, int dwmsEventTime);
 
         [DllImport("user32.dll")]
         public static extern bool RedrawWindow(IntPtr hWnd, IntPtr lprcUpdate, IntPtr hrgnUpdate, RedrawWindowFlags flags);
@@ -270,34 +272,15 @@ namespace Launcher.WindowsAPI
         public static extern bool InvalidateRect(IntPtr hWnd, IntPtr lpRect, bool bErase);
 
         [DllImport("user32.dll")]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        public static extern bool SetForegroundWindow(IntPtr hWnd);
+        public static extern uint GetWindowThreadProcessId(IntPtr hWnd, out int lpdwProcessId);
 
         [DllImport("user32.dll")]
-        public static extern bool AllowSetForegroundWindow(int dwProcessId);
-
-        [DllImport("user32.dll", SetLastError = true)]
-        public static extern bool GetWindowRect(IntPtr hwnd, out Rect lpRect);
-
-        [DllImport("user32.dll", SetLastError = true)]
-        public static extern bool GetClientRect(IntPtr hwnd, out Rect lpRect);
-
-        public delegate IntPtr KeyboardHookDelegate(int nCode, IntPtr wParam, ref KbDllHookStruct lParam);
-        [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
-        public static extern IntPtr SetWindowsHookEx(int idHook, KeyboardHookDelegate lpfn, IntPtr hMod, int dwThreadId);
-
-        [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
-        public static extern IntPtr CallNextHookEx(IntPtr hhk, int nCode, IntPtr wParam, ref KbDllHookStruct lParam);
-
-        [DllImport("user32.dll", CharSet = CharSet.Auto, SetLastError = true)]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        public static extern bool UnhookWindowsHookEx(IntPtr hhk);
+        public static extern int RegisterWindowMessage(string lpString);
 
         [DllImport("user32.dll")]
-        public static extern IntPtr GetForegroundWindow();
+        public static extern int RegisterShellHookWindow(IntPtr Hwnd);
 
         [DllImport("user32.dll")]
-        public static extern int GetWindowText(IntPtr hWnd, StringBuilder text, int count);
-
+        public static extern int GetClassName(System.IntPtr hWnd, StringBuilder lpClassName, int nMaxCount);
     }
 }

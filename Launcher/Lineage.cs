@@ -16,6 +16,7 @@ using System;
 using System.IO;
 using Launcher.Models;
 using Launcher.WindowsAPI;
+using System.Diagnostics;
 
 namespace Launcher
 {
@@ -35,7 +36,6 @@ namespace Launcher
                 IntPtr.Zero, null, ref startupInfo, out processInfo);
 
             var tHandle = processInfo.HThread;
-            const int bytesWrite = 0;
 
             DllInjector.GetInstance.BInject(processInfo.DwProcessId, Path.Combine(clientDirectory, "login.dll"));
             Kernel32.ResumeThread(tHandle);
@@ -48,39 +48,30 @@ namespace Launcher
 
             Kernel32.CloseHandle(tHandle);
 
+            Kernel32.SuspendThread(hndProc);
+
             // Remove darkness
             if (settings.DisableDark)
             {
-                Kernel32.SuspendThread(hndProc);
-                Kernel32.WriteProcessMemory(hndProc, (IntPtr)0x0046690B, new byte[] { 0x90, 0xE9 }, 2, bytesWrite);
-                Kernel32.ResumeThread(hndProc);
+                Kernel32.WriteProcessMemory(hndProc, (IntPtr)0x0046690B, new byte[] { 0x90, 0xE9 }, 2, 0);
             }
 
             // Mob level highlight toggle
             if (settings.EnableMobColours)
             {
-                Kernel32.SuspendThread(hndProc);
                 Kernel32.WriteProcessMemory(hndProc, (IntPtr)0x0046786E, new byte[] { 0x90, 0x90, 0x90, 0x90, 0x90, 0x90 }, 6, 0);
-                Kernel32.ResumeThread(hndProc);
             }
                 
             // Don't know if the constant suspend/resume is needed, but WinXP was being funnky and this works
             // Needed to get the lance master poly working properly
             var zelgoPak = File.ReadAllBytes(Path.Combine(clientDirectory, "zelgo.pak"));
-            Kernel32.SuspendThread(hndProc);
             Kernel32.WriteProcessMemory(hndProc, (IntPtr)0x004B6CE0, new byte[] { 0xEB }, 1, 0);
-            Kernel32.ResumeThread(hndProc);
-            
-            Kernel32.SuspendThread(hndProc);
             Kernel32.WriteProcessMemory(hndProc, (IntPtr)0x00504538, zelgoPak, (uint)zelgoPak.Length - 1, 0);
-            System.Threading.Thread.Sleep(1000);
-            Kernel32.ResumeThread(hndProc);
-
-            Kernel32.SuspendThread(hndProc);
             Kernel32.WriteProcessMemory(hndProc, (IntPtr)0x006DA508, new byte[] { 0x0F, 0x27 }, 2, 0);
             Kernel32.ResumeThread(hndProc);
 
             Kernel32.CloseHandle(hndProc);
+            hndProc = IntPtr.Zero;
 
             System.Threading.Thread.Sleep(1000);
         }

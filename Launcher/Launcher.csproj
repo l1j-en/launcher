@@ -101,12 +101,6 @@
     <Compile Include="AddServerForm.Designer.cs">
       <DependentUpon>AddServerForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="CaptureMouseDialog.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="CaptureMouseDialog.Designer.cs">
-      <DependentUpon>CaptureMouseDialog.cs</DependentUpon>
-    </Compile>
     <Compile Include="ComboBoxItem.cs" />
     <Compile Include="Controls\OutlineLabel.cs">
       <SubType>Component</SubType>
@@ -150,15 +144,11 @@
     <Compile Include="Utilities\PakTools.cs" />
     <Compile Include="Utilities\Proxy\Client.cs" />
     <Compile Include="Utilities\Proxy\ProxyServer.cs" />
-    <Compile Include="WindowsAPI\Gdi32.cs" />
     <Compile Include="WindowsAPI\Kernel32.cs" />
     <Compile Include="WindowsAPI\User32.cs" />
     <Compile Include="LineageClient.cs" />
     <EmbeddedResource Include="AddServerForm.resx">
       <DependentUpon>AddServerForm.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="CaptureMouseDialog.resx">
-      <DependentUpon>CaptureMouseDialog.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Controls\GlassButton.resx">
       <DependentUpon>GlassButton.cs</DependentUpon>

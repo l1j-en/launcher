@@ -50,19 +50,11 @@ namespace Launcher
                 Resize = this.chkResize.Checked,
                 ClientBin = this.cmbBin.Text,
                 DisableDark = this.chkDisableDark.Checked,
-                BlurAc = this.chkBlurAc.Checked,
-                BlurChat =  this.chkBlurChat.Checked,
-                BlurHotKeys = this.chkBlurHotKeys.Checked,
-                BlurHpMp = this.chkBlurHpMp.Checked,
-                BlurLevel = this.chkBlurLevel.Checked,
-                BlurSaveSetting = this.cmbBlurOptions.SelectedItem.ToString(),
-                CaptureMouse = this.chkCaptureMouse.Checked,
                 EnableMobColours = this.chkMobColours.Checked,
                 MusicType = this.cmbMusic.SelectedItem.ToString()
             };
 
             settings.Resolution = this.chkResize.Checked ? (Resolution) this.cmbResolution.SelectedItem : null;
-            settings.Centred = this.chkCentre.Checked;
             settings.Windowed = this.chkWindowed.Checked;
 
             if (settings.ClientBin.Trim() == string.Empty || settings.ClientBin.Trim() == "No Client Directory Selected"
@@ -89,17 +81,6 @@ namespace Launcher
         private void SettingsForm_Load(object sender, EventArgs e)
         {
             var savedSettings = Helpers.LoadSettings(this._config.KeyName) ?? new Settings();
-
-            this.chkBlurAc.Checked = savedSettings.BlurAc;
-            this.chkBlurChat.Checked = savedSettings.BlurChat;
-            this.chkBlurHotKeys.Checked = savedSettings.BlurHotKeys;
-            this.chkBlurHpMp.Checked = savedSettings.BlurHpMp;
-            this.chkBlurLevel.Checked = savedSettings.BlurLevel;
-
-            this.cmbBlurOptions.SelectedIndex = savedSettings.BlurSaveSetting == null ? 0 : this.cmbBlurOptions.FindString(savedSettings.BlurSaveSetting);
-
-            this.chkCaptureMouse.Checked = savedSettings.CaptureMouse;
-
             var resolutions = LineageClient.GetResolutions(this._isWin8OrHigher);
 
             if (resolutions.Count > 0)
@@ -119,7 +100,6 @@ namespace Launcher
                 
             this.chkResize.Checked = savedSettings.Resize;
             this.chkWindowed.Checked = savedSettings.Windowed;
-            this.chkCentre.Checked = savedSettings.Centred;
 
             this.chkDisableDark.Checked = savedSettings.DisableDark;
             this.chkMobColours.Checked = savedSettings.EnableMobColours;
@@ -159,33 +139,30 @@ namespace Launcher
             if (!this.chkWindowed.Checked)
             {
                 this.chkResize.Checked = false;
-                this.chkCentre.Checked = false;
             }
-            else if (this._isWin8OrHigher && !this._initialLoad)
+            else
             {
-                if (MessageBox.Show(@"When you click save with this enabled, the launcher will write to the registry for the selected bin file forcing" + 
-                    @" it into 16 bit colours. This is required for Windows 8 or Higher. Do you wish to continue?", @"Continue?",
-                    MessageBoxButtons.YesNo, MessageBoxIcon.Asterisk) != DialogResult.Yes)
-                    this.chkWindowed.Checked = false;
+                if (!this._initialLoad)
+                {
+                    if (MessageBox.Show(@"Any window moved frop the top left corner will not be able to take screenshots!" 
+                            + "\n\nAre you sure you want to continue?", @"Continue?",
+                        MessageBoxButtons.YesNo, MessageBoxIcon.Asterisk) != DialogResult.Yes)
+                    {
+                        this.chkWindowed.Checked = false;
+                    }
+
+                    if (this._isWin8OrHigher)
+                    {
+                        if (MessageBox.Show(@"When you click save with this enabled, the launcher will write to the registry for the selected bin file forcing" +
+                            @" it into 16 bit colours. This is required for Windows 8 or Higher. Do you wish to continue?", @"Continue?",
+                            MessageBoxButtons.YesNo, MessageBoxIcon.Asterisk) != DialogResult.Yes)
+                            this.chkWindowed.Checked = false;
+                    }
+                }
             }
             
             if(this.cmbResolution.Items.Count > 0)
                 this.chkResize.Enabled = this.chkWindowed.Checked;
-
-            this.chkCentre.Enabled = this.chkWindowed.Checked;
-        }
-
-        private void pctMouseHelp_Click(object sender, EventArgs e)
-        {
-            new CaptureMouseDialog().ShowDialog();
-        }
-
-        private void chkBlur_CheckedChanged(object sender, EventArgs e)
-        {
-            var blurEnabled = this.chkBlurAc.Checked || this.chkBlurChat.Checked || this.chkBlurHotKeys.Checked ||
-                              this.chkBlurHpMp.Checked || this.chkBlurLevel.Checked;
-
-            this.cmbBlurOptions.Enabled = blurEnabled;
         }
     }
 }

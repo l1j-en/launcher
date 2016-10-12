@@ -50,6 +50,7 @@ namespace Launcher.Utilities.Proxy
 
                 // Create the new TcpListener..
                 this._serverListener = new TcpListener(IPAddress.Parse(this.LocalAddress), this.LocalPort);
+                this._serverListener.Server.NoDelay = true; // disable nagle
                 this._serverListener.Start();
 
                 // Setup the async handler when a client connects..
@@ -104,19 +105,24 @@ namespace Launcher.Utilities.Proxy
                 return;
             }
 
-            // End the async connection request..
-            var tcpClient = tcpServer.EndAcceptTcpClient(result);
+            try
+            {
+                // End the async connection request..
+                var tcpClient = tcpServer.EndAcceptTcpClient(result);
 
-            // Kill the previous client that was connected (if any)..
-            if (this._clientListener != null)
-                this._clientListener.Stop();
+                // Kill the previous client that was connected (if any)..
+                if (this._clientListener != null)
+                    this._clientListener.Stop();
 
-            // Prepare the client and start the proxying..
-            this._clientListener = new Client(tcpClient.Client);
-            this._clientListener.Start(this.RemoteAddress, this.RemotePort);
+                // Prepare the client and start the proxying..
+                this._clientListener = new Client(tcpClient.Client);
+                this._clientListener.Start(this.RemoteAddress, this.RemotePort);
 
-            // Begin listening for the next client..
-            tcpServer.BeginAcceptTcpClient(OnAcceptTcpClient, tcpServer);
+                // Begin listening for the next client..
+                tcpServer.BeginAcceptTcpClient(OnAcceptTcpClient, tcpServer);
+            }
+            catch (Exception) { } // to ignore a glitch that happens when using windowed mode
+            //TODO -- fix this properly!!
         } //end OnAcceptTcpClient
     }
 }

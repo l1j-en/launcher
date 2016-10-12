@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using System.Net.Sockets;
+using System.Linq;
 
 namespace Launcher.Utilities.Proxy
 {
@@ -54,7 +55,7 @@ namespace Launcher.Utilities.Proxy
         {
             // Setup class defaults..
             this._clientSocket = sockClient;
-            this._clientSocket.NoDelay = true;
+            this._clientSocket.NoDelay = true; // disable nagle
             this._clientBuffer = new byte[MaxBufferSize];
             this._clientBackklog = new List<byte>();
 
@@ -79,8 +80,8 @@ namespace Launcher.Utilities.Proxy
 
             this._isRunning = true;
 
-            // initialize it to 5 minutes in the future
-            this.LastPacketSent = (int)(DateTime.UtcNow - this._epochDate).TotalSeconds + 300;
+            // initialize it to 30 minutes in the future
+            this.LastPacketSent = (int)(DateTime.UtcNow - this._epochDate).TotalSeconds + 1800;
 
             // Attempt to parse the given remote target.
             // This allows an IP address or domain to be given.
@@ -110,7 +111,7 @@ namespace Launcher.Utilities.Proxy
             {
                 // Connect to the target machine on a new socket..
                 this._serverSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-                this._serverSocket.NoDelay = true;
+                this._serverSocket.NoDelay = true; // disable nagle
 
                 this._serverSocket.BeginConnect(new IPEndPoint(ipAddress, remotePort),
                     result =>
