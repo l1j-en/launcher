@@ -28,12 +28,12 @@ using Launcher.Utilities;
 using Launcher.Utilities.Proxy;
 using Launcher.WindowsAPI;
 using Microsoft.Win32;
+using System.Reflection;
 
 namespace Launcher
 {
     public partial class LauncherForm : Form
     {
-        private Process process;
         private const string Version = "2.2";
         private readonly bool _isWin8OrHigher;
         private User32.DevMode _revertResolution;
