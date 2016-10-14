@@ -19,7 +19,6 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using Launcher.Models;
-using Launcher.Utilities.Proxy;
 using Launcher.WindowsAPI;
 
 namespace Launcher
@@ -36,12 +35,10 @@ namespace Launcher
         private static Settings _appSettings = null;
 
         public Process Process { get; private set; }
-        public ProxyServer ProxyServer { get; private set; }
 
-        public LineageClient(string settingsKeyName, string processName, string clientDirectory, ProxyServer proxyServer, List<LineageClient> hookedWindows)
+        public LineageClient(string settingsKeyName, string processName, string clientDirectory, List<LineageClient> hookedWindows)
         {
             this._processName = processName;
-            this.ProxyServer = proxyServer;
             _hookedWindows = hookedWindows;
             _appSettings = Helpers.LoadSettings(settingsKeyName);
         }

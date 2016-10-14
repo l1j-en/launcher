@@ -25,7 +25,6 @@ using System.Threading;
 using System.Windows.Forms;
 using Launcher.Models;
 using Launcher.Utilities;
-using Launcher.Utilities.Proxy;
 using Launcher.WindowsAPI;
 using Microsoft.Win32;
 using System.Reflection;
@@ -34,7 +33,7 @@ namespace Launcher
 {
     public partial class LauncherForm : Form
     {
-        private const string Version = "2.3";
+        private const string Version = "2.4.1";
         private readonly bool _isWin8OrHigher;
         private User32.DevMode _revertResolution;
 
@@ -140,26 +139,32 @@ namespace Launcher
 
         private void playButton_Click(object sender, EventArgs e)
         {
-            var selectedServer = this._config.Servers[this.cmbServer.SelectedItem.ToString()];
-
-            var proxyServer = new ProxyServer();
-            proxyServer.LocalAddress = "127.0.0.1";
-            proxyServer.LocalPort = new Random().Next(30000, 65000);
-
-            proxyServer.RemoteAddress = selectedServer.IpOrDns;
-            proxyServer.RemotePort = selectedServer.Port;
-            proxyServer.Start();
-
-            this.Launch(proxyServer);
+            this.Launch(this._config.Servers[this.cmbServer.SelectedItem.ToString()]);
         }
 
-        private void Launch(ProxyServer proxyServer)
+        private void Launch(Server server)
         {
             var settings = Helpers.LoadSettings(this._config.KeyName);
             var binFile = Path.GetFileNameWithoutExtension(settings.ClientBin);
             var binpath = Path.Combine(this._config.InstallDir, binFile);
 
-            var ip = (uint)IPAddress.NetworkToHostOrder(BitConverter.ToInt32(IPAddress.Parse("127.0.0.1").GetAddressBytes(), 0));
+            IPAddress[] ipOrDns;
+
+            try
+            {
+                ipOrDns = Dns.GetHostAddresses(server.IpOrDns);
+            }
+            catch (SocketException)
+            {
+                MessageBox.Show(@"There was an error connecting to the server. Check the forums for any issues.",
+                    @"Error Connecting!",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+                this.CheckServerStatus(false);
+                return;
+            }
+
+
+            var ip = (uint)IPAddress.NetworkToHostOrder(BitConverter.ToInt32(ipOrDns[0].GetAddressBytes(), 0));
             var revertResolution = new User32.DevMode();
 
             if (settings.Resize)
@@ -167,9 +172,9 @@ namespace Launcher
             else if (settings.Windowed)
                 revertResolution = LineageClient.ChangeDisplayColour(this._isWin8OrHigher ? 32 : 16);
 
-            Lineage.Run(settings, this._config.InstallDir, settings.ClientBin, ip, (ushort)proxyServer.LocalPort);
+            Lineage.Run(settings, this._config.InstallDir, settings.ClientBin, ip, (ushort)server.Port);
 
-            var client = new LineageClient(this._config.KeyName, binFile, this._config.InstallDir, proxyServer, Clients);
+            var client = new LineageClient(this._config.KeyName, binFile, this._config.InstallDir, Clients);
             client.Initialize();
 
             lock (this._lockObject)
@@ -180,9 +185,6 @@ namespace Launcher
                 this._revertResolution = revertResolution;
                 this.tmrCheckProcess.Enabled = true;
             }
-
-            if (!tmrProxyStatus.Enabled)
-                tmrProxyStatus.Enabled = true;
         }
 
         private void cmbServer_SelectedIndexChanged(object sender, EventArgs e)
@@ -475,7 +477,6 @@ namespace Launcher
                     }
                     catch (Exception)
                     {
-                        Clients[i].ProxyServer.Stop();
                         Clients.RemoveAt(i);
                     }
                 }
@@ -485,25 +486,6 @@ namespace Launcher
                     this.tmrCheckProcess.Enabled = false;
                     LineageClient.ChangeDisplaySettings(revertResolution);
                     tmrCheckProcess.Stop();
-                    tmrProxyStatus.Stop();
-                }
-            }
-        }
-
-        private void tmrProxyStatus_Tick(object sender, EventArgs e)
-        {
-            var currentEpoch = (int)(DateTime.UtcNow - new DateTime(1970, 1, 1)).TotalSeconds;
-
-            lock (this._lockObject)
-            {
-                foreach (var client in Clients)
-                {
-                    // if it has been more than 30 minutes with no packet sent from the client
-                    // then send a keepalive packet
-                    var lastSent = client.ProxyServer.CheckLastSent();
-
-                    if (lastSent > -1 && currentEpoch - lastSent > 1800)
-                        client.ProxyServer.SendKeepAlive();
                 }
             }
         }

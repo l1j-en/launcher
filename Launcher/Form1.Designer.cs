@@ -40,7 +40,6 @@ namespace Launcher
             this.updateChecker = new System.ComponentModel.BackgroundWorker();
             this.prgUpdateCurrent = new System.Windows.Forms.ProgressBar();
             this.tmrCheckProcess = new System.Windows.Forms.Timer(this.components);
-            this.tmrProxyStatus = new System.Windows.Forms.Timer(this.components);
             this.lblVersion = new Launcher.Controls.OutlineLabel();
             this.lblVersionText = new Launcher.Controls.OutlineLabel();
             this.btnCheck = new Launcher.Controls.GlassButton();
@@ -127,11 +126,6 @@ namespace Launcher
             // 
             this.tmrCheckProcess.Interval = 500;
             this.tmrCheckProcess.Tick += new System.EventHandler(this.tmrCheckProcess_Tick);
-            // 
-            // tmrProxyStatus
-            // 
-            this.tmrProxyStatus.Interval = 60000;
-            this.tmrProxyStatus.Tick += new System.EventHandler(this.tmrProxyStatus_Tick);
             // 
             // lblVersion
             // 
@@ -347,7 +341,6 @@ namespace Launcher
         private System.Windows.Forms.Timer tmrCheckProcess;
         private OutlineLabel lblVersionText;
         private OutlineLabel lblVersion;
-        private System.Windows.Forms.Timer tmrProxyStatus;
 
 
     }

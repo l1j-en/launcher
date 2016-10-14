@@ -139,11 +139,8 @@
       <DependentUpon>UpdateForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Utilities\Encryption.cs" />
-    <Compile Include="Utilities\OpCodes.cs" />
     <Compile Include="Utilities\PacketIO.cs" />
     <Compile Include="Utilities\PakTools.cs" />
-    <Compile Include="Utilities\Proxy\Client.cs" />
-    <Compile Include="Utilities\Proxy\ProxyServer.cs" />
     <Compile Include="WindowsAPI\Kernel32.cs" />
     <Compile Include="WindowsAPI\User32.cs" />
     <Compile Include="LineageClient.cs" />
