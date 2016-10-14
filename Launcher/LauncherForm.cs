@@ -40,11 +40,18 @@ namespace Launcher
         private readonly object _lockObject = new object();
         private readonly LauncherConfig _config;
 
-        private static readonly List<LineageClient> Clients = new List<LineageClient>(); 
+        private static readonly List<LineageClient> Clients = new List<LineageClient>();
+
+        Socket socketListener;
+        private Socket socket1;
+        private Socket socket2;
+        private Thread thread1;
+        private Thread thread2;
+        private byte xorByte;
 
         public LauncherForm()
         {
-            var appLocation = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            var appLocation = @"C:\Program Files (x86)\Lineage Resurrection\";// Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             var associatedLaunchers = Helpers.GetAssociatedLaunchers(appLocation);
             
             if (!Helpers.LauncherInLineageDirectory(appLocation))
@@ -172,7 +179,24 @@ namespace Launcher
             else if (settings.Windowed)
                 revertResolution = LineageClient.ChangeDisplayColour(this._isWin8OrHigher ? 32 : 16);
 
-            Lineage.Run(settings, this._config.InstallDir, settings.ClientBin, ip, (ushort)server.Port);
+            var r = new Random();
+            IPEndPoint LocalEP;
+            int port = r.Next(1025, 50000);
+
+            try
+            {
+                LocalEP = new IPEndPoint(IPAddress.Parse("127.0.0.1"), port);
+                socketListener = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+                socketListener.Bind(LocalEP);
+                socketListener.Listen(1);
+                socketListener.BeginAccept(new AsyncCallback(ConnectCallback), socketListener);
+            }
+            catch
+            {
+                Environment.Exit(0);
+            }
+
+            Lineage.Run(settings, this._config.InstallDir, settings.ClientBin, (uint)IPAddress.NetworkToHostOrder(BitConverter.ToInt32(IPAddress.Parse("127.0.0.1").GetAddressBytes(), 0)), (ushort)port);
 
             var client = new LineageClient(this._config.KeyName, binFile, this._config.InstallDir, Clients);
             client.Initialize();
@@ -184,6 +208,74 @@ namespace Launcher
             {
                 this._revertResolution = revertResolution;
                 this.tmrCheckProcess.Enabled = true;
+            }
+        }
+
+        private void ConnectCallback(IAsyncResult ar)
+        {
+            try
+            {
+                IPAddress[] ipOrDns = Dns.GetHostAddresses("l1j.zelgo.net");
+
+                socket1 = socketListener.EndAccept(ar);
+                socket2 = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+                socket2.Connect(ipOrDns[0], 46838);
+
+                thread1 = new Thread(Proc1);
+                thread1.IsBackground = true;
+                thread1.Start();
+
+                thread2 = new Thread(Proc2);
+                thread2.IsBackground = true;
+                thread2.Start();
+                socketListener.Close();
+            }
+            catch
+            {
+                Environment.Exit(0);
+            }
+        }
+
+        private void Proc1()
+        {
+            int Size = 0;
+            byte[] data = new byte[100000];
+
+            while (true)
+            {
+                try
+                {
+                    Size = socket2.Receive(data);
+                    if (Size == 0) break;
+                    socket1.Send(data, 0, Size, SocketFlags.None);
+                }
+                catch
+                {
+                    break;
+                }
+            }
+        }
+
+        private void Proc2()
+        {
+            int Size = 0;
+            byte[] data = new byte[100000];
+
+            while (true)
+            {
+                try
+                {
+                    Size = socket1.Receive(data);
+
+                    if (Size == 0)
+                        break;
+
+                    socket2.Send(data, 0, Size, SocketFlags.None);
+                }
+                catch
+                {
+                    break;
+                }
             }
         }
 

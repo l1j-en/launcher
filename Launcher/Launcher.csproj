@@ -138,6 +138,7 @@
     <Compile Include="UpdateForm.Designer.cs">
       <DependentUpon>UpdateForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="Utilities\BigInteger.cs" />
     <Compile Include="Utilities\Encryption.cs" />
     <Compile Include="Utilities\PacketIO.cs" />
     <Compile Include="Utilities\PakTools.cs" />
