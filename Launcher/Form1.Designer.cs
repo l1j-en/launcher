@@ -40,6 +40,10 @@ namespace Launcher
             this.updateChecker = new System.ComponentModel.BackgroundWorker();
             this.prgUpdateCurrent = new System.Windows.Forms.ProgressBar();
             this.tmrCheckProcess = new System.Windows.Forms.Timer(this.components);
+            this.systemIcon = new System.Windows.Forms.NotifyIcon(this.components);
+            this.systemTrayContextMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.Restore = new System.Windows.Forms.ToolStripMenuItem();
+            this.Close = new System.Windows.Forms.ToolStripMenuItem();
             this.lblVersion = new Launcher.Controls.OutlineLabel();
             this.lblVersionText = new Launcher.Controls.OutlineLabel();
             this.btnCheck = new Launcher.Controls.GlassButton();
@@ -52,6 +56,7 @@ namespace Launcher
             this.lblServerStatusText = new Launcher.Controls.OutlineLabel();
             ((System.ComponentModel.ISupportInitialize)(this.pctLinLogo)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pctVote)).BeginInit();
+            this.systemTrayContextMenu.SuspendLayout();
             this.SuspendLayout();
             // 
             // BannerBrowser
@@ -126,6 +131,38 @@ namespace Launcher
             // 
             this.tmrCheckProcess.Interval = 500;
             this.tmrCheckProcess.Tick += new System.EventHandler(this.tmrCheckProcess_Tick);
+            // 
+            // systemIcon
+            // 
+            this.systemIcon.BalloonTipText = "Launcher is still running! If you close it while the game is running, you will be" +
+    " disconnected!";
+            this.systemIcon.BalloonTipTitle = "Still Running!";
+            this.systemIcon.ContextMenuStrip = this.systemTrayContextMenu;
+            this.systemIcon.Icon = ((System.Drawing.Icon)(resources.GetObject("systemIcon.Icon")));
+            this.systemIcon.Text = "Lineage Launcher";
+            this.systemIcon.MouseDoubleClick += new System.Windows.Forms.MouseEventHandler(this.systemIcon_MouseDoubleClick);
+            // 
+            // systemTrayContextMenu
+            // 
+            this.systemTrayContextMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.Restore,
+            this.Close});
+            this.systemTrayContextMenu.Name = "systemTrayContextMenu";
+            this.systemTrayContextMenu.Size = new System.Drawing.Size(114, 48);
+            // 
+            // Restore
+            // 
+            this.Restore.Name = "Restore";
+            this.Restore.Size = new System.Drawing.Size(113, 22);
+            this.Restore.Text = "Restore";
+            this.Restore.Click += new System.EventHandler(this.Restore_Click);
+            // 
+            // Close
+            // 
+            this.Close.Name = "Close";
+            this.Close.Size = new System.Drawing.Size(113, 22);
+            this.Close.Text = "Close";
+            this.Close.Click += new System.EventHandler(this.Close_Click);
             // 
             // lblVersion
             // 
@@ -316,6 +353,7 @@ namespace Launcher
             this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.LauncherForm_KeyDown);
             ((System.ComponentModel.ISupportInitialize)(this.pctLinLogo)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pctVote)).EndInit();
+            this.systemTrayContextMenu.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -341,8 +379,10 @@ namespace Launcher
         private System.Windows.Forms.Timer tmrCheckProcess;
         private OutlineLabel lblVersionText;
         private OutlineLabel lblVersion;
-
-
+        private System.Windows.Forms.NotifyIcon systemIcon;
+        private System.Windows.Forms.ContextMenuStrip systemTrayContextMenu;
+        private System.Windows.Forms.ToolStripMenuItem Restore;
+        private System.Windows.Forms.ToolStripMenuItem Close;
     }
 }
 

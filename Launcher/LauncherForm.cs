@@ -90,7 +90,15 @@ namespace Launcher
 
         private void btnClose_Click(object sender, EventArgs e)
         {
-            Application.Exit();
+            if(Clients.Count > 0)
+            {
+                systemIcon.Visible = true;
+                systemIcon.ShowBalloonTip(500);
+                this.Hide();
+            } else
+            {
+                Application.Exit();
+            }
         }
 
         private void btnSettings_Click(object sender, EventArgs e)
@@ -499,6 +507,30 @@ namespace Launcher
                     LineageClient.ChangeDisplaySettings(revertResolution);
                     tmrCheckProcess.Stop();
                 }
+            }
+        }
+
+        private void systemIcon_MouseDoubleClick(object sender, MouseEventArgs e)
+        {
+            systemIcon.Visible = false;
+            this.Show();
+        }
+
+        private void Restore_Click(object sender, EventArgs e)
+        {
+            systemIcon.Visible = false;
+            this.Show();
+        }
+
+        private void Close_Click(object sender, EventArgs e)
+        {
+            if(Clients.Count > 0)
+            {
+                MessageBox.Show("You cannot close the launcher while a client is running!", "Client Still Running!",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+            } else
+            {
+                Application.Exit();
             }
         }
     } //end class
