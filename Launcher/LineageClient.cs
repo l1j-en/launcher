@@ -19,7 +19,10 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using Launcher.Models;
-using Launcher.WindowsAPI;
+using Launcher.Utilities;
+using System.Net.Sockets;
+using System.Threading;
+using System.Net;
 
 namespace Launcher
 {
@@ -30,42 +33,54 @@ namespace Launcher
         private const int EnumCurrentSettings = -1;
         private readonly string _processName;
         private static List<LineageClient> _hookedWindows;
-        private static IntPtr _keyboardHookId = IntPtr.Zero;
         private const int MaxRetries = 10;
         private static Settings _appSettings = null;
+        private Socket _socketListener;
+        private Socket _clientSocket;
+        private Socket _serverSocket;
+        private Thread _clientThread;
+        private Thread _serverThread;
+        private readonly int _serverPort;
+        private readonly IPAddress _serverIp;
 
         public Process Process { get; private set; }
 
-        public LineageClient(string settingsKeyName, string processName, string clientDirectory, List<LineageClient> hookedWindows)
+        public LineageClient(string settingsKeyName, string processName, string clientDirectory, Socket socketListener, IPAddress ip,
+            int port, List<LineageClient> hookedWindows)
         {
             this._processName = processName;
             _hookedWindows = hookedWindows;
             _appSettings = Helpers.LoadSettings(settingsKeyName);
+            this._socketListener = socketListener;
+            this._serverIp = ip;
+            this._serverPort = port;
+
+            this._socketListener.BeginAccept(new AsyncCallback(ConnectCallback), socketListener);
         }
 
-        public static User32.DevMode ChangeDisplayColour(int bitCount)
+        public static Win32Api.DevMode ChangeDisplayColour(int bitCount)
         {
             return LineageClient.ChangeDisplaySettings(-1, -1, bitCount);
         }
 
-        public static User32.DevMode ChangeDisplaySettings(User32.DevMode mode)
+        public static Win32Api.DevMode ChangeDisplaySettings(Win32Api.DevMode mode)
         {
             return LineageClient.ChangeDisplaySettings(mode.dmPelsWidth, mode.dmPelsHeight, mode.dmBitsPerPel);
         }
 
         public static List<Resolution> GetResolutions(bool isWin8OrHigher)
         {
-            var currentResolution = new User32.DevMode();
-            User32.EnumDisplaySettings(null, EnumCurrentSettings, ref currentResolution);
+            var currentResolution = new Win32Api.DevMode();
+            Win32Api.EnumDisplaySettings(null, EnumCurrentSettings, ref currentResolution);
 
             var returnValue = new List<Resolution>();
             var i = 0;
-            var displayDevice = new User32.DevMode();
+            var displayDevice = new Win32Api.DevMode();
 
             // if we are pre Win 8, then use 16 bit colours, otherwise we use 32 bit since 16 bit isn't supported
             var colourBit = isWin8OrHigher ? 32 : 16;
 
-            while (User32.EnumDisplaySettings(null, i, ref displayDevice))
+            while (Win32Api.EnumDisplaySettings(null, i, ref displayDevice))
             {
                 var colour = displayDevice.dmBitsPerPel;
                 var width = displayDevice.dmPelsWidth;
@@ -87,14 +102,14 @@ namespace Launcher
             return returnValue.OrderByDescending(b => b.Width).ThenByDescending(b => b.Height).ToList();
         } 
 
-        public static User32.DevMode ChangeDisplaySettings(int width, int height, int bitCount)
+        public static Win32Api.DevMode ChangeDisplaySettings(int width, int height, int bitCount)
         {
-            var originalMode = new User32.DevMode();
+            var originalMode = new Win32Api.DevMode();
             originalMode.dmSize = (short)Marshal.SizeOf(originalMode);
 
             // Retrieving current settings
             // to edit them
-            User32.EnumDisplaySettings(null, EnumCurrentSettings, ref originalMode);
+            Win32Api.EnumDisplaySettings(null, EnumCurrentSettings, ref originalMode);
 
             // Making a copy of the current settings
             // to allow reseting to the original mode
@@ -110,7 +125,7 @@ namespace Launcher
             newMode.dmBitsPerPel = bitCount;
 
             // Capturing the operation result
-            var result = User32.ChangeDisplaySettings(ref newMode, 0);
+            var result = Win32Api.ChangeDisplaySettings(ref newMode, 0);
 
             if (result != DispChangeSuccessful)
                 MessageBox.Show(@"Resolution change failed. Unable to modify resolution.");
@@ -139,17 +154,17 @@ namespace Launcher
 
                         if(_appSettings.Windowed)
                         {
-                            var style = User32.GetWindowLong(pFoundWindow, (int)(User32.WindowLongFlags.GwlStyle));
+                            var style = Win32Api.GetWindowLong(pFoundWindow, (int)(Win32Api.WindowLongFlags.GwlStyle));
 
-                            var hmenu = User32.GetMenu(proc.MainWindowHandle);
-                            var count = User32.GetMenuItemCount(hmenu);
+                            var hmenu = Win32Api.GetMenu(proc.MainWindowHandle);
+                            var count = Win32Api.GetMenuItemCount(hmenu);
 
                             for (var i = 0; i < count; i++)
-                                User32.RemoveMenu(hmenu, 0, (int)(User32.MenuFlags.MfByposition | User32.MenuFlags.MfRemove));
+                                Win32Api.RemoveMenu(hmenu, 0, (int)(Win32Api.MenuFlags.MfByposition | Win32Api.MenuFlags.MfRemove));
 
                             //force a redraw
-                            User32.DrawMenuBar(proc.MainWindowHandle);
-                            User32.SetWindowLong(pFoundWindow, (int)User32.WindowLongFlags.GwlStyle, (style & ~(int)User32.WindowLongFlags.WsSysmenu));
+                            Win32Api.DrawMenuBar(proc.MainWindowHandle);
+                            Win32Api.SetWindowLong(pFoundWindow, (int)Win32Api.WindowLongFlags.GwlStyle, (style & ~(int)Win32Api.WindowLongFlags.WsSysmenu));
                         }
 
                         return;
@@ -161,10 +176,87 @@ namespace Launcher
             } //end while
         } //end Initialize
 
+        private void ConnectCallback(IAsyncResult ar)
+        {
+            this._clientSocket = _socketListener.EndAccept(ar);
+            this._serverSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            this._serverSocket.NoDelay = true;
+            this._serverSocket.Connect(this._serverIp, this._serverPort);
+
+            this._clientThread = new Thread(Client);
+            this._clientThread.IsBackground = true;
+            this._clientThread.Start();
+
+            this._serverThread = new Thread(Server);
+            this._serverThread.IsBackground = true;
+            this._serverThread.Start();
+            this._socketListener.Close();
+        }
+
+        private void Client()
+        {
+            int Size = 0;
+            byte[] data = new byte[100000];
+
+            while (true)
+            {
+                try
+                {
+                    Size = this._serverSocket.Receive(data);
+                    if (Size == 0)
+                        break;
+
+                    this._clientSocket.Send(data, 0, Size, SocketFlags.None);
+                }
+                catch
+                {
+                    break;
+                }
+            }
+        }
+
+        private void Server()
+        {
+            int Size = 0;
+            byte[] data = new byte[100000];
+
+            while (true)
+            {
+                try
+                {
+                    Size = this._clientSocket.Receive(data);
+
+                    if (Size == 0)
+                        break;
+
+                    this._serverSocket.Send(data, 0, Size, SocketFlags.None);
+                }
+                catch
+                {
+                    break;
+                }
+            }
+        }
+
+        public void Stop()
+        {
+            if(this._serverThread != null)
+                this._serverThread.Abort();
+
+            if(this._clientThread != null)
+                this._clientThread.Abort();
+
+            if(this._serverSocket != null)
+                this._serverSocket.Close();
+
+            if(this._clientSocket != null)
+                this._clientSocket.Close();
+        }
+
         private static void MoveWindowCallback(IntPtr hWinEventHook, uint iEvent, IntPtr hWnd, int idObject, int idChild, int dwEventThread, int dwmsEventTime)
         {
-            User32.InvalidateRect(IntPtr.Zero, IntPtr.Zero, true);
-            User32.RedrawWindow(hWinEventHook, IntPtr.Zero, IntPtr.Zero, User32.RedrawWindowFlags.UpdateNow);
+            Win32Api.InvalidateRect(IntPtr.Zero, IntPtr.Zero, true);
+            Win32Api.RedrawWindow(hWinEventHook, IntPtr.Zero, IntPtr.Zero, Win32Api.RedrawWindowFlags.UpdateNow);
         } //end MoveWindowCallback
     } //end class
 } //end namespace

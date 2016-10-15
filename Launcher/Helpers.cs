@@ -65,8 +65,7 @@ namespace Launcher
                                   (configKey.GetValue("WebsiteUrl") == null || configKey.GetValue("WebsiteUrl").ToString() != versionInfo.WebsiteUrl) ||
                                   (configKey.GetValue("UpdaterUrl") == null || configKey.GetValue("UpdaterUrl").ToString() != versionInfo.UpdaterUrl) ||
                                   (configKey.GetValue("LauncherUrl") == null || configKey.GetValue("LauncherUrl").ToString() != versionInfo.LauncherUrl) ||
-                                  (configKey.GetValue("UpdaterFilesRoot") == null || configKey.GetValue("UpdaterFilesRoot").ToString() != versionInfo.UpdaterFilesRoot) ||
-                                  (configKey.GetValue("PublicKey") == null || configKey.GetValue("PublicKey").ToString() != versionInfo.PublicKey);
+                                  (configKey.GetValue("UpdaterFilesRoot") == null || configKey.GetValue("UpdaterFilesRoot").ToString() != versionInfo.UpdaterFilesRoot);
             }
 
             configKey.SetValue("Servers", versionInfo.Servers, RegistryValueKind.String);
@@ -76,7 +75,6 @@ namespace Launcher
             configKey.SetValue("UpdaterUrl", versionInfo.UpdaterUrl, RegistryValueKind.String);
             configKey.SetValue("LauncherUrl", versionInfo.LauncherUrl, RegistryValueKind.String);
             configKey.SetValue("UpdaterFilesRoot", versionInfo.UpdaterFilesRoot, RegistryValueKind.String);
-            configKey.SetValue("PublicKey", versionInfo.PublicKey, RegistryValueKind.String);
 
             return actuallyUpdated;
         }
@@ -87,29 +85,6 @@ namespace Launcher
             {
                 var config = new LauncherConfig(keyName, appPath);
                 var configKey = Registry.CurrentUser.OpenSubKey(@"Software\" + keyName, true);
-
-                if (configKey == null || configKey.GetValue("Servers") == null)
-                {
-                    // if the config key is null and not equal to the default of "Lineage Resurrection"
-                    // then return null, otherwise lets try pulling it from the default URL and public key
-                    if (keyName != "Lineage Resurrection")
-                        return null;
-                    else
-                    {
-                        var versionInfo = GetVersionInfo(new Uri("http://launcher.travis-smith.ca/VersionInfo.php"), "<RSAKeyValue><Modulus>l5mJTTO/MHTnaLbzkr0bfbOvY6qC9jWa39IIOtujP1mAPqhdEG2dIbtx20QEZ5P/9hg0KP16RvYj6BSwU4/Ees90mKpXV/7PzTp9uSRZuKNo+uoku7oqar4ruWmpcpPErKVGqD0i7908C/833VzSxdBxnqFqgF1nAk1iRJsnjxC8hseimjfe/E1EvO+Uk/NcA9VFR7YRPknuMLWMoLyl0EN6lJ4z5xLZKhPqGpMdIjDRmW2PdQxSFs5FIsVK9jYnqW/M6o+PiL1uj1py3EaBgIOkOMSUhEAHlgNkqdYlXHkqQ4W3HTuNkQmVLL8oZd6NXrflcF3PDEr1JtbTd+X+DQ==</Modulus><Exponent>JQ==</Exponent></RSAKeyValue>");
-
-                        configKey = Registry.CurrentUser.CreateSubKey(@"Software\" + versionInfo.ServerName);
-
-                        UpdateConfig(versionInfo);
-
-                        var settingsKey = Registry.CurrentUser.OpenSubKey(@"Software\LineageLauncher", true);
-
-                        if(settingsKey == null)
-                            settingsKey = Registry.CurrentUser.CreateSubKey(@"Software\LineageLauncher");
-
-                        settingsKey.SetValue(versionInfo.ServerName, appPath, RegistryValueKind.String);
-                    }
-                }
                     
                 var servers = configKey.GetValue("Servers").ToString().Split(',');
                 config.Servers = new Dictionary<string, Server>();
@@ -256,6 +231,7 @@ namespace Launcher
 
                 //needed to drop this to SHA1 because WinXP doesn't always support higher by default
                 var result = rsa.VerifyData(Encoding.UTF8.GetBytes(json), CryptoConfig.MapNameToOID("SHA1"), signature); 
+
                 if (result)
                     return json.JsonDeserialize<VersionInfo>();
 
@@ -293,61 +269,6 @@ namespace Launcher
         {
             string versionName;
             return IsWin8OrHigher(out versionName);
-        } //end IsWin8OrHigher
-
-        public static Bitmap BlurImage(Bitmap imageToBlur, bool level, bool hpmp, bool ac, bool hotkeys, bool chat)
-        {
-            var screenshot = (Bitmap)imageToBlur.Clone();
-
-            using (var g = Graphics.FromImage(screenshot))
-            {
-                if(level)
-                    g.FillRectangle(new SolidBrush(Color.Black), new Rectangle(33, 387, 78, 9));
-
-                if (hpmp)
-                {
-                    g.FillRectangle(new SolidBrush(Color.Black), new Rectangle(33, 404, 78, 12)); //hp
-                    g.FillRectangle(new SolidBrush(Color.Black), new Rectangle(33, 423, 78, 12)); //mp 
-                }
-                
-                if(ac)
-                    g.FillRectangle(new SolidBrush(Color.Black), new Rectangle(30, 445, 24, 9));
-
-                if(hotkeys)
-                    g.FillRectangle(new SolidBrush(Color.Black), new Rectangle(500, 386, 136, 67));
-
-                if (chat)
-                {
-                    var checkColor = Color.FromArgb(231, 219, 222);
-                    var level2 = screenshot.GetPixel(325, 333) == checkColor;
-                    var level3 = screenshot.GetPixel(325, 299) == checkColor;
-                    var level4 = screenshot.GetPixel(325, 265) == checkColor;
-
-                    if (level4)
-                        g.FillRectangle(new SolidBrush(Color.Black), new Rectangle(136, 283, 332, 177));
-                    else if (level3)
-                        g.FillRectangle(new SolidBrush(Color.Black), new Rectangle(136, 318, 332, 141));
-                    else if (level2)
-                        g.FillRectangle(new SolidBrush(Color.Black), new Rectangle(136, 354, 332, 105));
-                    else
-                        g.FillRectangle(new SolidBrush(Color.Black), new Rectangle(136, 389, 332, 71));                    
-                }  
-            }
-
-            return screenshot;
-        } //end BlurImage
-
-        public static void SaveScreenshot(string fileName, Bitmap screenshot)
-        {
-            using (var memory = new MemoryStream())
-            {
-                using (var fs = new FileStream(fileName, FileMode.Create, FileAccess.ReadWrite))
-                {
-                    screenshot.Save(memory, System.Drawing.Imaging.ImageFormat.Png);
-                    var bytes = memory.ToArray();
-                    fs.Write(bytes, 0, bytes.Length);
-                }
-            }
-        } //end SaveScreenshot
+        } //end IsWin8OrHigher 
     } //end class
 } //end namespace

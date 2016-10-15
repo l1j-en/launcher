@@ -105,7 +105,7 @@
     <Compile Include="Controls\OutlineLabel.cs">
       <SubType>Component</SubType>
     </Compile>
-    <Compile Include="DllInjector.cs" />
+    <Compile Include="Injector.cs" />
     <Compile Include="ExtensionMethods.cs" />
     <Compile Include="Helpers.cs" />
     <Compile Include="LauncherForm.cs">
@@ -138,12 +138,8 @@
     <Compile Include="UpdateForm.Designer.cs">
       <DependentUpon>UpdateForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="Utilities\BigInteger.cs" />
-    <Compile Include="Utilities\Encryption.cs" />
-    <Compile Include="Utilities\PacketIO.cs" />
     <Compile Include="Utilities\PakTools.cs" />
-    <Compile Include="WindowsAPI\Kernel32.cs" />
-    <Compile Include="WindowsAPI\User32.cs" />
+    <Compile Include="Utilities\Win32Api.cs" />
     <Compile Include="LineageClient.cs" />
     <EmbeddedResource Include="AddServerForm.resx">
       <DependentUpon>AddServerForm.cs</DependentUpon>

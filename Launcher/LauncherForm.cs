@@ -25,9 +25,7 @@ using System.Threading;
 using System.Windows.Forms;
 using Launcher.Models;
 using Launcher.Utilities;
-using Launcher.WindowsAPI;
 using Microsoft.Win32;
-using System.Reflection;
 
 namespace Launcher
 {
@@ -35,19 +33,12 @@ namespace Launcher
     {
         private const string Version = "2.4.1";
         private readonly bool _isWin8OrHigher;
-        private User32.DevMode _revertResolution;
+        private Win32Api.DevMode _revertResolution;
 
         private readonly object _lockObject = new object();
         private readonly LauncherConfig _config;
 
         private static readonly List<LineageClient> Clients = new List<LineageClient>();
-
-        Socket socketListener;
-        private Socket socket1;
-        private Socket socket2;
-        private Thread thread1;
-        private Thread thread2;
-        private byte xorByte;
 
         public LauncherForm()
         {
@@ -170,112 +161,40 @@ namespace Launcher
                 return;
             }
 
-
-            var ip = (uint)IPAddress.NetworkToHostOrder(BitConverter.ToInt32(ipOrDns[0].GetAddressBytes(), 0));
-            var revertResolution = new User32.DevMode();
+            var revertResolution = new Win32Api.DevMode();
 
             if (settings.Resize)
                 revertResolution = LineageClient.ChangeDisplaySettings(settings.Resolution.Width, settings.Resolution.Height, settings.Resolution.Colour);
             else if (settings.Windowed)
                 revertResolution = LineageClient.ChangeDisplayColour(this._isWin8OrHigher ? 32 : 16);
 
-            var r = new Random();
-            IPEndPoint LocalEP;
-            int port = r.Next(1025, 50000);
-
             try
             {
-                LocalEP = new IPEndPoint(IPAddress.Parse("127.0.0.1"), port);
-                socketListener = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+                int proxyPort = new Random().Next(1025, 50000);
+                IPEndPoint LocalEP = new IPEndPoint(IPAddress.Parse("127.0.0.1"), proxyPort);
+                Socket socketListener = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+
+                socketListener.NoDelay = true;
                 socketListener.Bind(LocalEP);
                 socketListener.Listen(1);
-                socketListener.BeginAccept(new AsyncCallback(ConnectCallback), socketListener);
+
+                Lineage.Run(settings, this._config.InstallDir, settings.ClientBin, (ushort)proxyPort);
+
+                var client = new LineageClient(this._config.KeyName, binFile, this._config.InstallDir, socketListener, ipOrDns[0], server.Port, Clients);
+                client.Initialize();
+
+                lock (this._lockObject)
+                    Clients.Add(client);
+
+                if (!tmrCheckProcess.Enabled)
+                {
+                    this._revertResolution = revertResolution;
+                    this.tmrCheckProcess.Enabled = true;
+                }
             }
             catch
             {
                 Environment.Exit(0);
-            }
-
-            Lineage.Run(settings, this._config.InstallDir, settings.ClientBin, (uint)IPAddress.NetworkToHostOrder(BitConverter.ToInt32(IPAddress.Parse("127.0.0.1").GetAddressBytes(), 0)), (ushort)port);
-
-            var client = new LineageClient(this._config.KeyName, binFile, this._config.InstallDir, Clients);
-            client.Initialize();
-
-            lock (this._lockObject)
-                Clients.Add(client);
-
-            if (!tmrCheckProcess.Enabled)
-            {
-                this._revertResolution = revertResolution;
-                this.tmrCheckProcess.Enabled = true;
-            }
-        }
-
-        private void ConnectCallback(IAsyncResult ar)
-        {
-            try
-            {
-                IPAddress[] ipOrDns = Dns.GetHostAddresses("l1j.zelgo.net");
-
-                socket1 = socketListener.EndAccept(ar);
-                socket2 = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-                socket2.Connect(ipOrDns[0], 46838);
-
-                thread1 = new Thread(Proc1);
-                thread1.IsBackground = true;
-                thread1.Start();
-
-                thread2 = new Thread(Proc2);
-                thread2.IsBackground = true;
-                thread2.Start();
-                socketListener.Close();
-            }
-            catch
-            {
-                Environment.Exit(0);
-            }
-        }
-
-        private void Proc1()
-        {
-            int Size = 0;
-            byte[] data = new byte[100000];
-
-            while (true)
-            {
-                try
-                {
-                    Size = socket2.Receive(data);
-                    if (Size == 0) break;
-                    socket1.Send(data, 0, Size, SocketFlags.None);
-                }
-                catch
-                {
-                    break;
-                }
-            }
-        }
-
-        private void Proc2()
-        {
-            int Size = 0;
-            byte[] data = new byte[100000];
-
-            while (true)
-            {
-                try
-                {
-                    Size = socket1.Receive(data);
-
-                    if (Size == 0)
-                        break;
-
-                    socket2.Send(data, 0, Size, SocketFlags.None);
-                }
-                catch
-                {
-                    break;
-                }
             }
         }
 
@@ -569,6 +488,7 @@ namespace Launcher
                     }
                     catch (Exception)
                     {
+                        Clients[i].Stop();
                         Clients.RemoveAt(i);
                     }
                 }
