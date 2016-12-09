@@ -25,11 +25,19 @@ using System.Text;
 using System.Windows.Forms;
 using Launcher.Models;
 using Microsoft.Win32;
+using Launcher.Utilities;
+using System.Diagnostics;
 
 namespace Launcher
 {
     public static class Helpers
     {
+        public struct WindowsVersion
+        {
+            public static string Windows8 { get { return "Windows 8"; } private set { } }
+            public static string Windows10 { get { return "Windows 10"; } private set { } }
+        };
+
         //this is a delegate used to access the UI from another thread
         private delegate void SetControlPropertyThreadSafeDelegate(Control control, string propertyName, object propertyValue);
         public static void SetControlPropertyThreadSafe(Control control, string propertyName, object propertyValue)
@@ -256,19 +264,34 @@ namespace Launcher
         public static bool IsWin8OrHigher(out string versionName)
         {
             var win8Version = new Version(6, 2, 9200, 0);
-            versionName = "Windows 8";
+            versionName = WindowsVersion.Windows8;
 
             if (Environment.OSVersion.Version.Major >= 10)
-                versionName = "Windows 10";
+                versionName = WindowsVersion.Windows10;
 
             return Environment.OSVersion.Platform == PlatformID.Win32NT &&
                    Environment.OSVersion.Version >= win8Version;
         } //end IsWin8OrHigher
 
-        public static bool IsWin8Orhigher()
+        public static bool IsWin8OrHigher()
         {
             string versionName;
             return IsWin8OrHigher(out versionName);
         } //end IsWin8OrHigher 
+
+        public static bool ApplicationIsActivated(int processId = -1)
+        {
+            var activatedHandle = Win32Api.GetForegroundWindow();
+            if (activatedHandle == IntPtr.Zero)
+                return false;       // No window is currently activated
+
+            if(processId == -1)
+                processId = Process.GetCurrentProcess().Id;
+            
+            int activeProcId;
+            Win32Api.GetWindowThreadProcessId(activatedHandle, out activeProcId);
+
+            return activeProcId == processId;
+        } //end ApplicationIsActivated
     } //end class
 } //end namespace

@@ -16,7 +16,6 @@ using System;
 using System.IO;
 using Launcher.Models;
 using Launcher.Utilities;
-using System.Net.Sockets;
 using System.Net;
 
 namespace Launcher
@@ -42,29 +41,38 @@ namespace Launcher
 
             Injector.GetInstance.BInject(processInfo.DwProcessId, Path.Combine(clientDirectory, "login.dll"));
             Win32Api.ResumeThread(tHandle);
-            System.Threading.Thread.Sleep(1000);
 
             // open the process after it is created so we can add the appropriate flags to write to the process
-            var hndProc = Win32Api.OpenProcess((uint)(Win32Api.ProcessAccessFlags.CreateThread | Win32Api.ProcessAccessFlags.VirtualMemoryOperation
-                                              | Win32Api.ProcessAccessFlags.VirtualMemoryRead | Win32Api.ProcessAccessFlags.VirtualMemoryWrite
-                                              | Win32Api.ProcessAccessFlags.QueryInformation), 0, processInfo.DwProcessId);
+            var hndProc = Win32Api.OpenProcess((uint)(Win32Api.ProcessAccessFlags.CreateProcess | Win32Api.ProcessAccessFlags.VirtualMemoryOperation
+                                                | Win32Api.ProcessAccessFlags.VirtualMemoryRead | Win32Api.ProcessAccessFlags.VirtualMemoryWrite
+                                                | Win32Api.ProcessAccessFlags.QueryInformation), 0, processInfo.DwProcessId);
 
+                
+            Win32Api.SuspendThread(hndProc);
             Win32Api.CloseHandle(tHandle);
 
-            Win32Api.SuspendThread(hndProc);
+            var process = System.Diagnostics.Process.GetProcessById((int)processInfo.DwProcessId);
+            var timeSpan = DateTime.Now - process.StartTime;
+                
+            // wait for the thread to have been running for 1 second before continuing
+            while((DateTime.Now - process.StartTime).TotalSeconds < 0.9)
+            {
+                System.Threading.Thread.Sleep(50);
+            }
+                
 
             // Remove darkness
             if (settings.DisableDark)
             {
                 Win32Api.WriteProcessMemory(hndProc, (IntPtr)0x0046690B, new byte[] { 0x90, 0xE9 }, 2, 0);
             }
-
+                
             // Mob level highlight toggle
             if (settings.EnableMobColours)
             {
                 Win32Api.WriteProcessMemory(hndProc, (IntPtr)0x0046786E, new byte[] { 0x90, 0x90, 0x90, 0x90, 0x90, 0x90 }, 6, 0);
             }
-                
+
             // Don't know if the constant suspend/resume is needed, but WinXP was being funnky and this works
             // Needed to get the lance master poly working properly
             var zelgoPak = File.ReadAllBytes(Path.Combine(clientDirectory, "zelgo.pak"));
@@ -75,8 +83,6 @@ namespace Launcher
 
             Win32Api.CloseHandle(hndProc);
             hndProc = IntPtr.Zero;
-
-            System.Threading.Thread.Sleep(1000);
         }
     }
 }

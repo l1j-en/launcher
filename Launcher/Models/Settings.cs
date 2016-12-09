@@ -23,6 +23,7 @@ namespace Launcher.Models
         public bool Resize { get; set; }
         public bool DisableDark { get; set; }
         public bool EnableMobColours { get; set; }
+        public bool AutoFocusWin10 { get; set; }
 
         public Resolution Resolution { get; set; }
 

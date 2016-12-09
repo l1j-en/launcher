@@ -26,6 +26,7 @@ using System.Windows.Forms;
 using Launcher.Models;
 using Launcher.Utilities;
 using Microsoft.Win32;
+using System.Reflection;
 
 namespace Launcher
 {
@@ -33,6 +34,7 @@ namespace Launcher
     {
         private const string Version = "2.4.1";
         private readonly bool _isWin8OrHigher;
+        private readonly string _windowsVersion;
         private Win32Api.DevMode _revertResolution;
 
         private readonly object _lockObject = new object();
@@ -42,7 +44,7 @@ namespace Launcher
 
         public LauncherForm()
         {
-            var appLocation = @"C:\Program Files (x86)\Lineage Resurrection\";// Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            var appLocation = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             var associatedLaunchers = Helpers.GetAssociatedLaunchers(appLocation);
             
             if (!Helpers.LauncherInLineageDirectory(appLocation))
@@ -84,7 +86,7 @@ namespace Launcher
                 };
             }
 
-            this._isWin8OrHigher = Helpers.IsWin8Orhigher();
+            this._isWin8OrHigher = Helpers.IsWin8OrHigher(out this._windowsVersion);
             InitializeComponent();
         }
 
@@ -103,7 +105,7 @@ namespace Launcher
 
         private void btnSettings_Click(object sender, EventArgs e)
         {
-            var settingsForm = new SettingsForm(this._config, this._isWin8OrHigher);
+            var settingsForm = new SettingsForm(this._config, this._isWin8OrHigher, this._windowsVersion);
             settingsForm.ShowDialog();
             settingsForm.Dispose();
         }
@@ -121,7 +123,7 @@ namespace Launcher
                 
             if (string.IsNullOrEmpty(settings.ClientBin))
             {
-                var settingsDialog = new SettingsForm(this._config, this._isWin8OrHigher);
+                var settingsDialog = new SettingsForm(this._config, this._isWin8OrHigher, this._windowsVersion);
                 var dialogResult = settingsDialog.ShowDialog();
 
                 if (dialogResult != DialogResult.OK)
@@ -199,6 +201,9 @@ namespace Launcher
                     this._revertResolution = revertResolution;
                     this.tmrCheckProcess.Enabled = true;
                 }
+
+                if(settings.AutoFocusWin10)
+                    this.Win10SetClientFocus();
             }
             catch
             {
@@ -215,6 +220,31 @@ namespace Launcher
             statusThread.Start();
         }
 
+        private void Win10SetClientFocus()
+        {
+            // wait until the lineage client has focus, or we've waited 2 seconds
+            for (var i = 0; i < 40 && !Helpers.ApplicationIsActivated(Clients[0].Process.Id); i++)
+                Thread.Sleep(50);
+
+            // bring the launcher back to the foreground
+            var launcherWindowHandle = Process.GetCurrentProcess().MainWindowHandle;
+            Win32Api.ShowWindow(launcherWindowHandle, 9);
+            Win32Api.SetForegroundWindow(launcherWindowHandle);
+
+            // wait until the launcher re-gains focus, or we've waited 2 seconds
+            for (var i = 0; i < 40 && Helpers.ApplicationIsActivated(); i++)
+                Thread.Sleep(50);
+
+            // bring the client back to the foreground
+            var handle = Clients[Clients.Count - 1].Process.MainWindowHandle;
+            for (var i = 0; i < 40 && !Helpers.ApplicationIsActivated(handle.ToInt32()); i++)
+            {
+                Win32Api.ShowWindow(handle, 9);
+                Win32Api.SetForegroundWindow(handle);
+                Thread.Sleep(50);
+            }
+        }
+
         private bool CheckServerStatus(bool threaded)  
         {
             var returnValue = false;
@@ -226,7 +256,6 @@ namespace Launcher
             //like it isn't trying to check
             if (threaded)
             {
-                Helpers.SetControlPropertyThreadSafe(this.btnPlay, "Enabled", false);
                 Thread.Sleep(500);
                 cmbServer.Invoke(new Action(
                     () =>
@@ -237,7 +266,6 @@ namespace Launcher
             }
             else
             {
-                this.btnPlay.Enabled = false;
                 host = this._config.Servers[this.cmbServer.Text].IpOrDns;
                 port = this._config.Servers[this.cmbServer.Text].Port;
             }
@@ -486,6 +514,8 @@ namespace Launcher
         private void tmrCheckProcess_Tick(object sender, EventArgs e)
         {
             var revertResolution = this._revertResolution;
+            var settings = Helpers.LoadSettings(this._config.KeyName);
+
             lock (this._lockObject)
             {
                 for (var i = Clients.Count - 1; i >= 0; i--)
@@ -504,7 +534,10 @@ namespace Launcher
                 if (Clients.Count == 0)
                 {
                     this.tmrCheckProcess.Enabled = false;
-                    LineageClient.ChangeDisplaySettings(revertResolution);
+
+                    if(settings.Resize)
+                        LineageClient.ChangeDisplaySettings(revertResolution);
+
                     tmrCheckProcess.Stop();
                 }
             }
