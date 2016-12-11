@@ -224,7 +224,10 @@ namespace Launcher
         {
             // wait until the lineage client has focus, or we've waited 2 seconds
             for (var i = 0; i < 40 && !Helpers.ApplicationIsActivated(Clients[0].Process.Id); i++)
+            {
                 Thread.Sleep(50);
+            }
+                
 
             // bring the launcher back to the foreground
             var launcherWindowHandle = Process.GetCurrentProcess().MainWindowHandle;
@@ -233,7 +236,10 @@ namespace Launcher
 
             // wait until the launcher re-gains focus, or we've waited 2 seconds
             for (var i = 0; i < 40 && Helpers.ApplicationIsActivated(); i++)
+            {
                 Thread.Sleep(50);
+            }
+                
 
             // bring the client back to the foreground
             var handle = Clients[Clients.Count - 1].Process.MainWindowHandle;

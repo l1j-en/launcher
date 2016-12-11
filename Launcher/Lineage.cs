@@ -53,13 +53,13 @@ namespace Launcher
 
             var process = System.Diagnostics.Process.GetProcessById((int)processInfo.DwProcessId);
             var timeSpan = DateTime.Now - process.StartTime;
-                
-            // wait for the thread to have been running for 1 second before continuing
-            while((DateTime.Now - process.StartTime).TotalSeconds < 0.9)
+
+            // wait for the window to initialize before continuing the injection process
+            while (process.MainWindowTitle != "Lineage Windows Client")
             {
-                System.Threading.Thread.Sleep(50);
+                System.Threading.Thread.Sleep(10);
+                process.Refresh();
             }
-                
 
             // Remove darkness
             if (settings.DisableDark)
