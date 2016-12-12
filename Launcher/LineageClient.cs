@@ -45,6 +45,74 @@ namespace Launcher
 
         public Process Process { get; private set; }
 
+        private static void MoveWindowCallback(IntPtr hWinEventHook, uint iEvent, IntPtr hWnd, int idObject, int idChild, int dwEventThread, int dwmsEventTime)
+        {
+            Win32Api.InvalidateRect(IntPtr.Zero, IntPtr.Zero, true);
+            Win32Api.RedrawWindow(hWinEventHook, IntPtr.Zero, IntPtr.Zero, Win32Api.RedrawWindowFlags.UpdateNow);
+        } //end MoveWindowCallback
+
+        private void ConnectCallback(IAsyncResult ar)
+        {
+            this._clientSocket = _socketListener.EndAccept(ar);
+            this._serverSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            this._serverSocket.NoDelay = true;
+            this._serverSocket.Connect(this._serverIp, this._serverPort);
+
+            this._clientThread = new Thread(Client);
+            this._clientThread.IsBackground = true;
+            this._clientThread.Start();
+
+            this._serverThread = new Thread(Server);
+            this._serverThread.IsBackground = true;
+            this._serverThread.Start();
+            this._socketListener.Close();
+        } //end ConnectCallback
+
+        private void Client()
+        {
+            var size = 0;
+            var data = new byte[100000];
+
+            while (true)
+            {
+                try
+                {
+                    size = this._serverSocket.Receive(data);
+                    if (size == 0)
+                        break;
+
+                    this._clientSocket.Send(data, 0, size, SocketFlags.None);
+                }
+                catch
+                {
+                    break;
+                }
+            }
+        } //end Client
+
+        private void Server()
+        {
+            var size = 0;
+            var data = new byte[100000];
+
+            while (true)
+            {
+                try
+                {
+                    size = this._clientSocket.Receive(data);
+
+                    if (size == 0)
+                        break;
+
+                    this._serverSocket.Send(data, 0, size, SocketFlags.None);
+                }
+                catch
+                {
+                    break;
+                }
+            }
+        } //end Server
+
         public LineageClient(string settingsKeyName, string processName, string clientDirectory, Socket socketListener, IPAddress ip,
             int port, List<LineageClient> hookedWindows)
         {
@@ -56,17 +124,17 @@ namespace Launcher
             this._serverPort = port;
 
             this._socketListener.BeginAccept(new AsyncCallback(ConnectCallback), socketListener);
-        }
+        } //end constructor
 
         public static Win32Api.DevMode ChangeDisplayColour(int bitCount)
         {
             return LineageClient.ChangeDisplaySettings(-1, -1, bitCount);
-        }
+        } //end ChangeDisplayColour
 
         public static Win32Api.DevMode ChangeDisplaySettings(Win32Api.DevMode mode)
         {
             return LineageClient.ChangeDisplaySettings(mode.dmPelsWidth, mode.dmPelsHeight, mode.dmBitsPerPel);
-        }
+        } //end ChangeDisplaySettings
 
         public static List<Resolution> GetResolutions(bool isWin8OrHigher)
         {
@@ -100,7 +168,7 @@ namespace Launcher
             } //end while
 
             return returnValue.OrderByDescending(b => b.Width).ThenByDescending(b => b.Height).ToList();
-        } 
+        } //end GetResolutions
 
         public static Win32Api.DevMode ChangeDisplaySettings(int width, int height, int bitCount)
         {
@@ -171,72 +239,10 @@ namespace Launcher
                     } //end if
                 } //end foreach
 
-                System.Threading.Thread.Sleep(500);
+                Thread.Sleep(500);
                 attempts++;
             } //end while
         } //end Initialize
-
-        private void ConnectCallback(IAsyncResult ar)
-        {
-            this._clientSocket = _socketListener.EndAccept(ar);
-            this._serverSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-            this._serverSocket.NoDelay = true;
-            this._serverSocket.Connect(this._serverIp, this._serverPort);
-
-            this._clientThread = new Thread(Client);
-            this._clientThread.IsBackground = true;
-            this._clientThread.Start();
-
-            this._serverThread = new Thread(Server);
-            this._serverThread.IsBackground = true;
-            this._serverThread.Start();
-            this._socketListener.Close();
-        }
-
-        private void Client()
-        {
-            int Size = 0;
-            byte[] data = new byte[100000];
-
-            while (true)
-            {
-                try
-                {
-                    Size = this._serverSocket.Receive(data);
-                    if (Size == 0)
-                        break;
-
-                    this._clientSocket.Send(data, 0, Size, SocketFlags.None);
-                }
-                catch
-                {
-                    break;
-                }
-            }
-        }
-
-        private void Server()
-        {
-            int Size = 0;
-            byte[] data = new byte[100000];
-
-            while (true)
-            {
-                try
-                {
-                    Size = this._clientSocket.Receive(data);
-
-                    if (Size == 0)
-                        break;
-
-                    this._serverSocket.Send(data, 0, Size, SocketFlags.None);
-                }
-                catch
-                {
-                    break;
-                }
-            }
-        }
 
         public void Stop()
         {
@@ -251,12 +257,6 @@ namespace Launcher
 
             if(this._clientSocket != null)
                 this._clientSocket.Close();
-        }
-
-        private static void MoveWindowCallback(IntPtr hWinEventHook, uint iEvent, IntPtr hWnd, int idObject, int idChild, int dwEventThread, int dwmsEventTime)
-        {
-            Win32Api.InvalidateRect(IntPtr.Zero, IntPtr.Zero, true);
-            Win32Api.RedrawWindow(hWinEventHook, IntPtr.Zero, IntPtr.Zero, Win32Api.RedrawWindowFlags.UpdateNow);
-        } //end MoveWindowCallback
+        } //end Stop
     } //end class
 } //end namespace

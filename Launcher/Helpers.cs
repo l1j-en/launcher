@@ -278,20 +278,5 @@ namespace Launcher
             string versionName;
             return IsWin8OrHigher(out versionName);
         } //end IsWin8OrHigher 
-
-        public static bool ApplicationIsActivated(int processId = -1)
-        {
-            var activatedHandle = Win32Api.GetForegroundWindow();
-            if (activatedHandle == IntPtr.Zero)
-                return false;       // No window is currently activated
-
-            if(processId == -1)
-                processId = Process.GetCurrentProcess().Id;
-            
-            int activeProcId;
-            Win32Api.GetWindowThreadProcessId(activatedHandle, out activeProcId);
-
-            return activeProcId == processId;
-        } //end ApplicationIsActivated
     } //end class
 } //end namespace

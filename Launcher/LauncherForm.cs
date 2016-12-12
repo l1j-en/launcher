@@ -188,26 +188,33 @@ namespace Launcher
                 socketListener.Bind(LocalEP);
                 socketListener.Listen(1);
 
-                Lineage.Run(settings, this._config.InstallDir, settings.ClientBin, (ushort)proxyPort);
-
-                var client = new LineageClient(this._config.KeyName, binFile, this._config.InstallDir, socketListener, ipOrDns[0], server.Port, Clients);
-                client.Initialize();
-
-                lock (this._lockObject)
-                    Clients.Add(client);
-
-                if (!tmrCheckProcess.Enabled)
+                if(Lineage.Run(settings, this._config.InstallDir, settings.ClientBin, (ushort)proxyPort))
                 {
-                    this._revertResolution = revertResolution;
-                    this.tmrCheckProcess.Enabled = true;
-                }
+                    var client = new LineageClient(this._config.KeyName, binFile, this._config.InstallDir, socketListener, ipOrDns[0], server.Port, Clients);
+                    client.Initialize();
 
-                if(settings.AutoFocusWin10)
-                    this.Win10SetClientFocus();
+                    lock (this._lockObject)
+                        Clients.Add(client);
+
+                    if (!tmrCheckProcess.Enabled)
+                    {
+                        this._revertResolution = revertResolution;
+                        this.tmrCheckProcess.Enabled = true;
+                    }
+
+                    if (!settings.Windowed && this._isWin8OrHigher)
+                        this.Win10SetClientFocus();
+                } else
+                {
+                    MessageBox.Show("There was an error injecting into the Lineage client. Try running it again!", "Error Launching!",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
             }
-            catch
+            catch(Exception ex)
             {
-                Environment.Exit(0);
+                MessageBox.Show("An unknown error occurred launching the Lineage client. Try running it again!", "Error Launching!",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(ex.Message);
             }
         }
 
@@ -222,33 +229,8 @@ namespace Launcher
 
         private void Win10SetClientFocus()
         {
-            // wait until the lineage client has focus, or we've waited 2 seconds
-            for (var i = 0; i < 40 && !Helpers.ApplicationIsActivated(Clients[0].Process.Id); i++)
-            {
-                Thread.Sleep(50);
-            }
-                
-
-            // bring the launcher back to the foreground
-            var launcherWindowHandle = Process.GetCurrentProcess().MainWindowHandle;
-            Win32Api.ShowWindow(launcherWindowHandle, 9);
-            Win32Api.SetForegroundWindow(launcherWindowHandle);
-
-            // wait until the launcher re-gains focus, or we've waited 2 seconds
-            for (var i = 0; i < 40 && Helpers.ApplicationIsActivated(); i++)
-            {
-                Thread.Sleep(50);
-            }
-                
-
-            // bring the client back to the foreground
-            var handle = Clients[Clients.Count - 1].Process.MainWindowHandle;
-            for (var i = 0; i < 40 && !Helpers.ApplicationIsActivated(handle.ToInt32()); i++)
-            {
-                Win32Api.ShowWindow(handle, 9);
-                Win32Api.SetForegroundWindow(handle);
-                Thread.Sleep(50);
-            }
+            Win32Api.ShowWindow(Clients[Clients.Count - 1].Process.MainWindowHandle, 0); // hide
+            Win32Api.ShowWindow(Clients[Clients.Count - 1].Process.MainWindowHandle, 5); // show
         }
 
         private bool CheckServerStatus(bool threaded)  
@@ -567,8 +549,7 @@ namespace Launcher
             {
                 MessageBox.Show("You cannot close the launcher while a client is running!", "Client Still Running!",
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
-            } else
-            {
+            } else {
                 Application.Exit();
             }
         }

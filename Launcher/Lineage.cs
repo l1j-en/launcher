@@ -24,14 +24,13 @@ namespace Launcher
     {
         private static uint localHost = (uint)IPAddress.NetworkToHostOrder(BitConverter.ToInt32(IPAddress.Parse("127.0.0.1").GetAddressBytes(), 0));
 
-        public static void Run(Settings settings, string clientDirectory, string bin, ushort port)
+        public static bool Run(Settings settings, string clientDirectory, string bin, ushort port)
         {
             var binpath = Path.Combine(clientDirectory, bin);
 
             var startupInfo = new Win32Api.Startupinfo();
             var processInfo = new Win32Api.ProcessInformation();
 
-            //TODO -- what to do if !success?
             var success = Win32Api.CreateProcess(binpath, string.Format("\"{0}\" {1} {2}", binpath.Trim(), localHost, port),
                 IntPtr.Zero, IntPtr.Zero, false,
                 Win32Api.ProcessCreationFlags.CreateSuspended | Win32Api.ProcessCreationFlags.CreateDefaultErrorMode,
@@ -54,13 +53,18 @@ namespace Launcher
             var process = System.Diagnostics.Process.GetProcessById((int)processInfo.DwProcessId);
             var timeSpan = DateTime.Now - process.StartTime;
 
-            // wait for the window to initialize before continuing the injection process
-            while (process.MainWindowTitle != "Lineage Windows Client")
+            try
             {
-                System.Threading.Thread.Sleep(10);
-                process.Refresh();
+                // wait for the window to initialize before continuing the injection process
+                while (process.MainWindowTitle != "Lineage Windows Client")
+                {
+                    System.Threading.Thread.Sleep(5);
+                    process.Refresh();
+                }
+            } catch {
+                return false;
             }
-
+            
             // Remove darkness
             if (settings.DisableDark)
             {
@@ -83,6 +87,8 @@ namespace Launcher
 
             Win32Api.CloseHandle(hndProc);
             hndProc = IntPtr.Zero;
+
+            return true;
         }
     }
 }
