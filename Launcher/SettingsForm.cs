@@ -53,8 +53,7 @@ namespace Launcher
                 ClientBin = this.cmbBin.Text,
                 DisableDark = this.chkDisableDark.Checked,
                 EnableMobColours = this.chkMobColours.Checked,
-                MusicType = this.cmbMusic.SelectedItem.ToString(),
-                AutoFocusWin10 = this.chkAutoFocus.Checked
+                MusicType = this.cmbMusic.SelectedItem.ToString()
             };
 
             settings.Resolution = this.chkResize.Checked ? (Resolution) this.cmbResolution.SelectedItem : null;
@@ -86,9 +85,6 @@ namespace Launcher
             var savedSettings = Helpers.LoadSettings(this._config.KeyName) ?? new Settings();
             var resolutions = LineageClient.GetResolutions(this._isWin8OrHigher);
 
-            if (!this._isWin8OrHigher)
-                this.chkAutoFocus.Enabled = false;
-
             if (resolutions.Count > 0)
             {
                 this.cmbResolution.Items.AddRange(resolutions.ToArray());
@@ -104,7 +100,6 @@ namespace Launcher
                 this.chkResize.Enabled = false;
             }
 
-            this.chkAutoFocus.Checked = savedSettings.AutoFocusWin10;
             this.chkResize.Checked = savedSettings.Resize;
             this.chkWindowed.Checked = savedSettings.Windowed;
 
@@ -146,9 +141,6 @@ namespace Launcher
             if (!this.chkWindowed.Checked)
             {
                 this.chkResize.Checked = false;
-
-                if (this._isWin8OrHigher && this._windowsVersion == Helpers.WindowsVersion.Windows10)
-                    this.chkAutoFocus.Enabled = true;
             }
             else
             {
@@ -167,12 +159,6 @@ namespace Launcher
                             @" it into 16 bit colours. This is required for Windows 8 or Higher. Do you wish to continue?", @"Continue?",
                             MessageBoxButtons.YesNo, MessageBoxIcon.Asterisk) != DialogResult.Yes)
                             this.chkWindowed.Checked = false;
-                    }
-
-                    if (this._isWin8OrHigher && this._windowsVersion == Helpers.WindowsVersion.Windows10)
-                    {
-                        this.chkAutoFocus.Checked = false;
-                        this.chkAutoFocus.Enabled = false;
                     }
                 }
             }

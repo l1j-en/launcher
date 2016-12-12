@@ -53,7 +53,6 @@ namespace Launcher
             this.lblBin = new System.Windows.Forms.Label();
             this.folderBrowserDialog = new System.Windows.Forms.FolderBrowserDialog();
             this.btnClose = new Launcher.Controls.GlassButton();
-            this.chkAutoFocus = new System.Windows.Forms.CheckBox();
             this.grpWindowed.SuspendLayout();
             this.grpResolution.SuspendLayout();
             this.tabSettings.SuspendLayout();
@@ -107,13 +106,12 @@ namespace Launcher
             // 
             // grpWindowed
             // 
-            this.grpWindowed.Controls.Add(this.chkAutoFocus);
             this.grpWindowed.Controls.Add(this.grpResolution);
             this.grpWindowed.Controls.Add(this.chkResize);
             this.grpWindowed.Controls.Add(this.chkWindowed);
             this.grpWindowed.Location = new System.Drawing.Point(6, 6);
             this.grpWindowed.Name = "grpWindowed";
-            this.grpWindowed.Size = new System.Drawing.Size(276, 149);
+            this.grpWindowed.Size = new System.Drawing.Size(276, 124);
             this.grpWindowed.TabIndex = 5;
             this.grpWindowed.TabStop = false;
             this.grpWindowed.Text = "Window Settings";
@@ -122,7 +120,7 @@ namespace Launcher
             // 
             this.grpResolution.Controls.Add(this.cmbResolution);
             this.grpResolution.Enabled = false;
-            this.grpResolution.Location = new System.Drawing.Point(16, 90);
+            this.grpResolution.Location = new System.Drawing.Point(16, 68);
             this.grpResolution.Name = "grpResolution";
             this.grpResolution.Size = new System.Drawing.Size(248, 43);
             this.grpResolution.TabIndex = 3;
@@ -142,7 +140,7 @@ namespace Launcher
             // 
             this.chkResize.AutoSize = true;
             this.chkResize.Enabled = false;
-            this.chkResize.Location = new System.Drawing.Point(18, 64);
+            this.chkResize.Location = new System.Drawing.Point(18, 42);
             this.chkResize.Name = "chkResize";
             this.chkResize.Size = new System.Drawing.Size(126, 17);
             this.chkResize.TabIndex = 2;
@@ -153,7 +151,7 @@ namespace Launcher
             // chkWindowed
             // 
             this.chkWindowed.AutoSize = true;
-            this.chkWindowed.Location = new System.Drawing.Point(18, 41);
+            this.chkWindowed.Location = new System.Drawing.Point(18, 19);
             this.chkWindowed.Name = "chkWindowed";
             this.chkWindowed.Size = new System.Drawing.Size(107, 17);
             this.chkWindowed.TabIndex = 0;
@@ -317,16 +315,6 @@ namespace Launcher
             this.btnClose.TabStop = false;
             this.btnClose.Click += new System.EventHandler(this.btnClose_Click);
             // 
-            // chkAutoFocus
-            // 
-            this.chkAutoFocus.AutoSize = true;
-            this.chkAutoFocus.Location = new System.Drawing.Point(18, 18);
-            this.chkAutoFocus.Name = "chkAutoFocus";
-            this.chkAutoFocus.Size = new System.Drawing.Size(176, 17);
-            this.chkAutoFocus.TabIndex = 4;
-            this.chkAutoFocus.Text = "Auto-Focus Client (Win 10 Only)";
-            this.chkAutoFocus.UseVisualStyleBackColor = true;
-            // 
             // SettingsForm
             // 
             this.AcceptButton = this.btnSave;
@@ -390,6 +378,5 @@ namespace Launcher
         private System.Windows.Forms.CheckBox chkDisableDark;
         private System.Windows.Forms.GroupBox grpMobColours;
         private System.Windows.Forms.CheckBox chkMobColours;
-        private System.Windows.Forms.CheckBox chkAutoFocus;
     }
 }

@@ -210,11 +210,10 @@ namespace Launcher
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
-            catch(Exception ex)
+            catch
             {
                 MessageBox.Show("An unknown error occurred launching the Lineage client. Try running it again!", "Error Launching!",
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
-                MessageBox.Show(ex.Message);
             }
         }
 
@@ -291,7 +290,7 @@ namespace Launcher
                             Helpers.SetControlPropertyThreadSafe(this.btnPlay, "Enabled", true);
                     }
                 }
-                catch (Exception)
+                catch
                 {
                     Helpers.SetControlPropertyThreadSafe(this.lblServerStatus, "Text", "OFFLINE");
                     Helpers.SetControlPropertyThreadSafe(this.lblServerStatus, "ForeColor", Color.Red);
