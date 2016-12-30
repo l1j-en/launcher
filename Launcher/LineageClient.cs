@@ -53,19 +53,24 @@ namespace Launcher
 
         private void ConnectCallback(IAsyncResult ar)
         {
-            this._clientSocket = _socketListener.EndAccept(ar);
-            this._serverSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-            this._serverSocket.NoDelay = true;
-            this._serverSocket.Connect(this._serverIp, this._serverPort);
+            try
+            {
+                this._clientSocket = _socketListener.EndAccept(ar);
+                this._serverSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+                this._serverSocket.NoDelay = true;
+                this._serverSocket.Connect(this._serverIp, this._serverPort);
 
-            this._clientThread = new Thread(Client);
-            this._clientThread.IsBackground = true;
-            this._clientThread.Start();
+                this._clientThread = new Thread(Client);
+                this._clientThread.IsBackground = true;
+                this._clientThread.Start();
 
-            this._serverThread = new Thread(Server);
-            this._serverThread.IsBackground = true;
-            this._serverThread.Start();
-            this._socketListener.Close();
+                this._serverThread = new Thread(Server);
+                this._serverThread.IsBackground = true;
+                this._serverThread.Start();
+                this._socketListener.Close();
+            } catch {
+                this.Stop();
+            }
         } //end ConnectCallback
 
         private void Client()
