@@ -23,14 +23,16 @@ namespace Launcher
     public partial class SettingsForm : Form
     {
         private readonly bool _isWin8OrHigher;
+        private readonly string _windowsVersion;
         private bool _initialLoad = true;
         private readonly LauncherConfig _config;
 
-        public SettingsForm(LauncherConfig config, bool isWin8OrHigher)
+        public SettingsForm(LauncherConfig config, bool isWin8OrHigher, string windowsVersion)
         {
             InitializeComponent();
             this._config = config;
             this._isWin8OrHigher = isWin8OrHigher;
+            this._windowsVersion = windowsVersion;
         }
 
         private void btnClose_Click(object sender, EventArgs e)
@@ -97,7 +99,7 @@ namespace Launcher
 
                 this.chkResize.Enabled = false;
             }
-                
+
             this.chkResize.Checked = savedSettings.Resize;
             this.chkWindowed.Checked = savedSettings.Windowed;
 

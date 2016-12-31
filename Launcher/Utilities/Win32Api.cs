@@ -14,10 +14,12 @@
  */
 using System;
 using System.Runtime.InteropServices;
+using System.Text;
+using System.Windows.Forms;
 
-namespace Launcher.WindowsAPI
+namespace Launcher.Utilities
 {
-    public static class Kernel32
+    public class Win32Api
     {
         #region VirtualAllocEx flags
         [Flags]
@@ -109,6 +111,93 @@ namespace Launcher.WindowsAPI
             CreateSuspended = 0x00000004
         }
 
+        public const int HSHELL_WINDOWCREATED = 1;
+
+        public struct DevMode
+        {
+            private const int CCHDEVICENAME = 0x20;
+            private const int CCHFORMNAME = 0x20;
+            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 0x20)]
+            public string dmDeviceName;
+            public short dmSpecVersion;
+            public short dmDriverVersion;
+            public short dmSize;
+            public short dmDriverExtra;
+            public int dmFields;
+            public int dmPositionX;
+            public int dmPositionY;
+            public ScreenOrientation dmDisplayOrientation;
+            public int dmDisplayFixedOutput;
+            public short dmColor;
+            public short dmDuplex;
+            public short dmYResolution;
+            public short dmTTOption;
+            public short dmCollate;
+            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 0x20)]
+            public string dmFormName;
+            public short dmLogPixels;
+            public int dmBitsPerPel;
+            public int dmPelsWidth;
+            public int dmPelsHeight;
+            public int dmDisplayFlags;
+            public int dmDisplayFrequency;
+            public int dmICMMethod;
+            public int dmICMIntent;
+            public int dmMediaType;
+            public int dmDitherType;
+            public int dmReserved1;
+            public int dmReserved2;
+            public int dmPanningWidth;
+            public int dmPanningHeight;
+        }
+
+        [Flags]
+        public enum WindowLongFlags
+        {
+            WsClipsiblings = 0x04000000,
+            WsClipchildren = 0x02000000,
+            WsVisible = 0x10000000,
+            WsDisabled = 0x08000000,
+            WsMinimize = 0x20000000,
+            WsMaximize = 0x01000000,
+            WsCaption = 0x00C00000,
+            WsBorder = 0x00800000,
+            WsDlgframe = 0x00400000,
+            WsVscroll = 0x00200000,
+            WsHscroll = 0x00100000,
+            WsSysmenu = 0x00080000,
+            WsThickframe = 0x00040000,
+            WsMinimizebox = 0x00020000,
+            WsMaximizebox = 0x00010000,
+            GwlStyle = -16
+        }
+
+        [Flags]
+        public enum MenuFlags
+        {
+            MfRemove = 0x1000,
+            MfByposition = 0x400
+        }
+
+        [Flags]
+        public enum RedrawWindowFlags : uint
+        {
+            Invalidate = 0x1,
+            InternalPaint = 0x2,
+            Erase = 0x4,
+            Validate = 0x8,
+            NoInternalPaint = 0x10,
+            NoErase = 0x20,
+            NoChildren = 0x40,
+            AllChildren = 0x80,
+            UpdateNow = 0x100,
+            EraseNow = 0x200,
+            Frame = 0x400,
+            NoFrame = 0x800
+        }        
+
+        #region kernel32
+
         [DllImport("kernel32.dll", SetLastError = true)]
         public static extern IntPtr OpenProcess(uint dwDesiredAccess, int bInheritHandle, uint dwProcessId);
 
@@ -145,5 +234,46 @@ namespace Launcher.WindowsAPI
 
         [DllImport("kernel32.dll")]
         public static extern uint SuspendThread(IntPtr hThread);
+        #endregion
+
+        #region user32
+        //Sets window attributes
+        [DllImport("user32.dll")]
+        public static extern int SetWindowLong(IntPtr hWnd, int nIndex, int dwNewLong);
+
+        //Gets window attributes
+        [DllImport("user32.dll")]
+        public static extern int GetWindowLong(IntPtr hWnd, int nIndex);
+
+        [DllImport("user32.dll")]
+        public static extern IntPtr GetMenu(IntPtr hWnd);
+
+        [DllImport("user32.dll")]
+        public static extern int GetMenuItemCount(IntPtr hMenu);
+
+        [DllImport("user32.dll")]
+        public static extern bool DrawMenuBar(IntPtr hWnd);
+
+        [DllImport("user32.dll")]
+        public static extern bool RemoveMenu(IntPtr hMenu, uint uPosition, uint uFlags);
+
+        [DllImport("user32.dll")]
+        public static extern bool EnumDisplaySettings(string lpszDeviceName, int iModeNum, ref DevMode lpDevMode);
+
+        [DllImport("user32.dll")]
+        public static extern int ChangeDisplaySettings([In, Out]ref DevMode lpDevMode, [param: MarshalAs(UnmanagedType.U4)] uint dwflags);
+
+        [DllImport("user32.dll")]
+        public static extern bool RedrawWindow(IntPtr hWnd, IntPtr lprcUpdate, IntPtr hrgnUpdate, RedrawWindowFlags flags);
+
+        [DllImport("user32.dll")]
+        public static extern bool InvalidateRect(IntPtr hWnd, IntPtr lpRect, bool bErase);
+
+        [DllImport("user32.dll")]
+        public static extern int GetClassName(System.IntPtr hWnd, StringBuilder lpClassName, int nMaxCount);
+
+        [DllImport("user32.dll")]
+        public static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+        #endregion
     }
 }

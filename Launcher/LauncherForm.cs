@@ -25,8 +25,6 @@ using System.Threading;
 using System.Windows.Forms;
 using Launcher.Models;
 using Launcher.Utilities;
-using Launcher.Utilities.Proxy;
-using Launcher.WindowsAPI;
 using Microsoft.Win32;
 using System.Reflection;
 
@@ -34,14 +32,15 @@ namespace Launcher
 {
     public partial class LauncherForm : Form
     {
-        private const string Version = "2.3";
+        private const string Version = "2.4.1";
         private readonly bool _isWin8OrHigher;
-        private User32.DevMode _revertResolution;
+        private readonly string _windowsVersion;
+        private Win32Api.DevMode _revertResolution;
 
         private readonly object _lockObject = new object();
         private readonly LauncherConfig _config;
 
-        private static readonly List<LineageClient> Clients = new List<LineageClient>(); 
+        private static readonly List<LineageClient> Clients = new List<LineageClient>();
 
         public LauncherForm()
         {
@@ -87,18 +86,26 @@ namespace Launcher
                 };
             }
 
-            this._isWin8OrHigher = Helpers.IsWin8Orhigher();
+            this._isWin8OrHigher = Helpers.IsWin8OrHigher(out this._windowsVersion);
             InitializeComponent();
         }
 
         private void btnClose_Click(object sender, EventArgs e)
         {
-            Application.Exit();
+            if(Clients.Count > 0)
+            {
+                systemIcon.Visible = true;
+                systemIcon.ShowBalloonTip(500);
+                this.Hide();
+            } else
+            {
+                Application.Exit();
+            }
         }
 
         private void btnSettings_Click(object sender, EventArgs e)
         {
-            var settingsForm = new SettingsForm(this._config, this._isWin8OrHigher);
+            var settingsForm = new SettingsForm(this._config, this._isWin8OrHigher, this._windowsVersion);
             settingsForm.ShowDialog();
             settingsForm.Dispose();
         }
@@ -116,7 +123,7 @@ namespace Launcher
                 
             if (string.IsNullOrEmpty(settings.ClientBin))
             {
-                var settingsDialog = new SettingsForm(this._config, this._isWin8OrHigher);
+                var settingsDialog = new SettingsForm(this._config, this._isWin8OrHigher, this._windowsVersion);
                 var dialogResult = settingsDialog.ShowDialog();
 
                 if (dialogResult != DialogResult.OK)
@@ -140,49 +147,74 @@ namespace Launcher
 
         private void playButton_Click(object sender, EventArgs e)
         {
-            var selectedServer = this._config.Servers[this.cmbServer.SelectedItem.ToString()];
-
-            var proxyServer = new ProxyServer();
-            proxyServer.LocalAddress = "127.0.0.1";
-            proxyServer.LocalPort = new Random().Next(30000, 65000);
-
-            proxyServer.RemoteAddress = selectedServer.IpOrDns;
-            proxyServer.RemotePort = selectedServer.Port;
-            proxyServer.Start();
-
-            this.Launch(proxyServer);
+            this.Launch(this._config.Servers[this.cmbServer.SelectedItem.ToString()]);
         }
 
-        private void Launch(ProxyServer proxyServer)
+        private void Launch(Server server)
         {
             var settings = Helpers.LoadSettings(this._config.KeyName);
             var binFile = Path.GetFileNameWithoutExtension(settings.ClientBin);
             var binpath = Path.Combine(this._config.InstallDir, binFile);
 
-            var ip = (uint)IPAddress.NetworkToHostOrder(BitConverter.ToInt32(IPAddress.Parse("127.0.0.1").GetAddressBytes(), 0));
-            var revertResolution = new User32.DevMode();
+            IPAddress[] ipOrDns;
+
+            try
+            {
+                ipOrDns = Dns.GetHostAddresses(server.IpOrDns);
+            }
+            catch (SocketException)
+            {
+                MessageBox.Show(@"There was an error connecting to the server. Check the forums for any issues.",
+                    @"Error Connecting!",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+                this.CheckServerStatus(false);
+                return;
+            }
+
+            var revertResolution = new Win32Api.DevMode();
 
             if (settings.Resize)
                 revertResolution = LineageClient.ChangeDisplaySettings(settings.Resolution.Width, settings.Resolution.Height, settings.Resolution.Colour);
             else if (settings.Windowed)
                 revertResolution = LineageClient.ChangeDisplayColour(this._isWin8OrHigher ? 32 : 16);
 
-            Lineage.Run(settings, this._config.InstallDir, settings.ClientBin, ip, (ushort)proxyServer.LocalPort);
-
-            var client = new LineageClient(this._config.KeyName, binFile, this._config.InstallDir, proxyServer, Clients);
-            client.Initialize();
-
-            lock (this._lockObject)
-                Clients.Add(client);
-
-            if (!tmrCheckProcess.Enabled)
+            try
             {
-                this._revertResolution = revertResolution;
-                this.tmrCheckProcess.Enabled = true;
-            }
+                int proxyPort = new Random().Next(1025, 50000);
+                IPEndPoint LocalEP = new IPEndPoint(IPAddress.Parse("127.0.0.1"), proxyPort);
+                Socket socketListener = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 
-            if (!tmrProxyStatus.Enabled)
-                tmrProxyStatus.Enabled = true;
+                socketListener.NoDelay = true;
+                socketListener.Bind(LocalEP);
+                socketListener.Listen(1);
+
+                if(Lineage.Run(settings, this._config.InstallDir, settings.ClientBin, (ushort)proxyPort))
+                {
+                    var client = new LineageClient(this._config.KeyName, binFile, this._config.InstallDir, socketListener, ipOrDns[0], server.Port, Clients);
+                    client.Initialize();
+
+                    lock (this._lockObject)
+                        Clients.Add(client);
+
+                    if (!tmrCheckProcess.Enabled)
+                    {
+                        this._revertResolution = revertResolution;
+                        this.tmrCheckProcess.Enabled = true;
+                    }
+
+                    if (!settings.Windowed && this._isWin8OrHigher)
+                        this.Win10SetClientFocus();
+                } else
+                {
+                    MessageBox.Show("There was an error injecting into the Lineage client. Try running it again!", "Error Launching!",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+            catch
+            {
+                MessageBox.Show("An unknown error occurred launching the Lineage client. Try running it again!", "Error Launching!",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         private void cmbServer_SelectedIndexChanged(object sender, EventArgs e)
@@ -192,6 +224,12 @@ namespace Launcher
 
             var statusThread = new Thread(() => this.CheckServerStatus(true)) { IsBackground = true };
             statusThread.Start();
+        }
+
+        private void Win10SetClientFocus()
+        {
+            Win32Api.ShowWindow(Clients[Clients.Count - 1].Process.MainWindowHandle, 0); // hide
+            Win32Api.ShowWindow(Clients[Clients.Count - 1].Process.MainWindowHandle, 5); // show
         }
 
         private bool CheckServerStatus(bool threaded)  
@@ -205,7 +243,6 @@ namespace Launcher
             //like it isn't trying to check
             if (threaded)
             {
-                Helpers.SetControlPropertyThreadSafe(this.btnPlay, "Enabled", false);
                 Thread.Sleep(500);
                 cmbServer.Invoke(new Action(
                     () =>
@@ -216,7 +253,6 @@ namespace Launcher
             }
             else
             {
-                this.btnPlay.Enabled = false;
                 host = this._config.Servers[this.cmbServer.Text].IpOrDns;
                 port = this._config.Servers[this.cmbServer.Text].Port;
             }
@@ -254,7 +290,7 @@ namespace Launcher
                             Helpers.SetControlPropertyThreadSafe(this.btnPlay, "Enabled", true);
                     }
                 }
-                catch (Exception)
+                catch
                 {
                     Helpers.SetControlPropertyThreadSafe(this.lblServerStatus, "Text", "OFFLINE");
                     Helpers.SetControlPropertyThreadSafe(this.lblServerStatus, "ForeColor", Color.Red);
@@ -465,6 +501,8 @@ namespace Launcher
         private void tmrCheckProcess_Tick(object sender, EventArgs e)
         {
             var revertResolution = this._revertResolution;
+            var settings = Helpers.LoadSettings(this._config.KeyName);
+
             lock (this._lockObject)
             {
                 for (var i = Clients.Count - 1; i >= 0; i--)
@@ -475,7 +513,7 @@ namespace Launcher
                     }
                     catch (Exception)
                     {
-                        Clients[i].ProxyServer.Stop();
+                        Clients[i].Stop();
                         Clients.RemoveAt(i);
                     }
                 }
@@ -483,28 +521,35 @@ namespace Launcher
                 if (Clients.Count == 0)
                 {
                     this.tmrCheckProcess.Enabled = false;
-                    LineageClient.ChangeDisplaySettings(revertResolution);
+
+                    if(settings.Resize)
+                        LineageClient.ChangeDisplaySettings(revertResolution);
+
                     tmrCheckProcess.Stop();
-                    tmrProxyStatus.Stop();
                 }
             }
         }
 
-        private void tmrProxyStatus_Tick(object sender, EventArgs e)
+        private void systemIcon_MouseDoubleClick(object sender, MouseEventArgs e)
         {
-            var currentEpoch = (int)(DateTime.UtcNow - new DateTime(1970, 1, 1)).TotalSeconds;
+            systemIcon.Visible = false;
+            this.Show();
+        }
 
-            lock (this._lockObject)
+        private void Restore_Click(object sender, EventArgs e)
+        {
+            systemIcon.Visible = false;
+            this.Show();
+        }
+
+        private void Close_Click(object sender, EventArgs e)
+        {
+            if(Clients.Count > 0)
             {
-                foreach (var client in Clients)
-                {
-                    // if it has been more than 30 minutes with no packet sent from the client
-                    // then send a keepalive packet
-                    var lastSent = client.ProxyServer.CheckLastSent();
-
-                    if (lastSent > -1 && currentEpoch - lastSent > 1800)
-                        client.ProxyServer.SendKeepAlive();
-                }
+                MessageBox.Show("You cannot close the launcher while a client is running!", "Client Still Running!",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+            } else {
+                Application.Exit();
             }
         }
     } //end class

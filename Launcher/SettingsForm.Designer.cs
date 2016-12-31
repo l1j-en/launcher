@@ -111,7 +111,7 @@ namespace Launcher
             this.grpWindowed.Controls.Add(this.chkWindowed);
             this.grpWindowed.Location = new System.Drawing.Point(6, 6);
             this.grpWindowed.Name = "grpWindowed";
-            this.grpWindowed.Size = new System.Drawing.Size(276, 140);
+            this.grpWindowed.Size = new System.Drawing.Size(276, 124);
             this.grpWindowed.TabIndex = 5;
             this.grpWindowed.TabStop = false;
             this.grpWindowed.Text = "Window Settings";
@@ -378,6 +378,5 @@ namespace Launcher
         private System.Windows.Forms.CheckBox chkDisableDark;
         private System.Windows.Forms.GroupBox grpMobColours;
         private System.Windows.Forms.CheckBox chkMobColours;
-
     }
 }
