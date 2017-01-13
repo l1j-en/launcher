@@ -24,14 +24,20 @@ namespace Launcher
     {
         private static uint localHost = (uint)IPAddress.NetworkToHostOrder(BitConverter.ToInt32(IPAddress.Parse("127.0.0.1").GetAddressBytes(), 0));
 
-        public static bool Run(Settings settings, string clientDirectory, string bin, ushort port)
+        public static bool Run(Settings settings, string clientDirectory, string bin, ushort port, IPAddress serverIp)
         {
             var binpath = Path.Combine(clientDirectory, bin);
+            uint connectionIp;
+
+            if (serverIp == null)
+                connectionIp = localHost;
+            else
+                connectionIp = (uint)IPAddress.NetworkToHostOrder(BitConverter.ToInt32(serverIp.GetAddressBytes(), 0));
 
             var startupInfo = new Win32Api.Startupinfo();
             var processInfo = new Win32Api.ProcessInformation();
 
-            var success = Win32Api.CreateProcess(binpath, string.Format("\"{0}\" {1} {2}", binpath.Trim(), localHost, port),
+            var success = Win32Api.CreateProcess(binpath, string.Format("\"{0}\" {1} {2}", binpath.Trim(), connectionIp, port),
                 IntPtr.Zero, IntPtr.Zero, false,
                 Win32Api.ProcessCreationFlags.CreateSuspended | Win32Api.ProcessCreationFlags.CreateDefaultErrorMode,
                 IntPtr.Zero, null, ref startupInfo, out processInfo);

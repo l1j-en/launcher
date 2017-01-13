@@ -42,6 +42,7 @@ namespace Launcher
         private Thread _serverThread;
         private readonly int _serverPort;
         private readonly IPAddress _serverIp;
+        private readonly bool _disableProxy;
 
         public Process Process { get; private set; }
 
@@ -119,7 +120,7 @@ namespace Launcher
         } //end Server
 
         public LineageClient(string settingsKeyName, string processName, string clientDirectory, Socket socketListener, IPAddress ip,
-            int port, List<LineageClient> hookedWindows)
+            int port, List<LineageClient> hookedWindows, bool disableProxy)
         {
             this._processName = processName;
             _hookedWindows = hookedWindows;
@@ -127,8 +128,10 @@ namespace Launcher
             this._socketListener = socketListener;
             this._serverIp = ip;
             this._serverPort = port;
+            this._disableProxy = disableProxy;
 
-            this._socketListener.BeginAccept(new AsyncCallback(ConnectCallback), socketListener);
+            if(!this._disableProxy)
+                this._socketListener.BeginAccept(new AsyncCallback(ConnectCallback), socketListener);
         } //end constructor
 
         public static Win32Api.DevMode ChangeDisplayColour(int bitCount)
@@ -219,6 +222,7 @@ namespace Launcher
                         (_hookedWindows.Count > 0 && _hookedWindows.All(b => b.Process.Id == proc.Id)))
                         continue;
 
+                    Thread.Sleep(500);
                     var pFoundWindow = proc.MainWindowHandle;
                     var procHandleId = pFoundWindow.ToInt32();
                     if (procHandleId > 0)

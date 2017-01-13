@@ -28,5 +28,7 @@ namespace Launcher.Models
 
         public string MusicType { get; set; }
         public string ClientBin { get; set; }
+
+        public bool DisableProxy { get; set; }
     }
 }

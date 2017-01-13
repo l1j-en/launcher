@@ -53,7 +53,8 @@ namespace Launcher
                 ClientBin = this.cmbBin.Text,
                 DisableDark = this.chkDisableDark.Checked,
                 EnableMobColours = this.chkMobColours.Checked,
-                MusicType = this.cmbMusic.SelectedItem.ToString()
+                MusicType = this.cmbMusic.SelectedItem.ToString(),
+                DisableProxy = !this.chkDisableNagle.Checked
             };
 
             settings.Resolution = this.chkResize.Checked ? (Resolution) this.cmbResolution.SelectedItem : null;
@@ -105,6 +106,8 @@ namespace Launcher
 
             this.chkDisableDark.Checked = savedSettings.DisableDark;
             this.chkMobColours.Checked = savedSettings.EnableMobColours;
+
+            this.chkDisableNagle.Checked = !savedSettings.DisableProxy;
 
             if (!string.IsNullOrEmpty(savedSettings.ClientBin))
             {

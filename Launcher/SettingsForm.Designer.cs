@@ -49,6 +49,7 @@ namespace Launcher
             this.chkDisableDark = new System.Windows.Forms.CheckBox();
             this.tabClient = new System.Windows.Forms.TabPage();
             this.grpClient = new System.Windows.Forms.GroupBox();
+            this.chkDisableNagle = new System.Windows.Forms.CheckBox();
             this.cmbBin = new System.Windows.Forms.ComboBox();
             this.lblBin = new System.Windows.Forms.Label();
             this.folderBrowserDialog = new System.Windows.Forms.FolderBrowserDialog();
@@ -268,14 +269,25 @@ namespace Launcher
             // 
             // grpClient
             // 
+            this.grpClient.Controls.Add(this.chkDisableNagle);
             this.grpClient.Controls.Add(this.cmbBin);
             this.grpClient.Controls.Add(this.lblBin);
             this.grpClient.Location = new System.Drawing.Point(5, 6);
             this.grpClient.Name = "grpClient";
-            this.grpClient.Size = new System.Drawing.Size(279, 63);
+            this.grpClient.Size = new System.Drawing.Size(279, 101);
             this.grpClient.TabIndex = 7;
             this.grpClient.TabStop = false;
             this.grpClient.Text = "Client Settings";
+            // 
+            // chkDisableNagle
+            // 
+            this.chkDisableNagle.AutoSize = true;
+            this.chkDisableNagle.Location = new System.Drawing.Point(9, 69);
+            this.chkDisableNagle.Name = "chkDisableNagle";
+            this.chkDisableNagle.Size = new System.Drawing.Size(194, 17);
+            this.chkDisableNagle.TabIndex = 5;
+            this.chkDisableNagle.Text = "Disable Nagle (Can Help Swing lag)";
+            this.chkDisableNagle.UseVisualStyleBackColor = false;
             // 
             // cmbBin
             // 
@@ -378,5 +390,6 @@ namespace Launcher
         private System.Windows.Forms.CheckBox chkDisableDark;
         private System.Windows.Forms.GroupBox grpMobColours;
         private System.Windows.Forms.CheckBox chkMobColours;
+        private System.Windows.Forms.CheckBox chkDisableNagle;
     }
 }

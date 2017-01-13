@@ -32,7 +32,7 @@ namespace Launcher
 {
     public partial class LauncherForm : Form
     {
-        private const string Version = "2.4.1";
+        private const string Version = "2.5.2";
         private readonly bool _isWin8OrHigher;
         private readonly string _windowsVersion;
         private Win32Api.DevMode _revertResolution;
@@ -181,6 +181,7 @@ namespace Launcher
             try
             {
                 int proxyPort = new Random().Next(1025, 50000);
+
                 IPEndPoint LocalEP = new IPEndPoint(IPAddress.Parse("127.0.0.1"), proxyPort);
                 Socket socketListener = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 
@@ -188,9 +189,11 @@ namespace Launcher
                 socketListener.Bind(LocalEP);
                 socketListener.Listen(1);
 
-                if(Lineage.Run(settings, this._config.InstallDir, settings.ClientBin, (ushort)proxyPort))
+                if(Lineage.Run(settings, this._config.InstallDir, settings.ClientBin,
+                    (ushort)(settings.DisableProxy ? server.Port : proxyPort), settings.DisableProxy ? ipOrDns[0] : null))
                 {
-                    var client = new LineageClient(this._config.KeyName, binFile, this._config.InstallDir, socketListener, ipOrDns[0], server.Port, Clients);
+                    var client = new LineageClient(this._config.KeyName, binFile, this._config.InstallDir, 
+                        socketListener, ipOrDns[0], server.Port, Clients, settings.DisableProxy);
                     client.Initialize();
 
                     lock (this._lockObject)
@@ -522,7 +525,7 @@ namespace Launcher
                 {
                     this.tmrCheckProcess.Enabled = false;
 
-                    if(settings.Resize)
+                    if(settings.Windowed || settings.Resize)
                         LineageClient.ChangeDisplaySettings(revertResolution);
 
                     tmrCheckProcess.Stop();
