@@ -23,6 +23,7 @@ using Launcher.Utilities;
 using System.Net.Sockets;
 using System.Threading;
 using System.Net;
+using Launcher.Utilities.Proxy;
 
 namespace Launcher
 {
@@ -35,14 +36,13 @@ namespace Launcher
         private static List<LineageClient> _hookedWindows;
         private const int MaxRetries = 10;
         private static Settings _appSettings = null;
-        private Socket _socketListener;
         private Socket _clientSocket;
         private Socket _serverSocket;
         private Thread _clientThread;
         private Thread _serverThread;
         private readonly int _serverPort;
         private readonly IPAddress _serverIp;
-        private readonly bool _disableProxy;
+        private readonly ProxyServer _proxyServer;
 
         public Process Process { get; private set; }
 
@@ -52,86 +52,15 @@ namespace Launcher
             Win32Api.RedrawWindow(hWinEventHook, IntPtr.Zero, IntPtr.Zero, Win32Api.RedrawWindowFlags.UpdateNow);
         } //end MoveWindowCallback
 
-        private void ConnectCallback(IAsyncResult ar)
-        {
-            try
-            {
-                this._clientSocket = _socketListener.EndAccept(ar);
-                this._serverSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-                this._serverSocket.NoDelay = true;
-                this._serverSocket.Connect(this._serverIp, this._serverPort);
-
-                this._clientThread = new Thread(Client);
-                this._clientThread.IsBackground = true;
-                this._clientThread.Start();
-
-                this._serverThread = new Thread(Server);
-                this._serverThread.IsBackground = true;
-                this._serverThread.Start();
-                this._socketListener.Close();
-            } catch {
-                this.Stop();
-            }
-        } //end ConnectCallback
-
-        private void Client()
-        {
-            var size = 0;
-            var data = new byte[100000];
-
-            while (true)
-            {
-                try
-                {
-                    size = this._serverSocket.Receive(data);
-                    if (size == 0)
-                        break;
-
-                    this._clientSocket.Send(data, 0, size, SocketFlags.None);
-                }
-                catch
-                {
-                    break;
-                }
-            }
-        } //end Client
-
-        private void Server()
-        {
-            var size = 0;
-            var data = new byte[100000];
-
-            while (true)
-            {
-                try
-                {
-                    size = this._clientSocket.Receive(data);
-
-                    if (size == 0)
-                        break;
-
-                    this._serverSocket.Send(data, 0, size, SocketFlags.None);
-                }
-                catch
-                {
-                    break;
-                }
-            }
-        } //end Server
-
-        public LineageClient(string settingsKeyName, string processName, string clientDirectory, Socket socketListener, IPAddress ip,
-            int port, List<LineageClient> hookedWindows, bool disableProxy)
+        public LineageClient(string settingsKeyName, string processName, string clientDirectory, ProxyServer proxyServer, IPAddress ip,
+            int port, List<LineageClient> hookedWindows)
         {
             this._processName = processName;
             _hookedWindows = hookedWindows;
             _appSettings = Helpers.LoadSettings(settingsKeyName);
-            this._socketListener = socketListener;
             this._serverIp = ip;
             this._serverPort = port;
-            this._disableProxy = disableProxy;
-
-            if(!this._disableProxy)
-                this._socketListener.BeginAccept(new AsyncCallback(ConnectCallback), socketListener);
+            this._proxyServer = proxyServer;
         } //end constructor
 
         public static Win32Api.DevMode ChangeDisplayColour(int bitCount)

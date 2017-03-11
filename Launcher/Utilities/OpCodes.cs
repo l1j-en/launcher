@@ -12,7 +12,8 @@
         public enum ServerOpCodes : byte
         {
             InitPacket = 161,
-            AttackPacket = 35
+            AttackPacket = 35,
+            OwnCharStatus = 59
         }
     }
 }

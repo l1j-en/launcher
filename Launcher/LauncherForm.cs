@@ -27,6 +27,7 @@ using Launcher.Models;
 using Launcher.Utilities;
 using Microsoft.Win32;
 using System.Reflection;
+using Launcher.Utilities.Proxy;
 
 namespace Launcher
 {
@@ -44,7 +45,7 @@ namespace Launcher
 
         public LauncherForm()
         {
-            var appLocation = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            var appLocation = @"C:\Program Files (x86)\Lineage Resurrection\";// Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             var associatedLaunchers = Helpers.GetAssociatedLaunchers(appLocation);
             
             if (!Helpers.LauncherInLineageDirectory(appLocation))
@@ -180,20 +181,23 @@ namespace Launcher
 
             try
             {
-                int proxyPort = new Random().Next(1025, 50000);
+                ProxyServer proxyServer = null;
+                if(!settings.DisableProxy)
+                {
+                    proxyServer = new ProxyServer();
+                    proxyServer.LocalAddress = "127.0.0.1";
+                    proxyServer.LocalPort = new Random().Next(1025, 50000);
 
-                IPEndPoint LocalEP = new IPEndPoint(IPAddress.Parse("127.0.0.1"), proxyPort);
-                Socket socketListener = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-
-                socketListener.NoDelay = true;
-                socketListener.Bind(LocalEP);
-                socketListener.Listen(1);
+                    proxyServer.RemoteAddress = server.IpOrDns;
+                    proxyServer.RemotePort = server.Port;
+                    proxyServer.Start();
+                }
 
                 if(Lineage.Run(settings, this._config.InstallDir, settings.ClientBin,
-                    (ushort)(settings.DisableProxy ? server.Port : proxyPort), settings.DisableProxy ? ipOrDns[0] : null))
+                    (ushort)(settings.DisableProxy ? server.Port : proxyServer.LocalPort), settings.DisableProxy ? ipOrDns[0] : null))
                 {
                     var client = new LineageClient(this._config.KeyName, binFile, this._config.InstallDir, 
-                        socketListener, ipOrDns[0], server.Port, Clients, settings.DisableProxy);
+                        proxyServer, ipOrDns[0], server.Port, Clients);
                     client.Initialize();
 
                     lock (this._lockObject)

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using System.Net.Sockets;
-using System.Linq;
 using System.Runtime.InteropServices;
 
 namespace Launcher.Utilities.Proxy
@@ -49,7 +48,7 @@ namespace Launcher.Utilities.Proxy
         public int LastPacketSent { get; private set; }
 
         private byte[] _lastAttackPacket = null;
-        private int _charId = -1;
+        private byte[] _charId = new byte[4];
 
         [DllImport("msvcrt.dll", CallingConvention = CallingConvention.Cdecl)]
         static extern int memcmp(byte[] b1, byte[] b2, long count);
@@ -295,15 +294,10 @@ namespace Launcher.Utilities.Proxy
                 var newSeed = new byte[4];
                 Array.Copy(decryptedPacket, 0, newSeed, 0, 4);
 
-                if (decryptedPacket[0] == 5 && this._lastAttackPacket != null)
-                {
-                    Console.WriteLine("Sending SWING to client!");
-                    this.SendToClient(this._lastAttackPacket, true);
-                }
-
                 _clientReceiveKey = Encryption.UpdateKey(_clientReceiveKey, newSeed);
 
-
+                if (decryptedPacket[0] == 5 && this._lastAttackPacket != null)
+                    this.SendToClient(this._lastAttackPacket, true);
 
                 this.SendToServer(decryptedPacket, true);
             }
@@ -386,18 +380,23 @@ namespace Launcher.Utilities.Proxy
                 Array.Copy(decryptedPacket, 0, newSeed, 0, 4);
 
                 // if it is an S_AttackPacket and the ID is the current character
-                if (decryptedPacket[0] == 35 && decryptedPacket[2] == this._charId)
+                if (decryptedPacket[0] == (int)OpCodes.ServerOpCodes.AttackPacket
+                    && decryptedPacket[2] == _charId[0] && decryptedPacket[3] == _charId[1]
+                    && decryptedPacket[4] == _charId[2] && decryptedPacket[5] == _charId[3])
                 {
-                    var hmm = decryptedPacket[2] == this._charId;
                     if (this._lastAttackPacket == null || !ByteArrayCompare(decryptedPacket, this._lastAttackPacket))
                         this._lastAttackPacket = decryptedPacket;
                 }
-                else if (decryptedPacket[0] == 1 && this._charId == -1)
-                    this._charId = decryptedPacket[5];
+                else if (decryptedPacket[0] == (int)OpCodes.ServerOpCodes.OwnCharStatus)
+                { // owncharpack
+                    for (var i = 0; i < 4; i++) // gets the users id from the char status
+                        this._charId[i] = decryptedPacket[i + 1];
 
+                }
                 _serverReceiveKey = Encryption.UpdateKey(_serverReceiveKey, newSeed);
 
-                this.SendToClient(decryptedPacket, true);
+                if (decryptedPacket[0] != (int)OpCodes.ServerOpCodes.AttackPacket)
+                    this.SendToClient(decryptedPacket, true);
             }
             // Begin listening for next packet.. 
             this.Server_BeginReceive();
@@ -479,7 +478,6 @@ namespace Launcher.Utilities.Proxy
         /// <param name="btPacket"></param>
         public void SendToServer(byte[] btPacket)
         {
-            Console.WriteLine("SENDING1!!!");
             if (!this._isRunning)
                 return;
 
@@ -510,7 +508,6 @@ namespace Launcher.Utilities.Proxy
         /// <param name="encrypt"></param>
         public void SendToServer(byte[] btPacket, bool encrypt)
         {
-            Console.WriteLine("SENDING2!!!");
             if (!this._isRunning)
                 return;
 
