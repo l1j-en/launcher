@@ -213,7 +213,7 @@ namespace Launcher
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
-            catch
+            catch(Exception)
             {
                 MessageBox.Show("An unknown error occurred launching the Lineage client. Try running it again!", "Error Launching!",
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -340,6 +340,14 @@ namespace Launcher
                     Port = Convert.ToInt32(addServerForm.txtPort.Text)
                 });
 
+                if(addServerForm.chkPermanent.Checked)
+                {
+                    Helpers.SetConfigValue(this._config.KeyName,
+                        "Servers",
+                        string.Format(",{0}:{1}:{2}", addServerForm.txtName.Text, addServerForm.txtIpAddress.Text, addServerForm.txtPort.Text)
+                        , true);
+                }
+                
                 this.cmbServer.Items.Add(addServerForm.txtName.Text);
                 this.cmbServer.SelectedIndex = cmbServer.Items.Count - 1;
             } //end if
@@ -360,7 +368,7 @@ namespace Launcher
 
                 var settings = Helpers.LoadSettings(this._config.KeyName);
 
-                if (Helpers.UpdateConfig(versionInfo))
+                if (Helpers.UpdateConfig(versionInfo, settings.DisableServerUpdate))
                 {
                     MessageBox.Show("Configuration information was updated from the server.\n\nThe launcher will close. Please re-launch.",
                         @"Configuration Updated", MessageBoxButtons.OK, MessageBoxIcon.Information);

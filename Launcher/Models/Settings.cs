@@ -30,5 +30,9 @@ namespace Launcher.Models
         public string ClientBin { get; set; }
 
         public bool DisableProxy { get; set; }
+
+        public bool DisableServerUpdate { get; set; }
+        public int WindowedDelay { get; set; }
+        public int LoginDelay { get; set; }
     }
 }

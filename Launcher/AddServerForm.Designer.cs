@@ -35,6 +35,7 @@
             this.txtIpAddress = new System.Windows.Forms.TextBox();
             this.txtPort = new System.Windows.Forms.TextBox();
             this.btnAdd = new System.Windows.Forms.Button();
+            this.chkPermanent = new System.Windows.Forms.CheckBox();
             this.SuspendLayout();
             // 
             // lblServerName
@@ -90,7 +91,7 @@
             // 
             // btnAdd
             // 
-            this.btnAdd.Location = new System.Drawing.Point(158, 78);
+            this.btnAdd.Location = new System.Drawing.Point(158, 111);
             this.btnAdd.Name = "btnAdd";
             this.btnAdd.Size = new System.Drawing.Size(75, 23);
             this.btnAdd.TabIndex = 6;
@@ -98,12 +99,23 @@
             this.btnAdd.UseVisualStyleBackColor = true;
             this.btnAdd.Click += new System.EventHandler(this.btnAdd_Click);
             // 
+            // chkPermanent
+            // 
+            this.chkPermanent.AutoSize = true;
+            this.chkPermanent.Location = new System.Drawing.Point(15, 80);
+            this.chkPermanent.Name = "chkPermanent";
+            this.chkPermanent.Size = new System.Drawing.Size(171, 17);
+            this.chkPermanent.TabIndex = 7;
+            this.chkPermanent.Text = "Permanently Add to Server List";
+            this.chkPermanent.UseVisualStyleBackColor = true;
+            // 
             // AddServerForm
             // 
             this.AcceptButton = this.btnAdd;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(245, 108);
+            this.ClientSize = new System.Drawing.Size(245, 146);
+            this.Controls.Add(this.chkPermanent);
             this.Controls.Add(this.btnAdd);
             this.Controls.Add(this.txtPort);
             this.Controls.Add(this.txtIpAddress);
@@ -129,5 +141,6 @@
         public System.Windows.Forms.TextBox txtIpAddress;
         public System.Windows.Forms.TextBox txtPort;
         private System.Windows.Forms.Button btnAdd;
+        public System.Windows.Forms.CheckBox chkPermanent;
     }
 }

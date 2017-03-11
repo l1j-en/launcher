@@ -222,7 +222,6 @@ namespace Launcher
                         (_hookedWindows.Count > 0 && _hookedWindows.All(b => b.Process.Id == proc.Id)))
                         continue;
 
-                    Thread.Sleep(500);
                     var pFoundWindow = proc.MainWindowHandle;
                     var procHandleId = pFoundWindow.ToInt32();
                     if (procHandleId > 0)
@@ -231,6 +230,7 @@ namespace Launcher
 
                         if(_appSettings.Windowed)
                         {
+                            Thread.Sleep(_appSettings.WindowedDelay);
                             var style = Win32Api.GetWindowLong(pFoundWindow, (int)(Win32Api.WindowLongFlags.GwlStyle));
 
                             var hmenu = Win32Api.GetMenu(proc.MainWindowHandle);

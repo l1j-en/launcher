@@ -26,6 +26,8 @@ namespace Launcher
         private readonly string _windowsVersion;
         private bool _initialLoad = true;
         private readonly LauncherConfig _config;
+        private int _windowDelay = 500;
+        private int _loginDelay = 500;
 
         public SettingsForm(LauncherConfig config, bool isWin8OrHigher, string windowsVersion)
         {
@@ -47,6 +49,15 @@ namespace Launcher
 
         private void btnSave_Click(object sender, EventArgs e)
         {
+            if(!Int32.TryParse(this.txtWinInjectionTiming.Text, out this._windowDelay) ||
+                !Int32.TryParse(this.txtLoginInjectionTiming.Text, out this._loginDelay) ||
+                this._windowDelay < 0 || this._windowDelay > 5000 || this._loginDelay < 0 || this._loginDelay > 5000)
+            {
+                MessageBox.Show("The Window and Login injection timing must be a number between 0 and 5000!",
+                    "Invalid Injection Timing", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
             var settings = new Settings
             {
                 Resize = this.chkResize.Checked,
@@ -54,7 +65,10 @@ namespace Launcher
                 DisableDark = this.chkDisableDark.Checked,
                 EnableMobColours = this.chkMobColours.Checked,
                 MusicType = this.cmbMusic.SelectedItem.ToString(),
-                DisableProxy = !this.chkDisableNagle.Checked
+                DisableProxy = !this.chkDisableNagle.Checked,
+                DisableServerUpdate = !this.chkSyncServers.Checked,
+                WindowedDelay = this._windowDelay,
+                LoginDelay = this._loginDelay
             };
 
             settings.Resolution = this.chkResize.Checked ? (Resolution) this.cmbResolution.SelectedItem : null;
@@ -124,6 +138,10 @@ namespace Launcher
             else
                 this.cmbMusic.SelectedIndex = this.cmbMusic.FindString(savedSettings.MusicType);
 
+            this.txtLoginInjectionTiming.Text = savedSettings.LoginDelay.ToString();
+            this.txtWinInjectionTiming.Text = savedSettings.WindowedDelay.ToString();
+            this.chkSyncServers.Checked = !savedSettings.DisableServerUpdate;
+
             this._initialLoad = false;
         }
 
@@ -168,6 +186,29 @@ namespace Launcher
             
             if(this.cmbResolution.Items.Count > 0)
                 this.chkResize.Enabled = this.chkWindowed.Checked;
+        }
+
+        private void picSyncHelp_Click(object sender, EventArgs e)
+        {
+            new CustomMessageBox("Server Sync", "This will stop the launcher from verifying your server information against the website.\n\n" + 
+                "That means if we update the server IP or DNS, you will not be able to connect unless you re-enable this option!",
+                new System.Drawing.Bitmap(Launcher.Properties.Resources.Help_Big)).ShowDialog();
+        }
+
+        private void picWinInjectionHelp_Click(object sender, EventArgs e)
+        {
+            new CustomMessageBox("Windowed Mode Injection Timing", 
+                "The amount of time in milliseconds, the client waits after the window opens before injecting the Windowed Mode code.\n\n" +
+                "Min Value: 0, Max Value: 5000, Default: 500",
+                new System.Drawing.Bitmap(Launcher.Properties.Resources.Help_Big)).ShowDialog();
+        }
+
+        private void picLoginInjection_Click(object sender, EventArgs e)
+        {
+            new CustomMessageBox("Login Code Injection Timing",
+                "The amount of time in milliseconds, the client waits after the Lineage process has started to inject the launcher code.\n\n" +
+                "Min Value: 0, Max Value: 5000, Default: 500",
+                new System.Drawing.Bitmap(Launcher.Properties.Resources.Help_Big)).ShowDialog();
         }
     }
 }

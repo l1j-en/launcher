@@ -234,6 +234,9 @@ namespace Launcher.Utilities
 
         [DllImport("kernel32.dll")]
         public static extern uint SuspendThread(IntPtr hThread);
+
+        [DllImport("kernel32.dll", SetLastError = true)]
+        public static extern bool ReadProcessMemory(IntPtr hProcess, IntPtr lpBaseAddress, byte[] buffer, uint size, int lpNumberOfBytesRead);
         #endregion
 
         #region user32

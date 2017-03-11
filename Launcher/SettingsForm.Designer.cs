@@ -31,8 +31,6 @@ namespace Launcher
         private void InitializeComponent()
         {
             this.lblSettings = new System.Windows.Forms.Label();
-            this.btnSave = new Launcher.Controls.GlassButton();
-            this.btnCancel = new Launcher.Controls.GlassButton();
             this.grpWindowed = new System.Windows.Forms.GroupBox();
             this.grpResolution = new System.Windows.Forms.GroupBox();
             this.cmbResolution = new System.Windows.Forms.ComboBox();
@@ -52,8 +50,20 @@ namespace Launcher
             this.chkDisableNagle = new System.Windows.Forms.CheckBox();
             this.cmbBin = new System.Windows.Forms.ComboBox();
             this.lblBin = new System.Windows.Forms.Label();
+            this.tabAdvanced = new System.Windows.Forms.TabPage();
+            this.grpAdvanced = new System.Windows.Forms.GroupBox();
+            this.chkSyncServers = new System.Windows.Forms.CheckBox();
             this.folderBrowserDialog = new System.Windows.Forms.FolderBrowserDialog();
+            this.picSyncHelp = new System.Windows.Forms.PictureBox();
+            this.btnSave = new Launcher.Controls.GlassButton();
+            this.btnCancel = new Launcher.Controls.GlassButton();
             this.btnClose = new Launcher.Controls.GlassButton();
+            this.lblWinInjectionTiming = new System.Windows.Forms.Label();
+            this.txtWinInjectionTiming = new System.Windows.Forms.TextBox();
+            this.picWinInjectionHelp = new System.Windows.Forms.PictureBox();
+            this.picLoginInjection = new System.Windows.Forms.PictureBox();
+            this.txtLoginInjectionTiming = new System.Windows.Forms.TextBox();
+            this.lblLoginInjectionTiming = new System.Windows.Forms.Label();
             this.grpWindowed.SuspendLayout();
             this.grpResolution.SuspendLayout();
             this.tabSettings.SuspendLayout();
@@ -64,6 +74,11 @@ namespace Launcher
             this.grpDisableDark.SuspendLayout();
             this.tabClient.SuspendLayout();
             this.grpClient.SuspendLayout();
+            this.tabAdvanced.SuspendLayout();
+            this.grpAdvanced.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.picSyncHelp)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.picWinInjectionHelp)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.picLoginInjection)).BeginInit();
             this.SuspendLayout();
             // 
             // lblSettings
@@ -77,33 +92,6 @@ namespace Launcher
             this.lblSettings.Size = new System.Drawing.Size(59, 15);
             this.lblSettings.TabIndex = 2;
             this.lblSettings.Text = "Settings";
-            // 
-            // btnSave
-            // 
-            this.btnSave.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.btnSave.GlowColor = System.Drawing.Color.Blue;
-            this.btnSave.InnerBorderColor = System.Drawing.Color.Transparent;
-            this.btnSave.Location = new System.Drawing.Point(153, 248);
-            this.btnSave.Name = "btnSave";
-            this.btnSave.OuterBorderColor = System.Drawing.Color.Transparent;
-            this.btnSave.Size = new System.Drawing.Size(75, 23);
-            this.btnSave.TabIndex = 3;
-            this.btnSave.Text = "Save Settings";
-            this.btnSave.Click += new System.EventHandler(this.btnSave_Click);
-            // 
-            // btnCancel
-            // 
-            this.btnCancel.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.btnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.btnCancel.GlowColor = System.Drawing.Color.Red;
-            this.btnCancel.InnerBorderColor = System.Drawing.Color.Transparent;
-            this.btnCancel.Location = new System.Drawing.Point(229, 248);
-            this.btnCancel.Name = "btnCancel";
-            this.btnCancel.OuterBorderColor = System.Drawing.Color.Transparent;
-            this.btnCancel.Size = new System.Drawing.Size(75, 23);
-            this.btnCancel.TabIndex = 4;
-            this.btnCancel.Text = "Cancel";
-            this.btnCancel.Click += new System.EventHandler(this.btnCancel_Click);
             // 
             // grpWindowed
             // 
@@ -165,6 +153,7 @@ namespace Launcher
             this.tabSettings.Controls.Add(this.tabWindow);
             this.tabSettings.Controls.Add(this.tabInGame);
             this.tabSettings.Controls.Add(this.tabClient);
+            this.tabSettings.Controls.Add(this.tabAdvanced);
             this.tabSettings.Location = new System.Drawing.Point(5, 27);
             this.tabSettings.Name = "tabSettings";
             this.tabSettings.SelectedIndex = 0;
@@ -207,7 +196,7 @@ namespace Launcher
             // chkMobColours
             // 
             this.chkMobColours.AutoSize = true;
-            this.chkMobColours.Location = new System.Drawing.Point(26, 19);
+            this.chkMobColours.Location = new System.Drawing.Point(14, 19);
             this.chkMobColours.Name = "chkMobColours";
             this.chkMobColours.Size = new System.Drawing.Size(121, 17);
             this.chkMobColours.TabIndex = 0;
@@ -249,7 +238,7 @@ namespace Launcher
             // chkDisableDark
             // 
             this.chkDisableDark.AutoSize = true;
-            this.chkDisableDark.Location = new System.Drawing.Point(26, 19);
+            this.chkDisableDark.Location = new System.Drawing.Point(18, 19);
             this.chkDisableDark.Name = "chkDisableDark";
             this.chkDisableDark.Size = new System.Drawing.Size(109, 17);
             this.chkDisableDark.TabIndex = 0;
@@ -309,6 +298,81 @@ namespace Launcher
             this.lblBin.TabIndex = 3;
             this.lblBin.Text = "Bin File";
             // 
+            // tabAdvanced
+            // 
+            this.tabAdvanced.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(206)))), ((int)(((byte)(203)))), ((int)(((byte)(203)))));
+            this.tabAdvanced.Controls.Add(this.grpAdvanced);
+            this.tabAdvanced.Location = new System.Drawing.Point(4, 22);
+            this.tabAdvanced.Name = "tabAdvanced";
+            this.tabAdvanced.Size = new System.Drawing.Size(287, 189);
+            this.tabAdvanced.TabIndex = 3;
+            this.tabAdvanced.Text = "Advanced";
+            // 
+            // grpAdvanced
+            // 
+            this.grpAdvanced.Controls.Add(this.picLoginInjection);
+            this.grpAdvanced.Controls.Add(this.txtLoginInjectionTiming);
+            this.grpAdvanced.Controls.Add(this.lblLoginInjectionTiming);
+            this.grpAdvanced.Controls.Add(this.picWinInjectionHelp);
+            this.grpAdvanced.Controls.Add(this.txtWinInjectionTiming);
+            this.grpAdvanced.Controls.Add(this.lblWinInjectionTiming);
+            this.grpAdvanced.Controls.Add(this.picSyncHelp);
+            this.grpAdvanced.Controls.Add(this.chkSyncServers);
+            this.grpAdvanced.Location = new System.Drawing.Point(6, 3);
+            this.grpAdvanced.Name = "grpAdvanced";
+            this.grpAdvanced.Size = new System.Drawing.Size(278, 103);
+            this.grpAdvanced.TabIndex = 0;
+            this.grpAdvanced.TabStop = false;
+            this.grpAdvanced.Text = "Advanced Settings";
+            // 
+            // chkSyncServers
+            // 
+            this.chkSyncServers.AutoSize = true;
+            this.chkSyncServers.Location = new System.Drawing.Point(17, 19);
+            this.chkSyncServers.Name = "chkSyncServers";
+            this.chkSyncServers.Size = new System.Drawing.Size(150, 17);
+            this.chkSyncServers.TabIndex = 1;
+            this.chkSyncServers.Text = "Update Server Information";
+            this.chkSyncServers.UseVisualStyleBackColor = true;
+            // 
+            // picSyncHelp
+            // 
+            this.picSyncHelp.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.picSyncHelp.Image = global::Launcher.Properties.Resources.Help;
+            this.picSyncHelp.Location = new System.Drawing.Point(238, 19);
+            this.picSyncHelp.Name = "picSyncHelp";
+            this.picSyncHelp.Size = new System.Drawing.Size(15, 15);
+            this.picSyncHelp.TabIndex = 2;
+            this.picSyncHelp.TabStop = false;
+            this.picSyncHelp.Click += new System.EventHandler(this.picSyncHelp_Click);
+            // 
+            // btnSave
+            // 
+            this.btnSave.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.btnSave.GlowColor = System.Drawing.Color.Blue;
+            this.btnSave.InnerBorderColor = System.Drawing.Color.Transparent;
+            this.btnSave.Location = new System.Drawing.Point(153, 248);
+            this.btnSave.Name = "btnSave";
+            this.btnSave.OuterBorderColor = System.Drawing.Color.Transparent;
+            this.btnSave.Size = new System.Drawing.Size(75, 23);
+            this.btnSave.TabIndex = 3;
+            this.btnSave.Text = "Save Settings";
+            this.btnSave.Click += new System.EventHandler(this.btnSave_Click);
+            // 
+            // btnCancel
+            // 
+            this.btnCancel.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.btnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
+            this.btnCancel.GlowColor = System.Drawing.Color.Red;
+            this.btnCancel.InnerBorderColor = System.Drawing.Color.Transparent;
+            this.btnCancel.Location = new System.Drawing.Point(229, 248);
+            this.btnCancel.Name = "btnCancel";
+            this.btnCancel.OuterBorderColor = System.Drawing.Color.Transparent;
+            this.btnCancel.Size = new System.Drawing.Size(75, 23);
+            this.btnCancel.TabIndex = 4;
+            this.btnCancel.Text = "Cancel";
+            this.btnCancel.Click += new System.EventHandler(this.btnCancel_Click);
+            // 
             // btnClose
             // 
             this.btnClose.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Center;
@@ -326,6 +390,62 @@ namespace Launcher
             this.btnClose.TabIndex = 1;
             this.btnClose.TabStop = false;
             this.btnClose.Click += new System.EventHandler(this.btnClose_Click);
+            // 
+            // lblWinInjectionTiming
+            // 
+            this.lblWinInjectionTiming.AutoSize = true;
+            this.lblWinInjectionTiming.Location = new System.Drawing.Point(73, 74);
+            this.lblWinInjectionTiming.Name = "lblWinInjectionTiming";
+            this.lblWinInjectionTiming.Size = new System.Drawing.Size(165, 13);
+            this.lblWinInjectionTiming.TabIndex = 3;
+            this.lblWinInjectionTiming.Text = "Windowed Mode Injection Timing";
+            // 
+            // txtWinInjectionTiming
+            // 
+            this.txtWinInjectionTiming.Location = new System.Drawing.Point(17, 71);
+            this.txtWinInjectionTiming.MaxLength = 4;
+            this.txtWinInjectionTiming.Name = "txtWinInjectionTiming";
+            this.txtWinInjectionTiming.Size = new System.Drawing.Size(50, 20);
+            this.txtWinInjectionTiming.TabIndex = 4;
+            // 
+            // picWinInjectionHelp
+            // 
+            this.picWinInjectionHelp.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.picWinInjectionHelp.Image = global::Launcher.Properties.Resources.Help;
+            this.picWinInjectionHelp.Location = new System.Drawing.Point(238, 74);
+            this.picWinInjectionHelp.Name = "picWinInjectionHelp";
+            this.picWinInjectionHelp.Size = new System.Drawing.Size(15, 15);
+            this.picWinInjectionHelp.TabIndex = 5;
+            this.picWinInjectionHelp.TabStop = false;
+            this.picWinInjectionHelp.Click += new System.EventHandler(this.picWinInjectionHelp_Click);
+            // 
+            // picLoginInjection
+            // 
+            this.picLoginInjection.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.picLoginInjection.Image = global::Launcher.Properties.Resources.Help;
+            this.picLoginInjection.Location = new System.Drawing.Point(238, 46);
+            this.picLoginInjection.Name = "picLoginInjection";
+            this.picLoginInjection.Size = new System.Drawing.Size(15, 15);
+            this.picLoginInjection.TabIndex = 8;
+            this.picLoginInjection.TabStop = false;
+            this.picLoginInjection.Click += new System.EventHandler(this.picLoginInjection_Click);
+            // 
+            // txtLoginInjectionTiming
+            // 
+            this.txtLoginInjectionTiming.Location = new System.Drawing.Point(17, 43);
+            this.txtLoginInjectionTiming.MaxLength = 4;
+            this.txtLoginInjectionTiming.Name = "txtLoginInjectionTiming";
+            this.txtLoginInjectionTiming.Size = new System.Drawing.Size(50, 20);
+            this.txtLoginInjectionTiming.TabIndex = 7;
+            // 
+            // lblLoginInjectionTiming
+            // 
+            this.lblLoginInjectionTiming.AutoSize = true;
+            this.lblLoginInjectionTiming.Location = new System.Drawing.Point(73, 46);
+            this.lblLoginInjectionTiming.Name = "lblLoginInjectionTiming";
+            this.lblLoginInjectionTiming.Size = new System.Drawing.Size(129, 13);
+            this.lblLoginInjectionTiming.TabIndex = 6;
+            this.lblLoginInjectionTiming.Text = "Launcher Injection Timing";
             // 
             // SettingsForm
             // 
@@ -360,6 +480,12 @@ namespace Launcher
             this.tabClient.ResumeLayout(false);
             this.grpClient.ResumeLayout(false);
             this.grpClient.PerformLayout();
+            this.tabAdvanced.ResumeLayout(false);
+            this.grpAdvanced.ResumeLayout(false);
+            this.grpAdvanced.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.picSyncHelp)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.picWinInjectionHelp)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.picLoginInjection)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -391,5 +517,15 @@ namespace Launcher
         private System.Windows.Forms.GroupBox grpMobColours;
         private System.Windows.Forms.CheckBox chkMobColours;
         private System.Windows.Forms.CheckBox chkDisableNagle;
+        private System.Windows.Forms.TabPage tabAdvanced;
+        private System.Windows.Forms.GroupBox grpAdvanced;
+        private System.Windows.Forms.CheckBox chkSyncServers;
+        private System.Windows.Forms.PictureBox picSyncHelp;
+        private System.Windows.Forms.PictureBox picWinInjectionHelp;
+        private System.Windows.Forms.TextBox txtWinInjectionTiming;
+        private System.Windows.Forms.Label lblWinInjectionTiming;
+        private System.Windows.Forms.PictureBox picLoginInjection;
+        private System.Windows.Forms.TextBox txtLoginInjectionTiming;
+        private System.Windows.Forms.Label lblLoginInjectionTiming;
     }
 }

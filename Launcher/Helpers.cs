@@ -14,7 +14,6 @@
  */
 using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.IO;
 using System.Net;
 using System.Reflection;
@@ -25,8 +24,6 @@ using System.Text;
 using System.Windows.Forms;
 using Launcher.Models;
 using Microsoft.Win32;
-using Launcher.Utilities;
-using System.Diagnostics;
 
 namespace Launcher
 {
@@ -53,7 +50,20 @@ namespace Launcher
             return File.Exists(Path.Combine(directory, "Login.dll"));
         }
 
-        public static bool UpdateConfig(VersionInfo versionInfo)
+        public static void SetConfigValue(string serverName, string field, string value, bool append = false)
+        {
+            var configKey = Registry.CurrentUser.OpenSubKey(@"Software\" + serverName, true);
+
+            var newValue = value;
+            if(append)
+            {
+                newValue = configKey.GetValue(field).ToString() + value;
+            }
+
+            configKey.SetValue(field, newValue, RegistryValueKind.String);
+        }
+
+        public static bool UpdateConfig(VersionInfo versionInfo, bool ignoreServers = false)
         {
             var actuallyUpdated = false;
 
@@ -67,7 +77,7 @@ namespace Launcher
 
             if (!actuallyUpdated)
             {
-                actuallyUpdated = (configKey.GetValue("Servers") == null || configKey.GetValue("Servers").ToString() != versionInfo.Servers) ||
+                actuallyUpdated = (configKey.GetValue("Servers") == null || (configKey.GetValue("Servers").ToString() != versionInfo.Servers && !ignoreServers)) ||
                                   (configKey.GetValue("VersionInfoUrl") == null || configKey.GetValue("VersionInfoUrl").ToString() != versionInfo.VersionInfoUrl) ||
                                   (configKey.GetValue("VoteUrl") == null || configKey.GetValue("VoteUrl").ToString() != versionInfo.VoteUrl) ||
                                   (configKey.GetValue("WebsiteUrl") == null || configKey.GetValue("WebsiteUrl").ToString() != versionInfo.WebsiteUrl) ||
@@ -76,7 +86,11 @@ namespace Launcher
                                   (configKey.GetValue("UpdaterFilesRoot") == null || configKey.GetValue("UpdaterFilesRoot").ToString() != versionInfo.UpdaterFilesRoot);
             }
 
-            configKey.SetValue("Servers", versionInfo.Servers, RegistryValueKind.String);
+            if(!ignoreServers)
+            {
+                configKey.SetValue("Servers", versionInfo.Servers, RegistryValueKind.String);
+            }
+            
             configKey.SetValue("VersionInfoUrl", versionInfo.VersionInfoUrl, RegistryValueKind.String);
             configKey.SetValue("VoteUrl", versionInfo.VoteUrl, RegistryValueKind.String);
             configKey.SetValue("WebsiteUrl", versionInfo.WebsiteUrl, RegistryValueKind.String);
@@ -146,9 +160,25 @@ namespace Launcher
 
                 if (settingsKey == null)
                     return new Settings();
+                var settings = (byte[])settingsKey.GetValue("AppSettings");
 
-                var ms = new MemoryStream((byte[])((RegistryKey)settingsKey).GetValue("AppSettings"));
-                return DeserializeFromStream<Settings>(ms);
+                var ms = new MemoryStream((byte[])settingsKey.GetValue("AppSettings"));
+                var settingsObject = DeserializeFromStream<Settings>(ms);
+
+                var settingsString = Encoding.UTF8.GetString(settings).ToLower();
+                // TODO -- temporary fix because the delays didn't exist before and I don't want to use
+                // a nullable int
+                if(settingsString.IndexOf("windoweddelay") == -1)
+                {
+                    settingsObject.WindowedDelay = 500;
+                }
+
+                if (settingsString.IndexOf("logindelay") == -1)
+                {
+                    settingsObject.LoginDelay = 500;
+                }
+
+                return settingsObject;
             }
             catch (Exception)
             {
@@ -278,5 +308,18 @@ namespace Launcher
             string versionName;
             return IsWin8OrHigher(out versionName);
         } //end IsWin8OrHigher 
+
+        public static bool ByteArrayCompare(byte[] a1, byte[] a2)
+        {
+            if (a1.Length != a2.Length)
+                return false;
+
+            for (int i = 0; i < a1.Length; i++)
+            {
+                if (a1[i] != a2[i])
+                    return false;
+            }
+            return true;
+        }
     } //end class
 } //end namespace
