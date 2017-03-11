@@ -380,9 +380,7 @@ namespace Launcher.Utilities.Proxy
                 Array.Copy(decryptedPacket, 0, newSeed, 0, 4);
 
                 // if it is an S_AttackPacket and the ID is the current character
-                if (decryptedPacket[0] == (int)OpCodes.ServerOpCodes.AttackPacket
-                    && decryptedPacket[2] == _charId[0] && decryptedPacket[3] == _charId[1]
-                    && decryptedPacket[4] == _charId[2] && decryptedPacket[5] == _charId[3])
+                if (this.IsOwnAttackPacket(decryptedPacket, this._charId))
                 {
                     if (this._lastAttackPacket == null || !ByteArrayCompare(decryptedPacket, this._lastAttackPacket))
                         this._lastAttackPacket = decryptedPacket;
@@ -395,7 +393,8 @@ namespace Launcher.Utilities.Proxy
                 }
                 _serverReceiveKey = Encryption.UpdateKey(_serverReceiveKey, newSeed);
 
-                if (decryptedPacket[0] != (int)OpCodes.ServerOpCodes.AttackPacket)
+                // ignore the AttackPacket coming from the server since we are handling it ourselves.
+                if (!this.IsOwnAttackPacket(decryptedPacket, this._charId))
                     this.SendToClient(decryptedPacket, true);
             }
             // Begin listening for next packet.. 
@@ -570,6 +569,13 @@ namespace Launcher.Utilities.Proxy
                     return this._serverSocket;
                 return null;
             }
+        }
+
+        private bool IsOwnAttackPacket(byte[] packet, byte[] charId)
+        {
+            return packet[0] == (int)OpCodes.ServerOpCodes.AttackPacket
+                    && packet[2] == this._charId[0] && packet[3] == this._charId[1]
+                    && packet[4] == this._charId[2] && packet[5] == this._charId[3];
         }
     }
 }
