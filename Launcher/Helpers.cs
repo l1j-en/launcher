@@ -321,5 +321,10 @@ namespace Launcher
             }
             return true;
         }
+
+        public static int StringToNumber(string versionNumber)
+        {
+            return int.Parse(versionNumber.Replace(".", ""));
+        }
     } //end class
 } //end namespace

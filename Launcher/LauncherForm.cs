@@ -33,7 +33,7 @@ namespace Launcher
 {
     public partial class LauncherForm : Form
     {
-        private const string Version = "2.5.2";
+        private const string Version = "2.6.0";
         private readonly bool _isWin8OrHigher;
         private readonly string _windowsVersion;
         private Win32Api.DevMode _revertResolution;
@@ -397,7 +397,7 @@ namespace Launcher
                     this.updateChecker.ReportProgress(1);
                 } //end if
 
-                if (versionInfo.Version != Version)
+                if (Helpers.StringToNumber(versionInfo.Version) > Helpers.StringToNumber(Version))
                 {
                     var result = DialogResult.Cancel;
 

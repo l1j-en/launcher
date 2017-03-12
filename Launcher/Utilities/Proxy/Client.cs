@@ -296,7 +296,8 @@ namespace Launcher.Utilities.Proxy
 
                 _clientReceiveKey = Encryption.UpdateKey(_clientReceiveKey, newSeed);
 
-                if (decryptedPacket[0] == 5 && this._lastAttackPacket != null)
+                if (decryptedPacket[0] == (int)OpCodes.ClientOpCodes.Attack
+                    && this._lastAttackPacket != null)
                     this.SendToClient(this._lastAttackPacket, true);
 
                 this.SendToServer(decryptedPacket, true);
@@ -573,7 +574,8 @@ namespace Launcher.Utilities.Proxy
 
         private bool IsOwnAttackPacket(byte[] packet, byte[] charId)
         {
-            return packet[0] == (int)OpCodes.ServerOpCodes.AttackPacket
+            // the S_AttackPacket length is 20 -- this is required so we don't crap out other, non-melee attack types
+            return packet.Length == 20 && packet[0] == (int)OpCodes.ServerOpCodes.AttackPacket
                     && packet[2] == this._charId[0] && packet[3] == this._charId[1]
                     && packet[4] == this._charId[2] && packet[5] == this._charId[3];
         }
