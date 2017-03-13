@@ -2,18 +2,12 @@
 {
     public class OpCodes
     {
-        public enum ClientOpCodes : byte
-        {
-            Attack = 5,
-            LoginPacket = 57,
-            ClientVersion = 127
-        }
+        public static int C_Attack = 5;
+        public static int C_LoginPacket = 57;
+        public static int C_ClientVersion = 127;
 
-        public enum ServerOpCodes : byte
-        {
-            InitPacket = 161,
-            AttackPacket = 35,
-            OwnCharStatus = 59
-        }
+        public static int S_InitPacket = 161;
+        public static int S_AttackPacket = 35;
+        public static int S_OwnCharStatus = 59;
     }
 }

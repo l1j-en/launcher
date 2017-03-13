@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
@@ -296,8 +297,9 @@ namespace Launcher.Utilities.Proxy
 
                 _clientReceiveKey = Encryption.UpdateKey(_clientReceiveKey, newSeed);
 
-                if (decryptedPacket[0] == (int)OpCodes.ClientOpCodes.Attack
-                    && this._lastAttackPacket != null)
+                // length of the C_Attack packet should be 12
+                if (decryptedPacket[0] == OpCodes.C_Attack && decryptedPacket.Length == 12 &&
+                    this.IsSameMob(decryptedPacket, OpCodes.C_Attack))
                     this.SendToClient(this._lastAttackPacket, true);
 
                 this.SendToServer(decryptedPacket, true);
@@ -380,23 +382,24 @@ namespace Launcher.Utilities.Proxy
                 var newSeed = new byte[4];
                 Array.Copy(decryptedPacket, 0, newSeed, 0, 4);
 
+                _serverReceiveKey = Encryption.UpdateKey(_serverReceiveKey, newSeed);
+
+                // ignore the AttackPacket coming from the server since we are handling it ourselves.
+                // but allow it through if it is the first attack on a new target
+                if (!this.IsOwnAttackPacket(decryptedPacket, this._charId) || !this.IsSameMob(decryptedPacket, OpCodes.S_AttackPacket))
+                    this.SendToClient(decryptedPacket, true);
+
                 // if it is an S_AttackPacket and the ID is the current character
                 if (this.IsOwnAttackPacket(decryptedPacket, this._charId))
                 {
                     if (this._lastAttackPacket == null || !ByteArrayCompare(decryptedPacket, this._lastAttackPacket))
                         this._lastAttackPacket = decryptedPacket;
                 }
-                else if (decryptedPacket[0] == (int)OpCodes.ServerOpCodes.OwnCharStatus)
-                { // owncharpack
+                else if (decryptedPacket[0] == OpCodes.S_OwnCharStatus)
+                {
                     for (var i = 0; i < 4; i++) // gets the users id from the char status
                         this._charId[i] = decryptedPacket[i + 1];
-
                 }
-                _serverReceiveKey = Encryption.UpdateKey(_serverReceiveKey, newSeed);
-
-                // ignore the AttackPacket coming from the server since we are handling it ourselves.
-                if (!this.IsOwnAttackPacket(decryptedPacket, this._charId))
-                    this.SendToClient(decryptedPacket, true);
             }
             // Begin listening for next packet.. 
             this.Server_BeginReceive();
@@ -541,11 +544,6 @@ namespace Launcher.Utilities.Proxy
             }
         }
 
-        public void SendKeepAlive()
-        {
-
-        }
-
         /// <summary>
         /// Gets the base client socket.
         /// </summary>
@@ -572,10 +570,24 @@ namespace Launcher.Utilities.Proxy
             }
         }
 
+        private bool IsSameMob(byte[] packet, int opcode)
+        {
+            if (this._lastAttackPacket == null)
+                return false;
+               
+            if(opcode == OpCodes.C_Attack)
+                return packet[0] == OpCodes.C_Attack && packet[1] == this._lastAttackPacket[6];
+                
+            if(opcode == OpCodes.S_AttackPacket)
+                return packet[6] == this._lastAttackPacket[6];
+
+            return false;
+        }
+
         private bool IsOwnAttackPacket(byte[] packet, byte[] charId)
         {
             // the S_AttackPacket length is 20 -- this is required so we don't crap out other, non-melee attack types
-            return packet.Length == 20 && packet[0] == (int)OpCodes.ServerOpCodes.AttackPacket
+            return packet.Length == 20 && packet[0] == OpCodes.S_AttackPacket
                     && packet[2] == this._charId[0] && packet[3] == this._charId[1]
                     && packet[4] == this._charId[2] && packet[5] == this._charId[3];
         }

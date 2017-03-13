@@ -52,18 +52,18 @@ namespace Launcher
             this.lblBin = new System.Windows.Forms.Label();
             this.tabAdvanced = new System.Windows.Forms.TabPage();
             this.grpAdvanced = new System.Windows.Forms.GroupBox();
-            this.chkSyncServers = new System.Windows.Forms.CheckBox();
-            this.folderBrowserDialog = new System.Windows.Forms.FolderBrowserDialog();
-            this.picSyncHelp = new System.Windows.Forms.PictureBox();
-            this.btnSave = new Launcher.Controls.GlassButton();
-            this.btnCancel = new Launcher.Controls.GlassButton();
-            this.btnClose = new Launcher.Controls.GlassButton();
-            this.lblWinInjectionTiming = new System.Windows.Forms.Label();
-            this.txtWinInjectionTiming = new System.Windows.Forms.TextBox();
-            this.picWinInjectionHelp = new System.Windows.Forms.PictureBox();
             this.picLoginInjection = new System.Windows.Forms.PictureBox();
             this.txtLoginInjectionTiming = new System.Windows.Forms.TextBox();
             this.lblLoginInjectionTiming = new System.Windows.Forms.Label();
+            this.picWinInjectionHelp = new System.Windows.Forms.PictureBox();
+            this.txtWinInjectionTiming = new System.Windows.Forms.TextBox();
+            this.lblWinInjectionTiming = new System.Windows.Forms.Label();
+            this.picSyncHelp = new System.Windows.Forms.PictureBox();
+            this.chkSyncServers = new System.Windows.Forms.CheckBox();
+            this.folderBrowserDialog = new System.Windows.Forms.FolderBrowserDialog();
+            this.btnSave = new Launcher.Controls.GlassButton();
+            this.btnCancel = new Launcher.Controls.GlassButton();
+            this.btnClose = new Launcher.Controls.GlassButton();
             this.grpWindowed.SuspendLayout();
             this.grpResolution.SuspendLayout();
             this.tabSettings.SuspendLayout();
@@ -76,9 +76,9 @@ namespace Launcher
             this.grpClient.SuspendLayout();
             this.tabAdvanced.SuspendLayout();
             this.grpAdvanced.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.picSyncHelp)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.picWinInjectionHelp)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.picLoginInjection)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.picWinInjectionHelp)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.picSyncHelp)).BeginInit();
             this.SuspendLayout();
             // 
             // lblSettings
@@ -273,9 +273,9 @@ namespace Launcher
             this.chkDisableNagle.AutoSize = true;
             this.chkDisableNagle.Location = new System.Drawing.Point(9, 69);
             this.chkDisableNagle.Name = "chkDisableNagle";
-            this.chkDisableNagle.Size = new System.Drawing.Size(194, 17);
+            this.chkDisableNagle.Size = new System.Drawing.Size(166, 17);
             this.chkDisableNagle.TabIndex = 5;
-            this.chkDisableNagle.Text = "Disable Nagle (Can Help Swing lag)";
+            this.chkDisableNagle.Text = "Local Proxy (Helps Swing lag)";
             this.chkDisableNagle.UseVisualStyleBackColor = false;
             // 
             // cmbBin
@@ -325,15 +325,61 @@ namespace Launcher
             this.grpAdvanced.TabStop = false;
             this.grpAdvanced.Text = "Advanced Settings";
             // 
-            // chkSyncServers
+            // picLoginInjection
             // 
-            this.chkSyncServers.AutoSize = true;
-            this.chkSyncServers.Location = new System.Drawing.Point(17, 19);
-            this.chkSyncServers.Name = "chkSyncServers";
-            this.chkSyncServers.Size = new System.Drawing.Size(150, 17);
-            this.chkSyncServers.TabIndex = 1;
-            this.chkSyncServers.Text = "Update Server Information";
-            this.chkSyncServers.UseVisualStyleBackColor = true;
+            this.picLoginInjection.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.picLoginInjection.Image = global::Launcher.Properties.Resources.Help;
+            this.picLoginInjection.Location = new System.Drawing.Point(238, 46);
+            this.picLoginInjection.Name = "picLoginInjection";
+            this.picLoginInjection.Size = new System.Drawing.Size(15, 15);
+            this.picLoginInjection.TabIndex = 8;
+            this.picLoginInjection.TabStop = false;
+            this.picLoginInjection.Click += new System.EventHandler(this.picLoginInjection_Click);
+            // 
+            // txtLoginInjectionTiming
+            // 
+            this.txtLoginInjectionTiming.Location = new System.Drawing.Point(17, 43);
+            this.txtLoginInjectionTiming.MaxLength = 4;
+            this.txtLoginInjectionTiming.Name = "txtLoginInjectionTiming";
+            this.txtLoginInjectionTiming.Size = new System.Drawing.Size(50, 20);
+            this.txtLoginInjectionTiming.TabIndex = 7;
+            // 
+            // lblLoginInjectionTiming
+            // 
+            this.lblLoginInjectionTiming.AutoSize = true;
+            this.lblLoginInjectionTiming.Location = new System.Drawing.Point(73, 46);
+            this.lblLoginInjectionTiming.Name = "lblLoginInjectionTiming";
+            this.lblLoginInjectionTiming.Size = new System.Drawing.Size(129, 13);
+            this.lblLoginInjectionTiming.TabIndex = 6;
+            this.lblLoginInjectionTiming.Text = "Launcher Injection Timing";
+            // 
+            // picWinInjectionHelp
+            // 
+            this.picWinInjectionHelp.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.picWinInjectionHelp.Image = global::Launcher.Properties.Resources.Help;
+            this.picWinInjectionHelp.Location = new System.Drawing.Point(238, 74);
+            this.picWinInjectionHelp.Name = "picWinInjectionHelp";
+            this.picWinInjectionHelp.Size = new System.Drawing.Size(15, 15);
+            this.picWinInjectionHelp.TabIndex = 5;
+            this.picWinInjectionHelp.TabStop = false;
+            this.picWinInjectionHelp.Click += new System.EventHandler(this.picWinInjectionHelp_Click);
+            // 
+            // txtWinInjectionTiming
+            // 
+            this.txtWinInjectionTiming.Location = new System.Drawing.Point(17, 71);
+            this.txtWinInjectionTiming.MaxLength = 4;
+            this.txtWinInjectionTiming.Name = "txtWinInjectionTiming";
+            this.txtWinInjectionTiming.Size = new System.Drawing.Size(50, 20);
+            this.txtWinInjectionTiming.TabIndex = 4;
+            // 
+            // lblWinInjectionTiming
+            // 
+            this.lblWinInjectionTiming.AutoSize = true;
+            this.lblWinInjectionTiming.Location = new System.Drawing.Point(73, 74);
+            this.lblWinInjectionTiming.Name = "lblWinInjectionTiming";
+            this.lblWinInjectionTiming.Size = new System.Drawing.Size(165, 13);
+            this.lblWinInjectionTiming.TabIndex = 3;
+            this.lblWinInjectionTiming.Text = "Windowed Mode Injection Timing";
             // 
             // picSyncHelp
             // 
@@ -345,6 +391,16 @@ namespace Launcher
             this.picSyncHelp.TabIndex = 2;
             this.picSyncHelp.TabStop = false;
             this.picSyncHelp.Click += new System.EventHandler(this.picSyncHelp_Click);
+            // 
+            // chkSyncServers
+            // 
+            this.chkSyncServers.AutoSize = true;
+            this.chkSyncServers.Location = new System.Drawing.Point(17, 19);
+            this.chkSyncServers.Name = "chkSyncServers";
+            this.chkSyncServers.Size = new System.Drawing.Size(150, 17);
+            this.chkSyncServers.TabIndex = 1;
+            this.chkSyncServers.Text = "Update Server Information";
+            this.chkSyncServers.UseVisualStyleBackColor = true;
             // 
             // btnSave
             // 
@@ -391,62 +447,6 @@ namespace Launcher
             this.btnClose.TabStop = false;
             this.btnClose.Click += new System.EventHandler(this.btnClose_Click);
             // 
-            // lblWinInjectionTiming
-            // 
-            this.lblWinInjectionTiming.AutoSize = true;
-            this.lblWinInjectionTiming.Location = new System.Drawing.Point(73, 74);
-            this.lblWinInjectionTiming.Name = "lblWinInjectionTiming";
-            this.lblWinInjectionTiming.Size = new System.Drawing.Size(165, 13);
-            this.lblWinInjectionTiming.TabIndex = 3;
-            this.lblWinInjectionTiming.Text = "Windowed Mode Injection Timing";
-            // 
-            // txtWinInjectionTiming
-            // 
-            this.txtWinInjectionTiming.Location = new System.Drawing.Point(17, 71);
-            this.txtWinInjectionTiming.MaxLength = 4;
-            this.txtWinInjectionTiming.Name = "txtWinInjectionTiming";
-            this.txtWinInjectionTiming.Size = new System.Drawing.Size(50, 20);
-            this.txtWinInjectionTiming.TabIndex = 4;
-            // 
-            // picWinInjectionHelp
-            // 
-            this.picWinInjectionHelp.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.picWinInjectionHelp.Image = global::Launcher.Properties.Resources.Help;
-            this.picWinInjectionHelp.Location = new System.Drawing.Point(238, 74);
-            this.picWinInjectionHelp.Name = "picWinInjectionHelp";
-            this.picWinInjectionHelp.Size = new System.Drawing.Size(15, 15);
-            this.picWinInjectionHelp.TabIndex = 5;
-            this.picWinInjectionHelp.TabStop = false;
-            this.picWinInjectionHelp.Click += new System.EventHandler(this.picWinInjectionHelp_Click);
-            // 
-            // picLoginInjection
-            // 
-            this.picLoginInjection.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.picLoginInjection.Image = global::Launcher.Properties.Resources.Help;
-            this.picLoginInjection.Location = new System.Drawing.Point(238, 46);
-            this.picLoginInjection.Name = "picLoginInjection";
-            this.picLoginInjection.Size = new System.Drawing.Size(15, 15);
-            this.picLoginInjection.TabIndex = 8;
-            this.picLoginInjection.TabStop = false;
-            this.picLoginInjection.Click += new System.EventHandler(this.picLoginInjection_Click);
-            // 
-            // txtLoginInjectionTiming
-            // 
-            this.txtLoginInjectionTiming.Location = new System.Drawing.Point(17, 43);
-            this.txtLoginInjectionTiming.MaxLength = 4;
-            this.txtLoginInjectionTiming.Name = "txtLoginInjectionTiming";
-            this.txtLoginInjectionTiming.Size = new System.Drawing.Size(50, 20);
-            this.txtLoginInjectionTiming.TabIndex = 7;
-            // 
-            // lblLoginInjectionTiming
-            // 
-            this.lblLoginInjectionTiming.AutoSize = true;
-            this.lblLoginInjectionTiming.Location = new System.Drawing.Point(73, 46);
-            this.lblLoginInjectionTiming.Name = "lblLoginInjectionTiming";
-            this.lblLoginInjectionTiming.Size = new System.Drawing.Size(129, 13);
-            this.lblLoginInjectionTiming.TabIndex = 6;
-            this.lblLoginInjectionTiming.Text = "Launcher Injection Timing";
-            // 
             // SettingsForm
             // 
             this.AcceptButton = this.btnSave;
@@ -483,9 +483,9 @@ namespace Launcher
             this.tabAdvanced.ResumeLayout(false);
             this.grpAdvanced.ResumeLayout(false);
             this.grpAdvanced.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.picSyncHelp)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.picWinInjectionHelp)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.picLoginInjection)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.picWinInjectionHelp)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.picSyncHelp)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 

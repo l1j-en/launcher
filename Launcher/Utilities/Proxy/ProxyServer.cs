@@ -33,10 +33,6 @@ namespace Launcher.Utilities.Proxy
             return this._clientListener.LastPacketSent;
         }
 
-        public void SendKeepAlive()
-        {
-            this._clientListener.SendKeepAlive();
-        }
         /// <summary>
         /// Starts our listen server to accept incoming connections.
         /// </summary>
