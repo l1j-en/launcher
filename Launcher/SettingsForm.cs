@@ -65,7 +65,7 @@ namespace Launcher
                 DisableDark = this.chkDisableDark.Checked,
                 EnableMobColours = this.chkMobColours.Checked,
                 MusicType = this.cmbMusic.SelectedItem.ToString(),
-                DisableProxy = !this.chkDisableNagle.Checked,
+                UseProxy = this.chkUseProxy.Checked,
                 DisableServerUpdate = !this.chkSyncServers.Checked,
                 WindowedDelay = this._windowDelay,
                 LoginDelay = this._loginDelay
@@ -121,7 +121,7 @@ namespace Launcher
             this.chkDisableDark.Checked = savedSettings.DisableDark;
             this.chkMobColours.Checked = savedSettings.EnableMobColours;
 
-            this.chkDisableNagle.Checked = !savedSettings.DisableProxy;
+            this.chkUseProxy.Checked = savedSettings.UseProxy;
 
             if (!string.IsNullOrEmpty(savedSettings.ClientBin))
             {
@@ -208,6 +208,15 @@ namespace Launcher
             new CustomMessageBox("Login Code Injection Timing",
                 "The amount of time in milliseconds, the client waits after the Lineage process has started to inject the launcher code.\n\n" +
                 "Min Value: 0, Max Value: 5000, Default: 500",
+                new System.Drawing.Bitmap(Launcher.Properties.Resources.Help_Big)).ShowDialog();
+        }
+
+        private void pctExperimental_Click(object sender, EventArgs e)
+        {
+            new CustomMessageBox("Experimental Feature",
+                "This feature is not fully supported and is used at your own risk.\n\n" +
+                "It has been shown to fix swing lag for several users, but some have experienced issues.\n\n" +
+                "Report bugs to l1jsmitty@gmail.com.",
                 new System.Drawing.Bitmap(Launcher.Properties.Resources.Help_Big)).ShowDialog();
         }
     }

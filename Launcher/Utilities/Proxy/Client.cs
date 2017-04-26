@@ -46,8 +46,6 @@ namespace Launcher.Utilities.Proxy
         private readonly byte[] _serverBuffer;
         private readonly List<byte> _serverBacklog;
 
-        public int LastPacketSent { get; private set; }
-
         private byte[] _lastAttackPacket = null;
         private byte[] _charId = new byte[4];
 
@@ -93,9 +91,6 @@ namespace Launcher.Utilities.Proxy
                 this.Stop();
 
             this._isRunning = true;
-
-            // initialize it to 30 minutes in the future
-            this.LastPacketSent = (int)(DateTime.UtcNow - this._epochDate).TotalSeconds + 1800;
 
             // Attempt to parse the given remote target.
             // This allows an IP address or domain to be given.
@@ -265,8 +260,6 @@ namespace Launcher.Utilities.Proxy
             Array.Copy(this._clientBuffer, 0, btRecvData, 0, nRecvCount);
             this._clientBackklog.AddRange(btRecvData);
 
-            this.LastPacketSent = (int)(DateTime.UtcNow - this._epochDate).TotalSeconds;
-
             // Process all the packets in the backlog.. 
             for (;;)
             {
@@ -404,18 +397,32 @@ namespace Launcher.Utilities.Proxy
             // Begin listening for next packet.. 
             this.Server_BeginReceive();
         }
-
+        
         /// <summary>
         /// Sends the given packet data to the client socket.
         /// </summary>
         /// <param name="btPacket"></param>
-        public void SendToClient(byte[] btPacket)
+        /// <param name="encrypt"></param>
+        public void SendToClient(byte[] btPacket, bool encrypt = false)
         {
             if (!this._isRunning)
                 return;
 
             try
             {
+                if (encrypt)
+                {
+                    // Get new seed for key
+                    var newSeed = new byte[4];
+                    Array.Copy(btPacket, 0, newSeed, 0, 4);
+
+                    // Encrypt modified packet
+                    btPacket = Encryption.Encrypt(btPacket, _clientSendKey);
+
+                    // Update key for next packet
+                    this._clientSendKey = Encryption.UpdateKey(this._clientSendKey, newSeed);
+                }
+
                 this._clientSocket.BeginSend(btPacket, 0, btPacket.Length, SocketFlags.None,
                     x =>
                     {
@@ -431,47 +438,6 @@ namespace Launcher.Utilities.Proxy
             catch (Exception)
             {
                 this.Stop();
-
-            }
-        }
-
-        /// <summary>
-        /// Sends the given packet data to the client socket.
-        /// </summary>
-        /// <param name="btPacket"></param>
-        /// <param name="encrypt"></param>
-        public void SendToClient(byte[] btPacket, bool encrypt)
-        {
-            if (!this._isRunning)
-                return;
-
-            try
-            {
-                // Get new seed for key
-                var newSeed = new byte[4];
-                Array.Copy(btPacket, 0, newSeed, 0, 4);
-
-                // Encrypt modified packet
-                var encryptedPacket = Encryption.Encrypt(btPacket, _clientSendKey);
-
-                // Update key for next packet
-                this._clientSendKey = Encryption.UpdateKey(this._clientSendKey, newSeed);
-
-                this._clientSocket.BeginSend(encryptedPacket, 0, encryptedPacket.Length, SocketFlags.None,
-                    x =>
-                    {
-                        if (!x.IsCompleted || !(x.AsyncState is Socket))
-                        {
-                            this.Stop();
-                            return;
-                        }
-
-                        ((Socket)x.AsyncState).EndSend(x);
-                    }, this._clientSocket);
-            }
-            catch (Exception)
-            {
-                this.Stop();
             }
         }
 
@@ -479,54 +445,28 @@ namespace Launcher.Utilities.Proxy
         /// Sends the given packet data to the server socket.
         /// </summary>
         /// <param name="btPacket"></param>
-        public void SendToServer(byte[] btPacket)
+        /// <param name="encrypt"></param>
+        public void SendToServer(byte[] btPacket, bool encrypt = false)
         {
             if (!this._isRunning)
                 return;
 
             try
             {
+                if(encrypt)
+                {
+                    // Get new seed for key
+                    var newSeed = new byte[4];
+                    Array.Copy(btPacket, 0, newSeed, 0, 4);
+
+                    // Encrypt modified packet
+                    btPacket = Encryption.Encrypt(btPacket, _serverSendKey);
+
+                    // Update key for next packet
+                    this._serverSendKey = Encryption.UpdateKey(this._serverSendKey, newSeed);
+                }
+
                 this._serverSocket.BeginSend(btPacket, 0, btPacket.Length, SocketFlags.None,
-                    x =>
-                    {
-                        if (!x.IsCompleted || !(x.AsyncState is Socket))
-                        {
-                            this.Stop();
-                            return;
-                        }
-
-                        ((Socket)x.AsyncState).EndSend(x);
-                    }, this._serverSocket);
-            }
-            catch (Exception)
-            {
-                this.Stop();
-            }
-        }
-
-        /// <summary>
-        /// Sends the given packet data to the server socket.
-        /// </summary>
-        /// <param name="btPacket"></param>
-        /// <param name="encrypt"></param>
-        public void SendToServer(byte[] btPacket, bool encrypt)
-        {
-            if (!this._isRunning)
-                return;
-
-            try
-            {
-                // Get new seed for key
-                var newSeed = new byte[4];
-                Array.Copy(btPacket, 0, newSeed, 0, 4);
-
-                // Encrypt modified packet
-                var encryptedPacket = Encryption.Encrypt(btPacket, _serverSendKey);
-
-                // Update key for next packet
-                this._serverSendKey = Encryption.UpdateKey(this._serverSendKey, newSeed);
-
-                this._serverSocket.BeginSend(encryptedPacket, 0, encryptedPacket.Length, SocketFlags.None,
                     x =>
                     {
                         if (!x.IsCompleted || !(x.AsyncState is Socket))
@@ -553,6 +493,7 @@ namespace Launcher.Utilities.Proxy
             {
                 if (this._isRunning && this._clientSocket != null)
                     return this._clientSocket;
+
                 return null;
             }
         }
@@ -566,6 +507,7 @@ namespace Launcher.Utilities.Proxy
             {
                 if (this._isRunning && this._serverSocket != null)
                     return this._serverSocket;
+
                 return null;
             }
         }
@@ -579,7 +521,7 @@ namespace Launcher.Utilities.Proxy
                 return packet[0] == OpCodes.C_Attack && packet[1] == this._lastAttackPacket[6];
                 
             if(opcode == OpCodes.S_AttackPacket)
-                return packet[6] == this._lastAttackPacket[6];
+                return packet[0] == OpCodes.S_AttackPacket && packet[6] == this._lastAttackPacket[6];
 
             return false;
         }

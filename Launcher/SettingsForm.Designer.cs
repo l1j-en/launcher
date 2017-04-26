@@ -47,7 +47,8 @@ namespace Launcher
             this.chkDisableDark = new System.Windows.Forms.CheckBox();
             this.tabClient = new System.Windows.Forms.TabPage();
             this.grpClient = new System.Windows.Forms.GroupBox();
-            this.chkDisableNagle = new System.Windows.Forms.CheckBox();
+            this.pctExperimental = new System.Windows.Forms.PictureBox();
+            this.chkUseProxy = new System.Windows.Forms.CheckBox();
             this.cmbBin = new System.Windows.Forms.ComboBox();
             this.lblBin = new System.Windows.Forms.Label();
             this.tabAdvanced = new System.Windows.Forms.TabPage();
@@ -74,6 +75,7 @@ namespace Launcher
             this.grpDisableDark.SuspendLayout();
             this.tabClient.SuspendLayout();
             this.grpClient.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pctExperimental)).BeginInit();
             this.tabAdvanced.SuspendLayout();
             this.grpAdvanced.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.picLoginInjection)).BeginInit();
@@ -258,7 +260,8 @@ namespace Launcher
             // 
             // grpClient
             // 
-            this.grpClient.Controls.Add(this.chkDisableNagle);
+            this.grpClient.Controls.Add(this.pctExperimental);
+            this.grpClient.Controls.Add(this.chkUseProxy);
             this.grpClient.Controls.Add(this.cmbBin);
             this.grpClient.Controls.Add(this.lblBin);
             this.grpClient.Location = new System.Drawing.Point(5, 6);
@@ -268,15 +271,26 @@ namespace Launcher
             this.grpClient.TabStop = false;
             this.grpClient.Text = "Client Settings";
             // 
-            // chkDisableNagle
+            // pctExperimental
             // 
-            this.chkDisableNagle.AutoSize = true;
-            this.chkDisableNagle.Location = new System.Drawing.Point(9, 69);
-            this.chkDisableNagle.Name = "chkDisableNagle";
-            this.chkDisableNagle.Size = new System.Drawing.Size(166, 17);
-            this.chkDisableNagle.TabIndex = 5;
-            this.chkDisableNagle.Text = "Local Proxy (Helps Swing lag)";
-            this.chkDisableNagle.UseVisualStyleBackColor = false;
+            this.pctExperimental.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.pctExperimental.Image = global::Launcher.Properties.Resources.Help;
+            this.pctExperimental.Location = new System.Drawing.Point(167, 69);
+            this.pctExperimental.Name = "pctExperimental";
+            this.pctExperimental.Size = new System.Drawing.Size(15, 15);
+            this.pctExperimental.TabIndex = 6;
+            this.pctExperimental.TabStop = false;
+            this.pctExperimental.Click += new System.EventHandler(this.pctExperimental_Click);
+            // 
+            // chkUseProxy
+            // 
+            this.chkUseProxy.AutoSize = true;
+            this.chkUseProxy.Location = new System.Drawing.Point(9, 69);
+            this.chkUseProxy.Name = "chkUseProxy";
+            this.chkUseProxy.Size = new System.Drawing.Size(161, 17);
+            this.chkUseProxy.TabIndex = 5;
+            this.chkUseProxy.Text = "Swing Lag Fix (Experimental)";
+            this.chkUseProxy.UseVisualStyleBackColor = false;
             // 
             // cmbBin
             // 
@@ -480,6 +494,7 @@ namespace Launcher
             this.tabClient.ResumeLayout(false);
             this.grpClient.ResumeLayout(false);
             this.grpClient.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pctExperimental)).EndInit();
             this.tabAdvanced.ResumeLayout(false);
             this.grpAdvanced.ResumeLayout(false);
             this.grpAdvanced.PerformLayout();
@@ -516,7 +531,7 @@ namespace Launcher
         private System.Windows.Forms.CheckBox chkDisableDark;
         private System.Windows.Forms.GroupBox grpMobColours;
         private System.Windows.Forms.CheckBox chkMobColours;
-        private System.Windows.Forms.CheckBox chkDisableNagle;
+        private System.Windows.Forms.CheckBox chkUseProxy;
         private System.Windows.Forms.TabPage tabAdvanced;
         private System.Windows.Forms.GroupBox grpAdvanced;
         private System.Windows.Forms.CheckBox chkSyncServers;
@@ -527,5 +542,6 @@ namespace Launcher
         private System.Windows.Forms.PictureBox picLoginInjection;
         private System.Windows.Forms.TextBox txtLoginInjectionTiming;
         private System.Windows.Forms.Label lblLoginInjectionTiming;
+        private System.Windows.Forms.PictureBox pctExperimental;
     }
 }

@@ -25,14 +25,6 @@ namespace Launcher.Utilities.Proxy
             this.RemotePort = 2000;
         }
 
-        public int CheckLastSent()
-        {
-            if (this._clientListener == null)
-                return -1;
-
-            return this._clientListener.LastPacketSent;
-        }
-
         /// <summary>
         /// Starts our listen server to accept incoming connections.
         /// </summary>
