@@ -65,6 +65,8 @@ namespace Launcher
             this.btnSave = new Launcher.Controls.GlassButton();
             this.btnCancel = new Launcher.Controls.GlassButton();
             this.btnClose = new Launcher.Controls.GlassButton();
+            this.grpUnderwater = new System.Windows.Forms.GroupBox();
+            this.chkDisableUnderwater = new System.Windows.Forms.CheckBox();
             this.grpWindowed.SuspendLayout();
             this.grpResolution.SuspendLayout();
             this.tabSettings.SuspendLayout();
@@ -81,6 +83,7 @@ namespace Launcher
             ((System.ComponentModel.ISupportInitialize)(this.picLoginInjection)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.picWinInjectionHelp)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.picSyncHelp)).BeginInit();
+            this.grpUnderwater.SuspendLayout();
             this.SuspendLayout();
             // 
             // lblSettings
@@ -159,7 +162,7 @@ namespace Launcher
             this.tabSettings.Location = new System.Drawing.Point(5, 27);
             this.tabSettings.Name = "tabSettings";
             this.tabSettings.SelectedIndex = 0;
-            this.tabSettings.Size = new System.Drawing.Size(295, 215);
+            this.tabSettings.Size = new System.Drawing.Size(295, 255);
             this.tabSettings.TabIndex = 7;
             // 
             // tabWindow
@@ -169,19 +172,20 @@ namespace Launcher
             this.tabWindow.Location = new System.Drawing.Point(4, 22);
             this.tabWindow.Name = "tabWindow";
             this.tabWindow.Padding = new System.Windows.Forms.Padding(3);
-            this.tabWindow.Size = new System.Drawing.Size(287, 189);
+            this.tabWindow.Size = new System.Drawing.Size(287, 229);
             this.tabWindow.TabIndex = 0;
             this.tabWindow.Text = "Window";
             // 
             // tabInGame
             // 
             this.tabInGame.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(206)))), ((int)(((byte)(203)))), ((int)(((byte)(203)))));
+            this.tabInGame.Controls.Add(this.grpUnderwater);
             this.tabInGame.Controls.Add(this.grpMobColours);
             this.tabInGame.Controls.Add(this.grpMusic);
             this.tabInGame.Controls.Add(this.grpDisableDark);
             this.tabInGame.Location = new System.Drawing.Point(4, 22);
             this.tabInGame.Name = "tabInGame";
-            this.tabInGame.Size = new System.Drawing.Size(287, 189);
+            this.tabInGame.Size = new System.Drawing.Size(287, 229);
             this.tabInGame.TabIndex = 2;
             this.tabInGame.Text = "In-Game";
             // 
@@ -208,7 +212,7 @@ namespace Launcher
             // grpMusic
             // 
             this.grpMusic.Controls.Add(this.cmbMusic);
-            this.grpMusic.Location = new System.Drawing.Point(6, 114);
+            this.grpMusic.Location = new System.Drawing.Point(6, 170);
             this.grpMusic.Name = "grpMusic";
             this.grpMusic.Size = new System.Drawing.Size(278, 52);
             this.grpMusic.TabIndex = 1;
@@ -254,7 +258,7 @@ namespace Launcher
             this.tabClient.Location = new System.Drawing.Point(4, 22);
             this.tabClient.Name = "tabClient";
             this.tabClient.Padding = new System.Windows.Forms.Padding(3);
-            this.tabClient.Size = new System.Drawing.Size(287, 189);
+            this.tabClient.Size = new System.Drawing.Size(287, 229);
             this.tabClient.TabIndex = 1;
             this.tabClient.Text = "Client Settings";
             // 
@@ -318,7 +322,7 @@ namespace Launcher
             this.tabAdvanced.Controls.Add(this.grpAdvanced);
             this.tabAdvanced.Location = new System.Drawing.Point(4, 22);
             this.tabAdvanced.Name = "tabAdvanced";
-            this.tabAdvanced.Size = new System.Drawing.Size(287, 189);
+            this.tabAdvanced.Size = new System.Drawing.Size(287, 229);
             this.tabAdvanced.TabIndex = 3;
             this.tabAdvanced.Text = "Advanced";
             // 
@@ -421,7 +425,7 @@ namespace Launcher
             this.btnSave.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnSave.GlowColor = System.Drawing.Color.Blue;
             this.btnSave.InnerBorderColor = System.Drawing.Color.Transparent;
-            this.btnSave.Location = new System.Drawing.Point(153, 248);
+            this.btnSave.Location = new System.Drawing.Point(153, 290);
             this.btnSave.Name = "btnSave";
             this.btnSave.OuterBorderColor = System.Drawing.Color.Transparent;
             this.btnSave.Size = new System.Drawing.Size(75, 23);
@@ -435,7 +439,7 @@ namespace Launcher
             this.btnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
             this.btnCancel.GlowColor = System.Drawing.Color.Red;
             this.btnCancel.InnerBorderColor = System.Drawing.Color.Transparent;
-            this.btnCancel.Location = new System.Drawing.Point(229, 248);
+            this.btnCancel.Location = new System.Drawing.Point(229, 290);
             this.btnCancel.Name = "btnCancel";
             this.btnCancel.OuterBorderColor = System.Drawing.Color.Transparent;
             this.btnCancel.Size = new System.Drawing.Size(75, 23);
@@ -461,6 +465,26 @@ namespace Launcher
             this.btnClose.TabStop = false;
             this.btnClose.Click += new System.EventHandler(this.btnClose_Click);
             // 
+            // grpUnderwater
+            // 
+            this.grpUnderwater.Controls.Add(this.chkDisableUnderwater);
+            this.grpUnderwater.Location = new System.Drawing.Point(6, 116);
+            this.grpUnderwater.Name = "grpUnderwater";
+            this.grpUnderwater.Size = new System.Drawing.Size(278, 48);
+            this.grpUnderwater.TabIndex = 2;
+            this.grpUnderwater.TabStop = false;
+            this.grpUnderwater.Text = "Underwater Effects";
+            // 
+            // chkDisableUnderwater
+            // 
+            this.chkDisableUnderwater.AutoSize = true;
+            this.chkDisableUnderwater.Location = new System.Drawing.Point(14, 19);
+            this.chkDisableUnderwater.Name = "chkDisableUnderwater";
+            this.chkDisableUnderwater.Size = new System.Drawing.Size(150, 17);
+            this.chkDisableUnderwater.TabIndex = 0;
+            this.chkDisableUnderwater.Text = "Disable Underwater Effect";
+            this.chkDisableUnderwater.UseVisualStyleBackColor = true;
+            // 
             // SettingsForm
             // 
             this.AcceptButton = this.btnSave;
@@ -468,7 +492,7 @@ namespace Launcher
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(206)))), ((int)(((byte)(203)))), ((int)(((byte)(203)))));
             this.CancelButton = this.btnCancel;
-            this.ClientSize = new System.Drawing.Size(309, 279);
+            this.ClientSize = new System.Drawing.Size(309, 319);
             this.Controls.Add(this.tabSettings);
             this.Controls.Add(this.btnCancel);
             this.Controls.Add(this.btnSave);
@@ -501,6 +525,8 @@ namespace Launcher
             ((System.ComponentModel.ISupportInitialize)(this.picLoginInjection)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.picWinInjectionHelp)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.picSyncHelp)).EndInit();
+            this.grpUnderwater.ResumeLayout(false);
+            this.grpUnderwater.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -543,5 +569,7 @@ namespace Launcher
         private System.Windows.Forms.TextBox txtLoginInjectionTiming;
         private System.Windows.Forms.Label lblLoginInjectionTiming;
         private System.Windows.Forms.PictureBox pctExperimental;
+        private System.Windows.Forms.GroupBox grpUnderwater;
+        private System.Windows.Forms.CheckBox chkDisableUnderwater;
     }
 }

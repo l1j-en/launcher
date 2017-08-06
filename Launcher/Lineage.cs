@@ -103,12 +103,18 @@ namespace Launcher
                 return false;
             }
 
+            // remove water
+            if(settings.DisableUnderwater)
+            {
+                Win32Api.WriteProcessMemory(hndProc, (IntPtr)0x00489245, new byte[] { 0x00 }, 1, 0);
+            }
+
             // Remove darkness
             if (settings.DisableDark)
             {
                 Win32Api.WriteProcessMemory(hndProc, (IntPtr)0x0046690B, new byte[] { 0x90, 0xE9 }, 2, 0);
             }
-                
+
             // Mob level highlight toggle
             if (settings.EnableMobColours)
             {

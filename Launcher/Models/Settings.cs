@@ -19,10 +19,19 @@ namespace Launcher.Models
     [Serializable]
     public class Settings
     {
+        public Settings(int delay)
+        {
+            this.WindowedDelay = delay;
+            this.LoginDelay = delay;
+        }
+
+        public Settings() { }
+
         public bool Windowed { get; set; }
         public bool Resize { get; set; }
         public bool DisableDark { get; set; }
         public bool EnableMobColours { get; set; }
+        public bool DisableUnderwater { get; set; }
 
         public Resolution Resolution { get; set; }
 

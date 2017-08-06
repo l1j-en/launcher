@@ -68,7 +68,8 @@ namespace Launcher
                 UseProxy = this.chkUseProxy.Checked,
                 DisableServerUpdate = !this.chkSyncServers.Checked,
                 WindowedDelay = this._windowDelay,
-                LoginDelay = this._loginDelay
+                LoginDelay = this._loginDelay,
+                DisableUnderwater = this.chkDisableUnderwater.Checked
             };
 
             settings.Resolution = this.chkResize.Checked ? (Resolution) this.cmbResolution.SelectedItem : null;
@@ -97,7 +98,7 @@ namespace Launcher
 
         private void SettingsForm_Load(object sender, EventArgs e)
         {
-            var savedSettings = Helpers.LoadSettings(this._config.KeyName) ?? new Settings();
+            var savedSettings = Helpers.LoadSettings(this._config.KeyName) ?? new Settings(this._windowDelay);
             var resolutions = LineageClient.GetResolutions(this._isWin8OrHigher);
 
             if (resolutions.Count > 0)
@@ -120,6 +121,7 @@ namespace Launcher
 
             this.chkDisableDark.Checked = savedSettings.DisableDark;
             this.chkMobColours.Checked = savedSettings.EnableMobColours;
+            this.chkDisableUnderwater.Checked = savedSettings.DisableUnderwater;
 
             this.chkUseProxy.Checked = savedSettings.UseProxy;
 
