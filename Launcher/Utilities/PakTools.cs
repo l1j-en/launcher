@@ -257,13 +257,24 @@ namespace Launcher.Utilities
             var fileStream = File.OpenWrite(pakFileName);
             foreach (var pakFile in files)
             {
+                var num = GetIndex(pakIndex, pakFile.FileName) - 1;
+
+                if (num < 0)
+                {
+                    Array.Resize<IndexRecord>(ref pakIndex, (int)pakIndex.Length + 1);
+                    num = pakIndex.Length - 1;
+
+                    pakIndex[num].FileName = pakFile.FileName;
+                    pakIndex[num].FileSize = pakFile.Content.Length;
+                }
+
                 var bytes = Encoding.Default.GetBytes(pakFile.Content);
                 bytes = PakTools.Encode(bytes, 0);
 
-                var num = pakFile.Id - 1;
                 pakIndex[num].Offset = (int)fileStream.Seek((long)0, SeekOrigin.End);
                 fileStream.Write(bytes, 0, (int)bytes.Length);
             }
+           
 
             fileStream.Close();
 
@@ -288,5 +299,17 @@ namespace Launcher.Utilities
 
             File.WriteAllBytes(indexFile, numArray);
         } //end RebuildIndex
+
+        private static int GetIndex(IndexRecord[] records, string filename)
+        {
+            for(int i = 0; i < records.Length; i++)
+            {
+                if (records[i].FileName.ToLower() == filename.ToLower())
+                    return i;
+
+            }
+
+            return -1;
+        }
     } //end class
 } //end namespace

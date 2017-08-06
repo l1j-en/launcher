@@ -25,6 +25,9 @@ namespace Launcher.Models
         public int Id { get; set; }
 
         [DataMember]
+        public string FileName { get; set; }
+
+        [DataMember]
         public string Content { get; set; }
     }
 }

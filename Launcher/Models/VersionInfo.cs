@@ -61,8 +61,5 @@ namespace Launcher.Models
 
         [DataMember]
         public string UpdaterFilesRoot { get; set; }
-
-        [DataMember]
-        public string PublicKey { get; set; }
     }
 }
