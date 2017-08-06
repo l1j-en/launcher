@@ -33,7 +33,7 @@ namespace Launcher
 {
     public partial class LauncherForm : Form
     {
-        private const string Version = "2.6.0";
+        private const string Version = "2.6.7";
         private readonly bool _isWin8OrHigher;
         private readonly string _windowsVersion;
         private Win32Api.DevMode _revertResolution;
@@ -119,7 +119,7 @@ namespace Launcher
             {
                 MessageBox.Show(@"There was an error loading your settings. If this was after an update, it may be intentional, however, " +
                 @"if it happens often please file a bug report.", @"Error Loading Settings", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                settings = new Settings();
+                settings = new Settings(500);
             }
                 
             if (string.IsNullOrEmpty(settings.ClientBin))

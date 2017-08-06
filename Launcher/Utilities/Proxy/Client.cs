@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
@@ -11,7 +10,6 @@ namespace Launcher.Utilities.Proxy
     [SuppressMessage("ReSharper", "ArrangeThisQualifier")]
     public class Client
     {
-        private readonly DateTime _epochDate;
         /// <summary>
         /// The maximum amount of data to receive in a single packet.
         /// </summary>
@@ -22,6 +20,7 @@ namespace Launcher.Utilities.Proxy
         /// (Helps reduce the number of unneeded exceptions.)
         /// </summary>
         private bool _isRunning;
+        private bool _isAwaitingAttack = false;
 
         /// <summary>
         /// Encryption keys
@@ -31,6 +30,7 @@ namespace Launcher.Utilities.Proxy
         private byte[] _clientSendKey = new byte[8];
         private byte[] _clientReceiveKey = new byte[8];
         private bool _hasEncryptionKeys;
+        private byte[] _clientReceiveKey_attackOnly = new byte[8];
 
         /// <summary>
         /// Client variables.
@@ -54,6 +54,9 @@ namespace Launcher.Utilities.Proxy
 
         static bool ByteArrayCompare(byte[] b1, byte[] b2)
         {
+            if (b1 == null || b2 == null)
+                return false;
+
             // Validate buffers are the same length.
             // This also ensures that the count does not exceed the length of either buffer.  
             return b1.Length == b2.Length && memcmp(b1, b2, b1.Length) == 0;
@@ -74,8 +77,6 @@ namespace Launcher.Utilities.Proxy
             this._serverSocket = null;
             this._serverBuffer = new byte[MaxBufferSize];
             this._serverBacklog = new List<byte>();
-
-            this._epochDate = new DateTime(1970, 1, 1);
         }
 
         /// <summary>
@@ -293,7 +294,11 @@ namespace Launcher.Utilities.Proxy
                 // length of the C_Attack packet should be 12
                 if (decryptedPacket[0] == OpCodes.C_Attack && decryptedPacket.Length == 12 &&
                     this.IsSameMob(decryptedPacket, OpCodes.C_Attack))
+                {
+                    this._isAwaitingAttack = true;
+                    this._clientReceiveKey_attackOnly = Encryption.UpdateKey(this._clientReceiveKey_attackOnly, newSeed);
                     this.SendToClient(this._lastAttackPacket, true);
+                }
 
                 this.SendToServer(decryptedPacket, true);
             }
@@ -360,6 +365,7 @@ namespace Launcher.Utilities.Proxy
                     this._serverReceiveKey = Encryption.InitKeys(BitConverter.ToUInt32(seed, 0));
                     this._clientSendKey = Encryption.InitKeys(BitConverter.ToUInt32(seed, 0));
                     this._clientReceiveKey = Encryption.InitKeys(BitConverter.ToUInt32(seed, 0));
+                    this._clientReceiveKey_attackOnly = Encryption.InitKeys(BitConverter.ToUInt32(seed, 0));
 
                     this._hasEncryptionKeys = true;
 
@@ -369,23 +375,29 @@ namespace Launcher.Utilities.Proxy
                 }
 
                 // Decrypt packet
-                var decryptedPacket = Encryption.Decrypt(btPacket, _serverReceiveKey);
+                var decryptedPacket = Encryption.Decrypt(btPacket, this._serverReceiveKey);
 
                 // Get new key seed and update key
                 var newSeed = new byte[4];
                 Array.Copy(decryptedPacket, 0, newSeed, 0, 4);
 
-                _serverReceiveKey = Encryption.UpdateKey(_serverReceiveKey, newSeed);
+                _serverReceiveKey = Encryption.UpdateKey(this._serverReceiveKey, newSeed);
 
                 // ignore the AttackPacket coming from the server since we are handling it ourselves.
                 // but allow it through if it is the first attack on a new target
-                if (!this.IsOwnAttackPacket(decryptedPacket, this._charId) || !this.IsSameMob(decryptedPacket, OpCodes.S_AttackPacket))
+                // however, stop it if for some reason we are still waiting for the attack on the last target to hit the client
+                if (!this.IsOwnAttackPacket(decryptedPacket, this._charId)
+                    || (!this.IsSameMob(decryptedPacket, OpCodes.S_AttackPacket) && !this._isAwaitingAttack))
+                {
                     this.SendToClient(decryptedPacket, true);
+                }  
 
                 // if it is an S_AttackPacket and the ID is the current character
+                // and we aren't already expecting a packet to be sent to the client
                 if (this.IsOwnAttackPacket(decryptedPacket, this._charId))
                 {
-                    if (this._lastAttackPacket == null || !ByteArrayCompare(decryptedPacket, this._lastAttackPacket))
+                    // if we are awaiting an attack back, do not update the last attack packet, we can get it on the next swing
+                    if (this._lastAttackPacket == null || (!ByteArrayCompare(decryptedPacket, this._lastAttackPacket) && !this._isAwaitingAttack))
                         this._lastAttackPacket = decryptedPacket;
                 }
                 else if (decryptedPacket[0] == OpCodes.S_OwnCharStatus)
@@ -408,32 +420,63 @@ namespace Launcher.Utilities.Proxy
             if (!this._isRunning)
                 return;
 
+            // if we received an attack packet but weren't waiting on one, then just return
+            if(!this._isAwaitingAttack && ByteArrayCompare(btPacket, this._lastAttackPacket))
+                return;
+
             try
             {
-                if (encrypt)
+                var packets = new List<byte[]>();
+
+                if (this._isAwaitingAttack)
                 {
-                    // Get new seed for key
-                    var newSeed = new byte[4];
-                    Array.Copy(btPacket, 0, newSeed, 0, 4);
+                    // only add it if it isn't the current packet being sent
+                    if(!ByteArrayCompare(btPacket, this._lastAttackPacket)) {
+                        packets.Add(this._lastAttackPacket);
+                    }
+                    
+                    this._isAwaitingAttack = false;
+                }   
 
-                    // Encrypt modified packet
-                    btPacket = Encryption.Encrypt(btPacket, _clientSendKey);
+                packets.Add(btPacket);
 
-                    // Update key for next packet
-                    this._clientSendKey = Encryption.UpdateKey(this._clientSendKey, newSeed);
-                }
-
-                this._clientSocket.BeginSend(btPacket, 0, btPacket.Length, SocketFlags.None,
-                    x =>
+                for(var i = 0; i < packets.Count; i++)
+                {
+                    if (encrypt || (i == 0 && packets.Count == 2))
                     {
-                        if (!x.IsCompleted || !(x.AsyncState is Socket))
-                        {
-                            this.Stop();
-                            return;
-                        }
+                        // Get new seed for key
+                        var newSeed = new byte[4];
+                        Array.Copy(packets[i], 0, newSeed, 0, 4);
 
-                        ((Socket)x.AsyncState).EndSend(x);
-                    }, this._clientSocket);
+                        // it's an attack packet and we haven't waited for a response from the server
+                        if(i == 0 && packets.Count == 2)
+                        {
+                            // Encrypt modified packet
+                            btPacket = Encryption.Encrypt(packets[i], this._clientReceiveKey_attackOnly);
+                        }
+                        else
+                        {
+                            // Encrypt modified packet
+                            btPacket = Encryption.Encrypt(packets[i], this._clientSendKey);
+
+                            // Update key for next packet
+                            this._clientSendKey = Encryption.UpdateKey(this._clientSendKey, newSeed);
+                        }
+                        
+                    }
+
+                    this._clientSocket.BeginSend(btPacket, 0, btPacket.Length, SocketFlags.None,
+                        x =>
+                        {
+                            if (!x.IsCompleted || !(x.AsyncState is Socket))
+                            {
+                                this.Stop();
+                                return;
+                            }
+
+                            ((Socket)x.AsyncState).EndSend(x);
+                        }, this._clientSocket);
+                }
             }
             catch (Exception)
             {
