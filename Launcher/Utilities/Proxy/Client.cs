@@ -70,7 +70,6 @@ namespace Launcher.Utilities.Proxy
         {
             // Setup class defaults..
             this._clientSocket = sockClient;
-            this._clientSocket.NoDelay = true; // disable nagle
             this._clientBuffer = new byte[MaxBufferSize];
             this._clientBackklog = new List<byte>();
 
@@ -289,14 +288,16 @@ namespace Launcher.Utilities.Proxy
                 var newSeed = new byte[4];
                 Array.Copy(decryptedPacket, 0, newSeed, 0, 4);
 
-                _clientReceiveKey = Encryption.UpdateKey(_clientReceiveKey, newSeed);
+                this._clientReceiveKey = Encryption.UpdateKey(this._clientReceiveKey, newSeed);
 
                 // length of the C_Attack packet should be 12
                 if (decryptedPacket[0] == OpCodes.C_Attack && decryptedPacket.Length == 12 &&
                     this.IsSameMob(decryptedPacket, OpCodes.C_Attack))
                 {
                     this._isAwaitingAttack = true;
-                    this._clientReceiveKey_attackOnly = Encryption.UpdateKey(this._clientReceiveKey_attackOnly, newSeed);
+
+                    this._clientReceiveKey_attackOnly = this._clientReceiveKey;
+
                     this.SendToClient(this._lastAttackPacket, true);
                 }
 
@@ -365,7 +366,6 @@ namespace Launcher.Utilities.Proxy
                     this._serverReceiveKey = Encryption.InitKeys(BitConverter.ToUInt32(seed, 0));
                     this._clientSendKey = Encryption.InitKeys(BitConverter.ToUInt32(seed, 0));
                     this._clientReceiveKey = Encryption.InitKeys(BitConverter.ToUInt32(seed, 0));
-                    this._clientReceiveKey_attackOnly = Encryption.InitKeys(BitConverter.ToUInt32(seed, 0));
 
                     this._hasEncryptionKeys = true;
 
@@ -462,7 +462,6 @@ namespace Launcher.Utilities.Proxy
                             // Update key for next packet
                             this._clientSendKey = Encryption.UpdateKey(this._clientSendKey, newSeed);
                         }
-                        
                     }
 
                     this._clientSocket.BeginSend(btPacket, 0, btPacket.Length, SocketFlags.None,
