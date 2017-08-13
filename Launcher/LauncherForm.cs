@@ -33,19 +33,20 @@ namespace Launcher
 {
     public partial class LauncherForm : Form
     {
-        private const string Version = "2.6.7";
+        private const string Version = "2.6.9";
         private readonly bool _isWin8OrHigher;
         private readonly string _windowsVersion;
         private Win32Api.DevMode _revertResolution;
 
         private readonly object _lockObject = new object();
         private readonly LauncherConfig _config;
+        private VersionInfo _versionInfo;
 
         private static readonly List<LineageClient> Clients = new List<LineageClient>();
 
         public LauncherForm()
         {
-            var appLocation = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            var appLocation = @"C:\Program Files (x86)\Lineage Resurrection";// Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             var associatedLaunchers = Helpers.GetAssociatedLaunchers(appLocation);
             
             if (!Helpers.LauncherInLineageDirectory(appLocation))
@@ -139,11 +140,28 @@ namespace Launcher
                 } //end if
             } //end if
 
-            this.updateChecker.RunWorkerAsync();
-
             this.lblVersion.Text = Version;
             this.cmbServer.Items.AddRange(this._config.Servers.Keys.ToArray());
             this.cmbServer.SelectedIndex = 0;
+            this._versionInfo = Helpers.GetVersionInfo(this._config.VersionInfoUrl, this._config.PublicKey);
+
+            if (Helpers.HasUpdates(this._versionInfo.FileChecksums["Updater.exe"], this._versionInfo.LastUpdated, this._config))
+            {
+                if(MessageBox.Show("The Launcher needs to download files to continue.", 
+                    "Updates pending", MessageBoxButtons.OKCancel, MessageBoxIcon.Information) == DialogResult.OK)
+                {
+                    this.updateChecker.RunWorkerAsync();
+                } else
+                {
+                    MessageBox.Show("Updates must be run to connect to the server. Closing Application.", 
+                        "Closing Application", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    Application.Exit();
+                }
+            }
+            else
+            {
+                this.updateChecker.ReportProgress(this.prgUpdates.Maximum);
+            }
         }
 
         private void playButton_Click(object sender, EventArgs e)
@@ -361,11 +379,7 @@ namespace Launcher
         {
             try
             {
-                var force = e.Argument != null && (bool) e.Argument;
                 var versionInfo = Helpers.GetVersionInfo(this._config.VersionInfoUrl, this._config.PublicKey);
-                var launcherKey = Registry.CurrentUser.OpenSubKey(@"Software\" + this._config.KeyName, true);
-                var lastUpdatedCheck = launcherKey.GetValue("LastUpdated");
-                var updatesLastRun = (int?) lastUpdatedCheck ?? 0;
 
                 if (versionInfo == null)
                     return;
@@ -421,9 +435,6 @@ namespace Launcher
                     } //end if
                 } //end if
 
-                if (versionInfo.LastUpdated < updatesLastRun && !force)
-                    return;
-
                 // checks for > 1 because the Updater.exe is always present.
                 if (versionInfo.FileChecksums != null && versionInfo.FileChecksums.Count > 1)
                 {
@@ -464,6 +475,7 @@ namespace Launcher
                     } //end for
 
                     var currentTime = DateTime.UtcNow - new DateTime(1970, 1, 1);
+                    var launcherKey = Registry.CurrentUser.OpenSubKey(@"Software\" + this._config.KeyName, true);
                     launcherKey.SetValue("LastUpdated", (int) currentTime.TotalSeconds, RegistryValueKind.DWord);
 
                     string versionName;

@@ -326,5 +326,25 @@ namespace Launcher
         {
             return int.Parse(versionNumber.Replace(".", ""));
         }
+
+        public static bool HasUpdates(string expectedUpdaterChecksum, long lastUpdated, LauncherConfig config)
+        {
+            var appDataPath = Directory.GetParent(Application.UserAppDataPath).ToString();
+            var updaterLocation = Path.Combine(appDataPath, "Updater.exe");
+            var updaterChecksum = Helpers.GetChecksum(updaterLocation);
+
+            if (!File.Exists(updaterLocation) || updaterChecksum != expectedUpdaterChecksum)
+                return true;
+
+            var versionInfo = Helpers.GetVersionInfo(config.VersionInfoUrl, config.PublicKey);
+            var launcherKey = Registry.CurrentUser.OpenSubKey(@"Software\" + config.KeyName, true);
+            var lastUpdatedCheck = launcherKey.GetValue("LastUpdated");
+            var updatesLastRun = (int?)lastUpdatedCheck ?? 0;
+
+            if (updatesLastRun < lastUpdated)
+                return true;
+
+            return false;
+        }
     } //end class
 } //end namespace

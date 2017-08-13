@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
@@ -30,7 +31,7 @@ namespace Launcher.Utilities.Proxy
         private byte[] _clientSendKey = new byte[8];
         private byte[] _clientReceiveKey = new byte[8];
         private bool _hasEncryptionKeys;
-        private byte[] _clientReceiveKey_attackOnly = new byte[8];
+        private List<byte[]> _clientReceiveKey_attackOnly = new List<byte[]>();
 
         /// <summary>
         /// Client variables.
@@ -48,6 +49,9 @@ namespace Launcher.Utilities.Proxy
 
         private byte[] _lastAttackPacket = null;
         private byte[] _charId = new byte[4];
+
+        private List<string> _packetLog = new List<string>();
+        private List<string> _doublePacketLog = new List<string>();
 
         [DllImport("msvcrt.dll", CallingConvention = CallingConvention.Cdecl)]
         static extern int memcmp(byte[] b1, byte[] b2, long count);
@@ -173,6 +177,21 @@ namespace Launcher.Utilities.Proxy
             this._serverSocket = null;
 
             this._isRunning = false;
+
+            var filename = "Log_" + DateTime.Now.ToString("yyyy-MM-dd HH-mm-ss") + ".txt";
+            var deskopPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+            System.IO.StreamWriter file = new System.IO.StreamWriter(deskopPath + "\\" + filename);
+            foreach(var packet in this._packetLog)
+            {
+                file.WriteLine(packet);
+            }
+
+            foreach (var packet in this._doublePacketLog)
+            {
+                file.WriteLine(packet);
+            }
+
+            file.Close();
         }
 
         /// <summary>
@@ -296,7 +315,7 @@ namespace Launcher.Utilities.Proxy
                 {
                     this._isAwaitingAttack = true;
 
-                    this._clientReceiveKey_attackOnly = this._clientReceiveKey;
+                    this._clientReceiveKey_attackOnly.Add(this._clientReceiveKey);
 
                     this.SendToClient(this._lastAttackPacket, true);
                 }
@@ -383,12 +402,19 @@ namespace Launcher.Utilities.Proxy
 
                 _serverReceiveKey = Encryption.UpdateKey(this._serverReceiveKey, newSeed);
 
+                while (this._packetLog.Count > 1000)
+                {
+                    this._packetLog.RemoveAt(0);
+                }
+
                 // ignore the AttackPacket coming from the server since we are handling it ourselves.
                 // but allow it through if it is the first attack on a new target
                 // however, stop it if for some reason we are still waiting for the attack on the last target to hit the client
                 if (!this.IsOwnAttackPacket(decryptedPacket, this._charId)
                     || (!this.IsSameMob(decryptedPacket, OpCodes.S_AttackPacket) && !this._isAwaitingAttack))
                 {
+                    this._packetLog.Add(DateTime.Now.ToShortTimeString() + ": Sent server packet to client");
+                    this._packetLog.Add(string.Join(",", decryptedPacket.Select(b => b.ToString()).ToArray()));
                     this.SendToClient(decryptedPacket, true);
                 }  
 
@@ -396,9 +422,15 @@ namespace Launcher.Utilities.Proxy
                 // and we aren't already expecting a packet to be sent to the client
                 if (this.IsOwnAttackPacket(decryptedPacket, this._charId))
                 {
+                    this._packetLog.Add(DateTime.Now.ToShortTimeString() + ": "
+                        + string.Join(",", decryptedPacket.Select(b => b.ToString()).ToArray()));
+
                     // if we are awaiting an attack back, do not update the last attack packet, we can get it on the next swing
                     if (this._lastAttackPacket == null || (!ByteArrayCompare(decryptedPacket, this._lastAttackPacket) && !this._isAwaitingAttack))
+                    {
+                        this._packetLog.Add(DateTime.Now.ToShortTimeString() + ": Queued last attack packet");
                         this._lastAttackPacket = decryptedPacket;
+                    }   
                 }
                 else if (decryptedPacket[0] == OpCodes.S_OwnCharStatus)
                 {
@@ -451,8 +483,35 @@ namespace Launcher.Utilities.Proxy
                         // it's an attack packet and we haven't waited for a response from the server
                         if(i == 0 && packets.Count == 2)
                         {
+                            this._doublePacketLog.Add("Double packet received key had: " + this._clientReceiveKey_attackOnly.Count + " entries");
+                            this._doublePacketLog.Add("Received at: " + DateTime.Now.ToShortTimeString());
                             // Encrypt modified packet
-                            btPacket = Encryption.Encrypt(packets[i], this._clientReceiveKey_attackOnly);
+
+                            for (var j = this._clientReceiveKey_attackOnly.Count - 1; i > 0; i--)
+                            {
+                                this._doublePacketLog.Add("Key Used: " + 
+                                    string.Join(",", this._clientReceiveKey_attackOnly[j].Select(b => b.ToString()).ToArray()));
+
+                                this._doublePacketLog.Add("Packet: " +
+                                    packets[i].Select(b => b.ToString()).ToArray());
+
+                                btPacket = Encryption.Encrypt(packets[i], this._clientReceiveKey_attackOnly[j]);
+                                this._clientReceiveKey_attackOnly.Remove(btPacket);
+
+                                this._clientSocket.BeginSend(btPacket, 0, btPacket.Length, SocketFlags.None,
+                                x =>
+                                {
+                                    if (!x.IsCompleted || !(x.AsyncState is Socket))
+                                    {
+                                        this.Stop();
+                                        return;
+                                    }
+
+                                    ((Socket)x.AsyncState).EndSend(x);
+                                }, this._clientSocket);
+                            }
+
+                            return;
                         }
                         else
                         {
@@ -574,6 +633,14 @@ namespace Launcher.Utilities.Proxy
             return packet.Length == 20 && packet[0] == OpCodes.S_AttackPacket
                     && packet[2] == this._charId[0] && packet[3] == this._charId[1]
                     && packet[4] == this._charId[2] && packet[5] == this._charId[3];
+        }
+
+        private static List<T> ToListOf<T>(byte[] array, Func<byte[], int, T> bitConverter)
+        {
+            var size = Marshal.SizeOf(typeof(T));
+            return Enumerable.Range(0, array.Length / size)
+                             .Select(i => bitConverter(array, i * size))
+                             .ToList();
         }
     }
 }
