@@ -257,7 +257,7 @@ namespace Launcher.Utilities
             var fileStream = File.OpenWrite(pakFileName);
             foreach (var pakFile in files)
             {
-                var num = GetIndex(pakIndex, pakFile.FileName) - 1;
+                var num = GetIndex(pakIndex, pakFile.FileName);
 
                 if (num < 0)
                 {
@@ -271,6 +271,7 @@ namespace Launcher.Utilities
                 var bytes = Encoding.Default.GetBytes(pakFile.Content);
                 bytes = PakTools.Encode(bytes, 0);
 
+                pakIndex[num].FileSize = bytes.Length;
                 pakIndex[num].Offset = (int)fileStream.Seek((long)0, SeekOrigin.End);
                 fileStream.Write(bytes, 0, (int)bytes.Length);
             }
@@ -300,7 +301,7 @@ namespace Launcher.Utilities
             File.WriteAllBytes(indexFile, numArray);
         } //end RebuildIndex
 
-        private static int GetIndex(IndexRecord[] records, string filename)
+        public static int GetIndex(IndexRecord[] records, string filename)
         {
             for(int i = 0; i < records.Length; i++)
             {

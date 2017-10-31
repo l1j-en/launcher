@@ -39,6 +39,8 @@ namespace Launcher
             this.tabSettings = new System.Windows.Forms.TabControl();
             this.tabWindow = new System.Windows.Forms.TabPage();
             this.tabInGame = new System.Windows.Forms.TabPage();
+            this.grpUnderwater = new System.Windows.Forms.GroupBox();
+            this.chkDisableUnderwater = new System.Windows.Forms.CheckBox();
             this.grpMobColours = new System.Windows.Forms.GroupBox();
             this.chkMobColours = new System.Windows.Forms.CheckBox();
             this.grpMusic = new System.Windows.Forms.GroupBox();
@@ -47,43 +49,42 @@ namespace Launcher
             this.chkDisableDark = new System.Windows.Forms.CheckBox();
             this.tabClient = new System.Windows.Forms.TabPage();
             this.grpClient = new System.Windows.Forms.GroupBox();
-            this.pctExperimental = new System.Windows.Forms.PictureBox();
             this.chkUseProxy = new System.Windows.Forms.CheckBox();
             this.cmbBin = new System.Windows.Forms.ComboBox();
             this.lblBin = new System.Windows.Forms.Label();
             this.tabAdvanced = new System.Windows.Forms.TabPage();
             this.grpAdvanced = new System.Windows.Forms.GroupBox();
-            this.picLoginInjection = new System.Windows.Forms.PictureBox();
             this.txtLoginInjectionTiming = new System.Windows.Forms.TextBox();
             this.lblLoginInjectionTiming = new System.Windows.Forms.Label();
-            this.picWinInjectionHelp = new System.Windows.Forms.PictureBox();
             this.txtWinInjectionTiming = new System.Windows.Forms.TextBox();
             this.lblWinInjectionTiming = new System.Windows.Forms.Label();
-            this.picSyncHelp = new System.Windows.Forms.PictureBox();
             this.chkSyncServers = new System.Windows.Forms.CheckBox();
             this.folderBrowserDialog = new System.Windows.Forms.FolderBrowserDialog();
             this.btnSave = new Launcher.Controls.GlassButton();
             this.btnCancel = new Launcher.Controls.GlassButton();
+            this.pctExperimental = new System.Windows.Forms.PictureBox();
+            this.picLoginInjection = new System.Windows.Forms.PictureBox();
+            this.picWinInjectionHelp = new System.Windows.Forms.PictureBox();
+            this.picSyncHelp = new System.Windows.Forms.PictureBox();
             this.btnClose = new Launcher.Controls.GlassButton();
-            this.grpUnderwater = new System.Windows.Forms.GroupBox();
-            this.chkDisableUnderwater = new System.Windows.Forms.CheckBox();
+            this.btn_manage_polies = new Launcher.Controls.GlassButton();
             this.grpWindowed.SuspendLayout();
             this.grpResolution.SuspendLayout();
             this.tabSettings.SuspendLayout();
             this.tabWindow.SuspendLayout();
             this.tabInGame.SuspendLayout();
+            this.grpUnderwater.SuspendLayout();
             this.grpMobColours.SuspendLayout();
             this.grpMusic.SuspendLayout();
             this.grpDisableDark.SuspendLayout();
             this.tabClient.SuspendLayout();
             this.grpClient.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.pctExperimental)).BeginInit();
             this.tabAdvanced.SuspendLayout();
             this.grpAdvanced.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pctExperimental)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.picLoginInjection)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.picWinInjectionHelp)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.picSyncHelp)).BeginInit();
-            this.grpUnderwater.SuspendLayout();
             this.SuspendLayout();
             // 
             // lblSettings
@@ -189,6 +190,26 @@ namespace Launcher
             this.tabInGame.TabIndex = 2;
             this.tabInGame.Text = "In-Game";
             // 
+            // grpUnderwater
+            // 
+            this.grpUnderwater.Controls.Add(this.chkDisableUnderwater);
+            this.grpUnderwater.Location = new System.Drawing.Point(6, 116);
+            this.grpUnderwater.Name = "grpUnderwater";
+            this.grpUnderwater.Size = new System.Drawing.Size(278, 48);
+            this.grpUnderwater.TabIndex = 2;
+            this.grpUnderwater.TabStop = false;
+            this.grpUnderwater.Text = "Underwater Effects";
+            // 
+            // chkDisableUnderwater
+            // 
+            this.chkDisableUnderwater.AutoSize = true;
+            this.chkDisableUnderwater.Location = new System.Drawing.Point(14, 19);
+            this.chkDisableUnderwater.Name = "chkDisableUnderwater";
+            this.chkDisableUnderwater.Size = new System.Drawing.Size(150, 17);
+            this.chkDisableUnderwater.TabIndex = 0;
+            this.chkDisableUnderwater.Text = "Disable Underwater Effect";
+            this.chkDisableUnderwater.UseVisualStyleBackColor = true;
+            // 
             // grpMobColours
             // 
             this.grpMobColours.Controls.Add(this.chkMobColours);
@@ -275,17 +296,6 @@ namespace Launcher
             this.grpClient.TabStop = false;
             this.grpClient.Text = "Client Settings";
             // 
-            // pctExperimental
-            // 
-            this.pctExperimental.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.pctExperimental.Image = global::Launcher.Properties.Resources.Help;
-            this.pctExperimental.Location = new System.Drawing.Point(167, 69);
-            this.pctExperimental.Name = "pctExperimental";
-            this.pctExperimental.Size = new System.Drawing.Size(15, 15);
-            this.pctExperimental.TabIndex = 6;
-            this.pctExperimental.TabStop = false;
-            this.pctExperimental.Click += new System.EventHandler(this.pctExperimental_Click);
-            // 
             // chkUseProxy
             // 
             this.chkUseProxy.AutoSize = true;
@@ -319,6 +329,7 @@ namespace Launcher
             // tabAdvanced
             // 
             this.tabAdvanced.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(206)))), ((int)(((byte)(203)))), ((int)(((byte)(203)))));
+            this.tabAdvanced.Controls.Add(this.btn_manage_polies);
             this.tabAdvanced.Controls.Add(this.grpAdvanced);
             this.tabAdvanced.Location = new System.Drawing.Point(4, 22);
             this.tabAdvanced.Name = "tabAdvanced";
@@ -343,17 +354,6 @@ namespace Launcher
             this.grpAdvanced.TabStop = false;
             this.grpAdvanced.Text = "Advanced Settings";
             // 
-            // picLoginInjection
-            // 
-            this.picLoginInjection.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.picLoginInjection.Image = global::Launcher.Properties.Resources.Help;
-            this.picLoginInjection.Location = new System.Drawing.Point(238, 46);
-            this.picLoginInjection.Name = "picLoginInjection";
-            this.picLoginInjection.Size = new System.Drawing.Size(15, 15);
-            this.picLoginInjection.TabIndex = 8;
-            this.picLoginInjection.TabStop = false;
-            this.picLoginInjection.Click += new System.EventHandler(this.picLoginInjection_Click);
-            // 
             // txtLoginInjectionTiming
             // 
             this.txtLoginInjectionTiming.Location = new System.Drawing.Point(17, 43);
@@ -371,17 +371,6 @@ namespace Launcher
             this.lblLoginInjectionTiming.TabIndex = 6;
             this.lblLoginInjectionTiming.Text = "Launcher Injection Timing";
             // 
-            // picWinInjectionHelp
-            // 
-            this.picWinInjectionHelp.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.picWinInjectionHelp.Image = global::Launcher.Properties.Resources.Help;
-            this.picWinInjectionHelp.Location = new System.Drawing.Point(238, 74);
-            this.picWinInjectionHelp.Name = "picWinInjectionHelp";
-            this.picWinInjectionHelp.Size = new System.Drawing.Size(15, 15);
-            this.picWinInjectionHelp.TabIndex = 5;
-            this.picWinInjectionHelp.TabStop = false;
-            this.picWinInjectionHelp.Click += new System.EventHandler(this.picWinInjectionHelp_Click);
-            // 
             // txtWinInjectionTiming
             // 
             this.txtWinInjectionTiming.Location = new System.Drawing.Point(17, 71);
@@ -398,17 +387,6 @@ namespace Launcher
             this.lblWinInjectionTiming.Size = new System.Drawing.Size(165, 13);
             this.lblWinInjectionTiming.TabIndex = 3;
             this.lblWinInjectionTiming.Text = "Windowed Mode Injection Timing";
-            // 
-            // picSyncHelp
-            // 
-            this.picSyncHelp.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.picSyncHelp.Image = global::Launcher.Properties.Resources.Help;
-            this.picSyncHelp.Location = new System.Drawing.Point(238, 19);
-            this.picSyncHelp.Name = "picSyncHelp";
-            this.picSyncHelp.Size = new System.Drawing.Size(15, 15);
-            this.picSyncHelp.TabIndex = 2;
-            this.picSyncHelp.TabStop = false;
-            this.picSyncHelp.Click += new System.EventHandler(this.picSyncHelp_Click);
             // 
             // chkSyncServers
             // 
@@ -447,6 +425,50 @@ namespace Launcher
             this.btnCancel.Text = "Cancel";
             this.btnCancel.Click += new System.EventHandler(this.btnCancel_Click);
             // 
+            // pctExperimental
+            // 
+            this.pctExperimental.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.pctExperimental.Image = global::Launcher.Properties.Resources.Help;
+            this.pctExperimental.Location = new System.Drawing.Point(167, 69);
+            this.pctExperimental.Name = "pctExperimental";
+            this.pctExperimental.Size = new System.Drawing.Size(15, 15);
+            this.pctExperimental.TabIndex = 6;
+            this.pctExperimental.TabStop = false;
+            this.pctExperimental.Click += new System.EventHandler(this.pctExperimental_Click);
+            // 
+            // picLoginInjection
+            // 
+            this.picLoginInjection.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.picLoginInjection.Image = global::Launcher.Properties.Resources.Help;
+            this.picLoginInjection.Location = new System.Drawing.Point(238, 46);
+            this.picLoginInjection.Name = "picLoginInjection";
+            this.picLoginInjection.Size = new System.Drawing.Size(15, 15);
+            this.picLoginInjection.TabIndex = 8;
+            this.picLoginInjection.TabStop = false;
+            this.picLoginInjection.Click += new System.EventHandler(this.picLoginInjection_Click);
+            // 
+            // picWinInjectionHelp
+            // 
+            this.picWinInjectionHelp.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.picWinInjectionHelp.Image = global::Launcher.Properties.Resources.Help;
+            this.picWinInjectionHelp.Location = new System.Drawing.Point(238, 74);
+            this.picWinInjectionHelp.Name = "picWinInjectionHelp";
+            this.picWinInjectionHelp.Size = new System.Drawing.Size(15, 15);
+            this.picWinInjectionHelp.TabIndex = 5;
+            this.picWinInjectionHelp.TabStop = false;
+            this.picWinInjectionHelp.Click += new System.EventHandler(this.picWinInjectionHelp_Click);
+            // 
+            // picSyncHelp
+            // 
+            this.picSyncHelp.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.picSyncHelp.Image = global::Launcher.Properties.Resources.Help;
+            this.picSyncHelp.Location = new System.Drawing.Point(238, 19);
+            this.picSyncHelp.Name = "picSyncHelp";
+            this.picSyncHelp.Size = new System.Drawing.Size(15, 15);
+            this.picSyncHelp.TabIndex = 2;
+            this.picSyncHelp.TabStop = false;
+            this.picSyncHelp.Click += new System.EventHandler(this.picSyncHelp_Click);
+            // 
             // btnClose
             // 
             this.btnClose.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Center;
@@ -465,25 +487,18 @@ namespace Launcher
             this.btnClose.TabStop = false;
             this.btnClose.Click += new System.EventHandler(this.btnClose_Click);
             // 
-            // grpUnderwater
+            // btn_manage_polies
             // 
-            this.grpUnderwater.Controls.Add(this.chkDisableUnderwater);
-            this.grpUnderwater.Location = new System.Drawing.Point(6, 116);
-            this.grpUnderwater.Name = "grpUnderwater";
-            this.grpUnderwater.Size = new System.Drawing.Size(278, 48);
-            this.grpUnderwater.TabIndex = 2;
-            this.grpUnderwater.TabStop = false;
-            this.grpUnderwater.Text = "Underwater Effects";
-            // 
-            // chkDisableUnderwater
-            // 
-            this.chkDisableUnderwater.AutoSize = true;
-            this.chkDisableUnderwater.Location = new System.Drawing.Point(14, 19);
-            this.chkDisableUnderwater.Name = "chkDisableUnderwater";
-            this.chkDisableUnderwater.Size = new System.Drawing.Size(150, 17);
-            this.chkDisableUnderwater.TabIndex = 0;
-            this.chkDisableUnderwater.Text = "Disable Underwater Effect";
-            this.chkDisableUnderwater.UseVisualStyleBackColor = true;
+            this.btn_manage_polies.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.btn_manage_polies.GlowColor = System.Drawing.Color.Blue;
+            this.btn_manage_polies.InnerBorderColor = System.Drawing.Color.Transparent;
+            this.btn_manage_polies.Location = new System.Drawing.Point(42, 128);
+            this.btn_manage_polies.Name = "btn_manage_polies";
+            this.btn_manage_polies.OuterBorderColor = System.Drawing.Color.Transparent;
+            this.btn_manage_polies.Size = new System.Drawing.Size(202, 25);
+            this.btn_manage_polies.TabIndex = 9;
+            this.btn_manage_polies.Text = "Customize Polymorph List";
+            this.btn_manage_polies.Click += new System.EventHandler(this.btn_manage_polies_Click);
             // 
             // SettingsForm
             // 
@@ -510,6 +525,8 @@ namespace Launcher
             this.tabSettings.ResumeLayout(false);
             this.tabWindow.ResumeLayout(false);
             this.tabInGame.ResumeLayout(false);
+            this.grpUnderwater.ResumeLayout(false);
+            this.grpUnderwater.PerformLayout();
             this.grpMobColours.ResumeLayout(false);
             this.grpMobColours.PerformLayout();
             this.grpMusic.ResumeLayout(false);
@@ -518,15 +535,13 @@ namespace Launcher
             this.tabClient.ResumeLayout(false);
             this.grpClient.ResumeLayout(false);
             this.grpClient.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.pctExperimental)).EndInit();
             this.tabAdvanced.ResumeLayout(false);
             this.grpAdvanced.ResumeLayout(false);
             this.grpAdvanced.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.pctExperimental)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.picLoginInjection)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.picWinInjectionHelp)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.picSyncHelp)).EndInit();
-            this.grpUnderwater.ResumeLayout(false);
-            this.grpUnderwater.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -571,5 +586,6 @@ namespace Launcher
         private System.Windows.Forms.PictureBox pctExperimental;
         private System.Windows.Forms.GroupBox grpUnderwater;
         private System.Windows.Forms.CheckBox chkDisableUnderwater;
+        private GlassButton btn_manage_polies;
     }
 }

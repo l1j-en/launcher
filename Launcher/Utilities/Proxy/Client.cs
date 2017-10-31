@@ -517,6 +517,9 @@ namespace Launcher.Utilities.Proxy
                         {
                             // Encrypt modified packet
                             btPacket = Encryption.Encrypt(packets[i], this._clientSendKey);
+                            this._packetLog.Add(DateTime.Now.ToShortTimeString() + ": Sent to client:");
+                            this._packetLog.Add("Packet: " + string.Join(",", packets[i].Select(b => b.ToString()).ToArray()));
+                            this._packetLog.Add("Key: " + string.Join(",", this._clientSendKey.Select(b => b.ToString()).ToArray()));
 
                             // Update key for next packet
                             this._clientSendKey = Encryption.UpdateKey(this._clientSendKey, newSeed);

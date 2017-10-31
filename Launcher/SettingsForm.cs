@@ -17,6 +17,7 @@ using System.IO;
 using System.Linq;
 using System.Windows.Forms;
 using Launcher.Models;
+using System.Collections.Generic;
 
 namespace Launcher
 {
@@ -219,7 +220,12 @@ namespace Launcher
                 "This feature is not fully supported and is used at your own risk.\n\n" +
                 "It has been shown to fix swing lag for several users, but some have experienced issues.\n\n" +
                 "Report bugs to l1jsmitty@gmail.com.",
-                new System.Drawing.Bitmap(Launcher.Properties.Resources.Help_Big)).ShowDialog();
+                new System.Drawing.Bitmap(Properties.Resources.Help_Big)).ShowDialog();
+        }
+
+        private void btn_manage_polies_Click(object sender, EventArgs e)
+        {
+            var polyDialog = new Polymorphs(this._config).ShowDialog();
         }
     }
 }

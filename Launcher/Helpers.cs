@@ -275,7 +275,7 @@ namespace Launcher
 
                 return null;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 return null;
             }
