@@ -145,7 +145,7 @@ namespace Launcher
             this.cmbServer.SelectedIndex = 0;
             this._versionInfo = Helpers.GetVersionInfo(this._config.VersionInfoUrl, this._config.PublicKey);
 
-            if (Helpers.HasUpdates(this._versionInfo.FileChecksums["Updater.exe"], this._versionInfo.LastUpdated, this._config))
+            if (this._versionInfo != null && Helpers.HasUpdates(this._versionInfo.FileChecksums["Updater.exe"], this._versionInfo.LastUpdated, this._config))
             {
                 if(MessageBox.Show("The Launcher needs to download files to continue.", 
                     "Updates pending", MessageBoxButtons.OKCancel, MessageBoxIcon.Information) == DialogResult.OK)
