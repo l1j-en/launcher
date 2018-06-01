@@ -177,21 +177,6 @@ namespace Launcher.Utilities.Proxy
             this._serverSocket = null;
 
             this._isRunning = false;
-
-            var filename = "Log_" + DateTime.Now.ToString("yyyy-MM-dd HH-mm-ss") + ".txt";
-            var deskopPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
-            System.IO.StreamWriter file = new System.IO.StreamWriter(deskopPath + "\\" + filename);
-            foreach(var packet in this._packetLog)
-            {
-                file.WriteLine(packet);
-            }
-
-            foreach (var packet in this._doublePacketLog)
-            {
-                file.WriteLine(packet);
-            }
-
-            file.Close();
         }
 
         /// <summary>
