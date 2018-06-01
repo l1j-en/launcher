@@ -17,7 +17,6 @@ using System.IO;
 using System.Linq;
 using System.Windows.Forms;
 using Launcher.Models;
-using System.Collections.Generic;
 
 namespace Launcher
 {
@@ -219,13 +218,36 @@ namespace Launcher
             new CustomMessageBox("Experimental Feature",
                 "This feature is not fully supported and is used at your own risk.\n\n" +
                 "It has been shown to fix swing lag for several users, but some have experienced issues.\n\n" +
-                "Report bugs to l1jsmitty@gmail.com.",
+                "Report bugs on zelgo.net.",
                 new System.Drawing.Bitmap(Properties.Resources.Help_Big)).ShowDialog();
         }
 
         private void btn_manage_polies_Click(object sender, EventArgs e)
         {
             var polyDialog = new Polymorphs(this._config).ShowDialog();
+        }
+
+        private void btn_revert_poly_Click(object sender, EventArgs e)
+        {
+            var textFile = Path.Combine(this._config.InstallDir, "text.pak");
+            var idxFile = textFile.Replace(".pak", ".idx");
+
+            var originalTextPak = textFile.Replace("text.pak", "text.pak.original");
+            var originalIdxPak = idxFile.Replace("text.idx", "text.idx.original");
+
+            if (!File.Exists(originalTextPak) || !File.Exists(originalIdxPak))
+            {
+                MessageBox.Show(@"Unable to revert poly list. No backup found!", @"No Backup Found!", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            if (MessageBox.Show(@"This will overwrite your custom poly list with the default. Continue?", @"Continue?", MessageBoxButtons.YesNo, MessageBoxIcon.Asterisk) != DialogResult.Yes)
+                return;
+
+            File.Copy(originalTextPak, textFile, true);
+            File.Copy(originalIdxPak, idxFile, true);
+
+            MessageBox.Show("Polymorph list reverted!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
     }
 }

@@ -337,8 +337,19 @@ namespace Launcher
                 MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.Yes)
             {
                 var filePath = Path.Combine(this._config.InstallDir, "text.pak");
-
                 var idxFile = filePath.Replace(".pak", ".idx");
+
+                // make a backup copy of the text.pak and text.idx
+                if (!File.Exists(filePath.Replace("text.pak", "text.pak.original")))
+                {
+                    File.Copy(filePath, filePath.Replace("text.pak", "text.pak.original"));
+                }
+
+                if (!File.Exists(idxFile.Replace("text.idx", "text.idx.original")))
+                {
+                    File.Copy(idxFile, idxFile.Replace("text.idx", "text.idx.original"));
+                }
+
                 var pakIndex = PakTools.RebuildPak(filePath, new List<PakFile>
                 {
                     new PakFile

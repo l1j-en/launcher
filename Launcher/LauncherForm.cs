@@ -33,7 +33,7 @@ namespace Launcher
 {
     public partial class LauncherForm : Form
     {
-        private const string Version = "2.6.9";
+        private const string Version = "2.7.0";
         private readonly bool _isWin8OrHigher;
         private readonly string _windowsVersion;
         private Win32Api.DevMode _revertResolution;
@@ -46,7 +46,7 @@ namespace Launcher
 
         public LauncherForm()
         {
-            var appLocation = @"C:\Program Files (x86)\Lineage Resurrection";// Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            var appLocation = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             var associatedLaunchers = Helpers.GetAssociatedLaunchers(appLocation);
             
             if (!Helpers.LauncherInLineageDirectory(appLocation))
