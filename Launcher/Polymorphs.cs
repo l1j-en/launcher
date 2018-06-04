@@ -208,7 +208,7 @@ namespace Launcher
 
                 polyContents = Encoding.GetEncoding("big5")
                     .GetString(numArray).Split('\n').Select(b => Regex.Replace(b.Trim(), @"<[^>]*>", string.Empty))
-                    .Where(b => b.Trim() != string.Empty && b != "Choose a monster.").ToList();
+                    .Where(b => b.Trim() != string.Empty && b != "Choose a monster." && !b.Contains("Release Polymorph")).ToList();
             }
 
             // it is the default file, so return an empty list since they haven't customized
@@ -369,6 +369,7 @@ namespace Launcher
         private string CreatePolylistHtml()
         {
             var polyHtml = new StringBuilder("<body>\n<p><font fg=ffffff>Choose a monster.</font></p>\n");
+            polyHtml.AppendLine("<br><a action=\"none\">Release Polymorph</a><br>");
 
             foreach(var poly in this._selectedPolymorphs)
             {

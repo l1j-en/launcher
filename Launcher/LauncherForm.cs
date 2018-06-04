@@ -33,7 +33,7 @@ namespace Launcher
 {
     public partial class LauncherForm : Form
     {
-        private const string Version = "2.7.0";
+        private const string Version = "2.7.2";
         private readonly bool _isWin8OrHigher;
         private readonly string _windowsVersion;
         private Win32Api.DevMode _revertResolution;
@@ -145,23 +145,7 @@ namespace Launcher
             this.cmbServer.SelectedIndex = 0;
             this._versionInfo = Helpers.GetVersionInfo(this._config.VersionInfoUrl, this._config.PublicKey);
 
-            if (this._versionInfo != null && Helpers.HasUpdates(this._versionInfo.FileChecksums["Updater.exe"], this._versionInfo.LastUpdated, this._config))
-            {
-                if(MessageBox.Show("The Launcher needs to download files to continue.", 
-                    "Updates pending", MessageBoxButtons.OKCancel, MessageBoxIcon.Information) == DialogResult.OK)
-                {
-                    this.updateChecker.RunWorkerAsync();
-                } else
-                {
-                    MessageBox.Show("Updates must be run to connect to the server. Closing Application.", 
-                        "Closing Application", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    Application.Exit();
-                }
-            }
-            else
-            {
-                this.updateChecker.ReportProgress(this.prgUpdates.Maximum);
-            }
+            this.updateChecker.RunWorkerAsync();
         }
 
         private void playButton_Click(object sender, EventArgs e)

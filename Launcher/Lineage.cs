@@ -59,7 +59,10 @@ namespace Launcher
                     // gameguard and runtime expired
                     Win32Api.WriteProcessMemory(processInfo.HProcess, (IntPtr)0x0045CF2F, new byte[] { 0xEB }, 1, 0);
                     Win32Api.WriteProcessMemory(processInfo.HProcess, (IntPtr)0x0045E3AC, new byte[] { 0x90, 0xE9 }, 2, 0);
+                    Win32Api.WriteProcessMemory(processInfo.HProcess, (IntPtr)0x004DE45A, new byte[] { 0x90, 0x90 }, 2, 0);
+                    Win32Api.WriteProcessMemory(processInfo.HProcess, (IntPtr)0x0045BA71, new byte[] { 0x90, 0x90, 0x90, 0x90, 0x90, 0x90 }, 6, 0);
                     Win32Api.WriteProcessMemory(processInfo.HProcess, (IntPtr)0x0045EABA, new byte[] { 0xEB }, 1, 0);
+                    Win32Api.WriteProcessMemory(processInfo.HProcess, (IntPtr)0x00474AC4, new byte[] { 0x90, 0x90, 0x90, 0x90, 0x90, 0x84, 0xC0, 0x5E, 0x5B, 0xEB }, 10, 0);
                     break;
                 }
 
