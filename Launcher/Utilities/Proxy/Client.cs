@@ -50,9 +50,6 @@ namespace Launcher.Utilities.Proxy
         private byte[] _lastAttackPacket = null;
         private byte[] _charId = new byte[4];
 
-        private List<string> _packetLog = new List<string>();
-        private List<string> _doublePacketLog = new List<string>();
-
         [DllImport("msvcrt.dll", CallingConvention = CallingConvention.Cdecl)]
         static extern int memcmp(byte[] b1, byte[] b2, long count);
 
@@ -387,10 +384,6 @@ namespace Launcher.Utilities.Proxy
 
                 _serverReceiveKey = Encryption.UpdateKey(this._serverReceiveKey, newSeed);
 
-                while (this._packetLog.Count > 1000)
-                {
-                    this._packetLog.RemoveAt(0);
-                }
 
                 // ignore the AttackPacket coming from the server since we are handling it ourselves.
                 // but allow it through if it is the first attack on a new target
@@ -398,8 +391,6 @@ namespace Launcher.Utilities.Proxy
                 if (!this.IsOwnAttackPacket(decryptedPacket, this._charId)
                     || (!this.IsSameMob(decryptedPacket, OpCodes.S_AttackPacket) && !this._isAwaitingAttack))
                 {
-                    this._packetLog.Add(DateTime.Now.ToShortTimeString() + ": Sent server packet to client");
-                    this._packetLog.Add(string.Join(",", decryptedPacket.Select(b => b.ToString()).ToArray()));
                     this.SendToClient(decryptedPacket, true);
                 }  
 
@@ -407,13 +398,9 @@ namespace Launcher.Utilities.Proxy
                 // and we aren't already expecting a packet to be sent to the client
                 if (this.IsOwnAttackPacket(decryptedPacket, this._charId))
                 {
-                    this._packetLog.Add(DateTime.Now.ToShortTimeString() + ": "
-                        + string.Join(",", decryptedPacket.Select(b => b.ToString()).ToArray()));
-
                     // if we are awaiting an attack back, do not update the last attack packet, we can get it on the next swing
                     if (this._lastAttackPacket == null || (!ByteArrayCompare(decryptedPacket, this._lastAttackPacket) && !this._isAwaitingAttack))
                     {
-                        this._packetLog.Add(DateTime.Now.ToShortTimeString() + ": Queued last attack packet");
                         this._lastAttackPacket = decryptedPacket;
                     }   
                 }
@@ -468,18 +455,10 @@ namespace Launcher.Utilities.Proxy
                         // it's an attack packet and we haven't waited for a response from the server
                         if(i == 0 && packets.Count == 2)
                         {
-                            this._doublePacketLog.Add("Double packet received key had: " + this._clientReceiveKey_attackOnly.Count + " entries");
-                            this._doublePacketLog.Add("Received at: " + DateTime.Now.ToShortTimeString());
                             // Encrypt modified packet
 
                             for (var j = this._clientReceiveKey_attackOnly.Count - 1; i > 0; i--)
                             {
-                                this._doublePacketLog.Add("Key Used: " + 
-                                    string.Join(",", this._clientReceiveKey_attackOnly[j].Select(b => b.ToString()).ToArray()));
-
-                                this._doublePacketLog.Add("Packet: " +
-                                    packets[i].Select(b => b.ToString()).ToArray());
-
                                 btPacket = Encryption.Encrypt(packets[i], this._clientReceiveKey_attackOnly[j]);
                                 this._clientReceiveKey_attackOnly.Remove(btPacket);
 
@@ -502,9 +481,6 @@ namespace Launcher.Utilities.Proxy
                         {
                             // Encrypt modified packet
                             btPacket = Encryption.Encrypt(packets[i], this._clientSendKey);
-                            this._packetLog.Add(DateTime.Now.ToShortTimeString() + ": Sent to client:");
-                            this._packetLog.Add("Packet: " + string.Join(",", packets[i].Select(b => b.ToString()).ToArray()));
-                            this._packetLog.Add("Key: " + string.Join(",", this._clientSendKey.Select(b => b.ToString()).ToArray()));
 
                             // Update key for next packet
                             this._clientSendKey = Encryption.UpdateKey(this._clientSendKey, newSeed);

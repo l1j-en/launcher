@@ -195,7 +195,7 @@ namespace Launcher
 
             var indexes = PakTools.LoadIndexData(idxFile);
             var records = PakTools.CreateIndexRecords(indexes, true);
-            var polyFile = records[11991];
+            var polyFile = records[11995]; //monlist0-e
 
             List<string> polyContents;
 
@@ -207,7 +207,7 @@ namespace Launcher
                 numArray = PakTools.Decode(numArray, 0);
 
                 polyContents = Encoding.GetEncoding("big5")
-                    .GetString(numArray).Split('\n').Select(b => Regex.Replace(b.Trim(), @"<[^>]*>", string.Empty))
+                    .GetString(numArray).Split('\n').Select(b => Regex.Replace(b.Trim(), @"<[^>]*>", string.Empty).Trim())
                     .Where(b => b.Trim() != string.Empty && b != "Choose a monster." && !b.Contains("Release Polymorph")).ToList();
             }
 
@@ -218,6 +218,28 @@ namespace Launcher
             }
 
             return polyContents;
+        }
+
+        private string GetUpdatedMonlistContent()
+        {
+            var filePath = Path.Combine(this._config.InstallDir, "text.pak");
+            var idxFile = filePath.Replace(".pak", ".idx");
+
+            var indexes = PakTools.LoadIndexData(idxFile);
+            var records = PakTools.CreateIndexRecords(indexes, true);
+            var polyFile = records[11991]; //monlist-e
+
+            using (var fileStream = File.Open(filePath, FileMode.Open, FileAccess.Read))
+            {
+                byte[] numArray = new byte[polyFile.FileSize];
+                fileStream.Seek((long)polyFile.Offset, SeekOrigin.Begin);
+                fileStream.Read(numArray, 0, polyFile.FileSize);
+                numArray = PakTools.Decode(numArray, 0);
+                var hmm = Encoding.GetEncoding("big5").GetString(numArray)
+                    .Replace("Ordinary Monsters", "Custom Polylist");
+                return Encoding.GetEncoding("big5").GetString(numArray)
+                    .Replace("Ordinary Monsters", "Custom Polylist");
+            }
         }
 
         private void Update_Lists()
@@ -354,9 +376,14 @@ namespace Launcher
                 {
                     new PakFile
                     {
+                        Id = 11996,
+                        FileName = "monlist0-e.html",
+                        Content = this.CreatePolylistHtml()
+                    }, new PakFile
+                    {
                         Id = 11992,
                         FileName = "monlist-e.html",
-                        Content = this.CreatePolylistHtml()
+                        Content = this.GetUpdatedMonlistContent()
                     }
                 }, true);
 
@@ -368,22 +395,27 @@ namespace Launcher
 
         private string CreatePolylistHtml()
         {
-            var polyHtml = new StringBuilder("<body>\n<p><font fg=ffffff>Choose a monster.</font></p>\n");
-            polyHtml.AppendLine("<br><a action=\"none\">Release Polymorph</a><br>");
+            var polyHtml = new StringBuilder();
+            polyHtml.AppendLine("<body><p><font fg=ffffff>Choose a monster. </p></font>");
+            polyHtml.AppendLine("<br><a action=\"none\">Release Polymorph</a>");
+            polyHtml.AppendLine("<br>");
 
             foreach(var poly in this._selectedPolymorphs)
             {
                 if(polyList.ContainsKey(poly))
                 {
                     var polyDefinition = polyList[poly];
-                    polyHtml.AppendLine("<a action=\"" + polyDefinition + "\">" + poly + "</a><br>");
+                    polyHtml.AppendLine("<br> <a action=\"" + polyDefinition + "\">" + poly + "</a>");
                 } else
                 {
-                    polyHtml.AppendLine("<br><font fg=ffffaf>" + poly + "</font><br><br>");
+                    polyHtml.AppendLine("<br><font fg=ffffaf>" + poly + "</font>");
                 }
             }
 
-            return polyHtml.ToString() + "</body>";
+            polyHtml.AppendLine("<br><br><img src=\"#331\" link=\"monlist\">");
+            polyHtml.AppendLine("</body>");
+
+            return polyHtml.ToString();
         }
     }
 }

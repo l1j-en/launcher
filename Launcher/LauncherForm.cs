@@ -33,7 +33,7 @@ namespace Launcher
 {
     public partial class LauncherForm : Form
     {
-        private const string Version = "2.7.4";
+        private const string Version = "2.7.6";
         private readonly bool _isWin8OrHigher;
         private readonly string _windowsVersion;
         private Win32Api.DevMode _revertResolution;
@@ -364,6 +364,10 @@ namespace Launcher
             try
             {
                 var versionInfo = Helpers.GetVersionInfo(this._config.VersionInfoUrl, this._config.PublicKey);
+                var force = e.Argument != null && (bool)e.Argument;
+                var launcherKey = Registry.CurrentUser.OpenSubKey(@"Software\" + this._config.KeyName, true);
+                var lastUpdatedCheck = launcherKey.GetValue("LastUpdated");
+                var updatesLastRun = (int?)lastUpdatedCheck ?? 0;
 
                 if (versionInfo == null)
                     return;
@@ -419,6 +423,9 @@ namespace Launcher
                     } //end if
                 } //end if
 
+                if (versionInfo.LastUpdated < updatesLastRun && !force)
+                    return;
+
                 // checks for > 1 because the Updater.exe is always present.
                 if (versionInfo.FileChecksums != null && versionInfo.FileChecksums.Count > 1)
                 {
@@ -459,7 +466,6 @@ namespace Launcher
                     } //end for
 
                     var currentTime = DateTime.UtcNow - new DateTime(1970, 1, 1);
-                    var launcherKey = Registry.CurrentUser.OpenSubKey(@"Software\" + this._config.KeyName, true);
                     launcherKey.SetValue("LastUpdated", (int) currentTime.TotalSeconds, RegistryValueKind.DWord);
 
                     string versionName;

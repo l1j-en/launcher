@@ -271,7 +271,7 @@ namespace Launcher.Utilities
                 var bytes = Encoding.Default.GetBytes(pakFile.Content);
                 bytes = PakTools.Encode(bytes, 0);
 
-                pakIndex[num].FileSize = bytes.Length;
+                pakIndex[num].FileSize = pakFile.Content.Length;
                 pakIndex[num].Offset = (int)fileStream.Seek((long)0, SeekOrigin.End);
                 fileStream.Write(bytes, 0, (int)bytes.Length);
             }
