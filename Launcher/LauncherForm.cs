@@ -143,9 +143,16 @@ namespace Launcher
             this.lblVersion.Text = Version;
             this.cmbServer.Items.AddRange(this._config.Servers.Keys.ToArray());
             this.cmbServer.SelectedIndex = 0;
+
+            var versionInfoThread = new Thread(() => this.LoadVersionInfo()) { IsBackground = true };
+            versionInfoThread.Start();
+        }
+
+        private void LoadVersionInfo()
+        {
             this._versionInfo = Helpers.GetVersionInfo(this._config.VersionInfoUrl, this._config.PublicKey);
 
-            this.updateChecker.RunWorkerAsync();
+            this.Invoke((MethodInvoker)delegate { updateChecker.RunWorkerAsync(); });
         }
 
         private void playButton_Click(object sender, EventArgs e)
