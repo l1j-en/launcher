@@ -54,6 +54,7 @@ namespace Launcher
             this.btnClose = new Launcher.Controls.GlassButton();
             this.lblServerStatus = new Launcher.Controls.OutlineLabel();
             this.lblServerStatusText = new Launcher.Controls.OutlineLabel();
+            this.configChecker = new System.ComponentModel.BackgroundWorker();
             ((System.ComponentModel.ISupportInitialize)(this.pctLinLogo)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pctVote)).BeginInit();
             this.systemTrayContextMenu.SuspendLayout();
@@ -321,6 +322,11 @@ namespace Launcher
             this.lblServerStatusText.TabIndex = 14;
             this.lblServerStatusText.Text = "SERVER STATUS:";
             // 
+            // configChecker
+            // 
+            this.configChecker.WorkerReportsProgress = true;
+            this.configChecker.DoWork += new System.ComponentModel.DoWorkEventHandler(this.configChecker_DoWork);
+            // 
             // LauncherForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -383,6 +389,7 @@ namespace Launcher
         private System.Windows.Forms.ContextMenuStrip systemTrayContextMenu;
         private System.Windows.Forms.ToolStripMenuItem Restore;
         private System.Windows.Forms.ToolStripMenuItem Close;
+        private System.ComponentModel.BackgroundWorker configChecker;
     }
 }
 

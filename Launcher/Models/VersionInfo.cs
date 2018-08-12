@@ -33,10 +33,7 @@ namespace Launcher.Models
         public long LastUpdated { get; set; }
 
         [DataMember]
-        public Dictionary<string, string> FileChecksums { get; set; } 
-
-        [DataMember]
-        public Dictionary<string, List<PakFile>> PakFiles { get; set; }
+        public Dictionary<string, long> Files { get; set; } 
 
         [DataMember]
         public string ServerName { get; set; }

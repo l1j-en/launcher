@@ -144,20 +144,13 @@ namespace Launcher
             this.cmbServer.Items.AddRange(this._config.Servers.Keys.ToArray());
             this.cmbServer.SelectedIndex = 0;
 
-            var versionInfoThread = new Thread(() => this.LoadVersionInfo()) { IsBackground = true };
+            var versionInfoThread = new Thread(() => this.configChecker.RunWorkerAsync()) { IsBackground = true };
             versionInfoThread.Start();
-        }
-
-        private void LoadVersionInfo()
-        {
-            this._versionInfo = Helpers.GetVersionInfo(this._config.VersionInfoUrl, this._config.PublicKey);
-
-            this.Invoke((MethodInvoker)delegate { updateChecker.RunWorkerAsync(); });
         }
 
         private void playButton_Click(object sender, EventArgs e)
         {
-            this.Launch(this._config.Servers[this.cmbServer.SelectedItem.ToString()]);
+            this.updateChecker.RunWorkerAsync();
         }
 
         private void Launch(Server server)
@@ -392,9 +385,8 @@ namespace Launcher
                 var applicationPath = Application.ExecutablePath;
                 var appDataPath = Directory.GetParent(Application.UserAppDataPath).ToString();
                 var updaterLocation = Path.Combine(appDataPath, "Updater.exe");
-                var updaterChecksum = Helpers.GetChecksum(updaterLocation);
 
-                if (!File.Exists(updaterLocation) || updaterChecksum != versionInfo.FileChecksums["Updater.exe"])
+                if (!File.Exists(updaterLocation) || versionInfo.Files["Updater.exe"] < updatesLastRun)
                 {
                     using (var client = new WebClient())
                     {
@@ -434,38 +426,25 @@ namespace Launcher
                     return;
 
                 // checks for > 1 because the Updater.exe is always present.
-                if (versionInfo.FileChecksums != null && versionInfo.FileChecksums.Count > 1)
+                if (versionInfo.Files != null && versionInfo.Files.Count > 1)
                 {
-                    Helpers.SetControlPropertyThreadSafe(this.prgUpdates, "Maximum", versionInfo.FileChecksums.Count);
+                    Helpers.SetControlPropertyThreadSafe(this.prgUpdates, "Maximum", versionInfo.Files.Count);
 
-                    for (var i = 1; i < versionInfo.FileChecksums.Count; i++)
+                    for (var i = 1; i < versionInfo.Files.Count; i++)
                     {
-                        var file = versionInfo.FileChecksums.ElementAt(i).Key;
-                        var checksum = versionInfo.FileChecksums.ElementAt(i).Value;
+                        var file = versionInfo.Files.ElementAt(i).Key;
+                        var lastModified = versionInfo.Files.ElementAt(i).Value;
                         var filePath = Path.Combine(this._config.InstallDir, file);
 
-                        if (!File.Exists(filePath) || Helpers.GetChecksum(filePath) != checksum)
+                        if (!File.Exists(filePath) || lastModified < updatesLastRun)
                         {
                             var extension = Path.GetExtension(file);
                             using (var client = new WebClient())
                             {
                                 client.DownloadProgressChanged += client_DownloadProgressChanged;
-
-                                if (File.Exists(filePath) && extension != null
-                                    && extension.Equals(".pak", StringComparison.CurrentCultureIgnoreCase) &&
-                                    !file.Contains("zelgo"))
-                                {
-                                    var idxFile = filePath.Replace(".pak", ".idx");
-                                    var pakIndex = PakTools.RebuildPak(filePath, versionInfo.PakFiles[file], true);
-
-                                    PakTools.RebuildIndex(idxFile, pakIndex, true);
-                                }
-                                else
-                                {
-                                    client.DownloadFileAsyncSync(
-                                        new Uri(this._config.UpdaterFilesRoot + file.Replace("\\", "/")),
-                                        filePath);
-                                }
+                                client.DownloadFileAsyncSync(
+                                    new Uri(this._config.UpdaterFilesRoot + file.Replace("\\", "/")),
+                                    filePath);
                             }
                         }
 
@@ -497,6 +476,30 @@ namespace Launcher
             } //end try/finally
         } //end updateChecker
 
+        private void patchFiles()
+        {
+            var paths = new List<string>
+            {
+                "text"
+            };
+
+            var patchFiles = false;
+
+            foreach (var path in paths)
+            {
+                if (Directory.GetFiles(Path.Combine(this._config.InstallDir, path)).Length > 0)
+                {
+                    patchFiles = true;
+                    break;
+                }
+            }
+
+            if (patchFiles)
+            {
+               
+            }
+        }
+
         private void client_DownloadProgressChanged(object sender, DownloadProgressChangedEventArgs e)
         {
             Helpers.SetControlPropertyThreadSafe(this.prgUpdateCurrent, "Maximum" , (int)e.TotalBytesToReceive / 100);
@@ -505,10 +508,11 @@ namespace Launcher
 
         private void updateChecker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
-            if(this.lblServerStatus.Text.ToUpper() == "ONLINE")
-                this.btnPlay.Enabled = true;
-
+            this.patchFiles();
+            this.btnPlay.Enabled = true;
             this.btnCheck.Enabled = true;
+
+            this.Launch(this._config.Servers[this.cmbServer.SelectedItem.ToString()]);
         } //end updateChecker_RunWorkerCompleted
 
         private void updateChecker_ProgressChanged(object sender, ProgressChangedEventArgs e)
@@ -575,6 +579,59 @@ namespace Launcher
             } else {
                 Application.Exit();
             }
+        }
+
+        private void configChecker_DoWork(object sender, DoWorkEventArgs e)
+        {
+            this._versionInfo = Helpers.GetVersionInfo(this._config.VersionInfoUrl, this._config.PublicKey);
+
+            var force = e.Argument != null && (bool)e.Argument;
+            var launcherKey = Registry.CurrentUser.OpenSubKey(@"Software\" + this._config.KeyName, true);
+            var lastUpdatedCheck = launcherKey.GetValue("LastUpdated");
+            var updatesLastRun = (int?)lastUpdatedCheck ?? 0;
+
+            if (this._versionInfo == null)
+                return;
+
+            var settings = Helpers.LoadSettings(this._config.KeyName);
+
+            if (Helpers.UpdateConfig(this._versionInfo, settings.DisableServerUpdate))
+            {
+                MessageBox.Show("Configuration information was updated from the server.\n\nThe launcher will close. Please re-launch.",
+                    @"Configuration Updated", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                this.Close();
+            }
+
+            if (Helpers.StringToNumber(this._versionInfo.Version) > Helpers.StringToNumber(Version))
+            {
+                var applicationPath = Application.ExecutablePath;
+                var appDataPath = Directory.GetParent(Application.UserAppDataPath).ToString();
+                var updaterLocation = Path.Combine(appDataPath, "Updater.exe");
+                var updaterChecksum = Helpers.GetChecksum(updaterLocation);
+
+                var result = DialogResult.Cancel;
+
+                // push to the UI thread to actually display the dialog... ugly hack
+                var dialog = this.BeginInvoke(new MethodInvoker(delegate
+                {
+                    result = new UpdateForm(this._versionInfo).ShowDialog();
+                }));
+
+                this.EndInvoke(dialog);
+
+                if (result == DialogResult.OK)
+                {
+                    var info = new ProcessStartInfo(updaterLocation);
+                    info.Arguments = "\"" + applicationPath + "\"";
+
+                    if (Environment.OSVersion.Version.Major >= 6)
+                        info.Verb = "runas";
+
+                    Process.Start(info);
+                } //end if
+            } //end if
+
+            Helpers.SetControlPropertyThreadSafe(this.btnPlay, "Enabled", true);
         }
     } //end class
 } //end namespace
