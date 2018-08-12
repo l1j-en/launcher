@@ -254,30 +254,50 @@ namespace Launcher.Utilities
         {
             var pakIndex = PakTools.CreateIndexRecords(PakTools.LoadIndexData(pakFileName.Replace(".pak", ".idx")), true);
 
-            var fileStream = File.OpenWrite(pakFileName);
+            var fileStream1 = File.OpenWrite(pakFileName.Replace(".pak", ".idx"));
+            var fileStream2 = File.OpenWrite(pakFileName);
+            
             foreach (var pakFile in files)
             {
-                var num = GetIndex(pakIndex, pakFile.FileName);
+                var updatedList = new List<PakTools.IndexRecord>();
 
-                if (num < 0)
+                byte[] numArray = File.ReadAllBytes(pakFile.FileName);
+                int offset = (int)fileStream1.Seek(0L, SeekOrigin.End);
+                fileStream1.Write(numArray, 0, numArray.Length);
+
+                string filename = pakFile.FileName.Substring(pakFile.FileName.LastIndexOf('\\') + 1);
+
+                var newRecord = new PakTools.IndexRecord(filename, numArray.Length, offset);
+                bool inserted = false;
+
+                for (int i = 0; i < pakIndex.Length; ++i)
                 {
-                    Array.Resize<IndexRecord>(ref pakIndex, (int)pakIndex.Length + 1);
-                    num = pakIndex.Length - 1;
+                    PakTools.IndexRecord oldRecord = pakIndex[i];
 
-                    pakIndex[num].FileName = pakFile.FileName;
-                    pakIndex[num].FileSize = pakFile.Content.Length;
+                    if (oldRecord.FileName.Equals(filename))
+                    {
+                        updatedList.Add(newRecord);
+                    } // if our filename comes before the records filename alphabetically
+                    else if (!inserted && string.CompareOrdinal(filename, oldRecord.FileName) == -1)
+                    {
+                        inserted = true;
+                        updatedList.Add(newRecord);
+                        updatedList.Add(oldRecord);
+                    }
+                    else
+                    {
+                        updatedList.Add(oldRecord);
+                    }
                 }
 
-                var bytes = Encoding.Default.GetBytes(pakFile.Content);
-                bytes = PakTools.Encode(bytes, 0);
-
-                pakIndex[num].FileSize = pakFile.Content.Length;
-                pakIndex[num].Offset = (int)fileStream.Seek((long)0, SeekOrigin.End);
-                fileStream.Write(bytes, 0, (int)bytes.Length);
+                Array.Resize<PakTools.IndexRecord>(ref pakIndex, updatedList.Count);
+                pakIndex = updatedList.ToArray();
             }
-           
 
-            fileStream.Close();
+            fileStream2.Seek(0L, SeekOrigin.Begin);
+            fileStream2.Write(BitConverter.GetBytes(pakIndex.Length), 0, 4);
+            fileStream2.Close();
+            fileStream1.Close();
 
             return pakIndex;
         } //end RebuildPak
