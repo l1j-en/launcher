@@ -33,7 +33,7 @@ namespace Launcher
 {
     public partial class LauncherForm : Form
     {
-        private const string Version = "2.7.6";
+        private const string Version = "3.0.0";
         private readonly bool _isWin8OrHigher;
         private readonly string _windowsVersion;
         private Win32Api.DevMode _revertResolution;
@@ -422,9 +422,6 @@ namespace Launcher
                     } //end if
                 } //end if
 
-                if (versionInfo.LastUpdated < updatesLastRun && !force)
-                    return;
-
                 // checks for > 1 because the Updater.exe is always present.
                 if (versionInfo.Files != null && versionInfo.Files.Count > 1)
                 {
@@ -436,7 +433,7 @@ namespace Launcher
                         var lastModified = versionInfo.Files.ElementAt(i).Value;
                         var filePath = Path.Combine(this._config.InstallDir, file);
 
-                        if (!File.Exists(filePath) || lastModified < updatesLastRun)
+                        if (!File.Exists(filePath) || lastModified > updatesLastRun)
                         {
                             var extension = Path.GetExtension(file);
                             using (var client = new WebClient())
@@ -476,27 +473,13 @@ namespace Launcher
             } //end try/finally
         } //end updateChecker
 
-        private void patchFiles()
+        private void PatchFiles()
         {
-            var paths = new List<string>
-            {
-                "text"
-            };
+           var patchForm = new Patcher(this._config);
 
-            var patchFiles = false;
-
-            foreach (var path in paths)
+            if(!patchForm.IsDisposed)
             {
-                if (Directory.GetFiles(Path.Combine(this._config.InstallDir, path)).Length > 0)
-                {
-                    patchFiles = true;
-                    break;
-                }
-            }
-
-            if (patchFiles)
-            {
-               
+                patchForm.ShowDialog();
             }
         }
 
@@ -508,11 +491,11 @@ namespace Launcher
 
         private void updateChecker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
-            this.patchFiles();
+            this.PatchFiles();
             this.btnPlay.Enabled = true;
             this.btnCheck.Enabled = true;
 
-            this.Launch(this._config.Servers[this.cmbServer.SelectedItem.ToString()]);
+            //this.Launch(this._config.Servers[this.cmbServer.SelectedItem.ToString()]);
         } //end updateChecker_RunWorkerCompleted
 
         private void updateChecker_ProgressChanged(object sender, ProgressChangedEventArgs e)

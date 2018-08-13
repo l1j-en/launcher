@@ -133,6 +133,12 @@
     <Compile Include="Models\LauncherConfig.cs" />
     <Compile Include="Models\PakFile.cs" />
     <Compile Include="Models\VersionInfo.cs" />
+    <Compile Include="Patcher.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Patcher.Designer.cs">
+      <DependentUpon>Patcher.cs</DependentUpon>
+    </Compile>
     <Compile Include="Polymorphs.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -177,6 +183,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="LauncherForm.resx">
       <DependentUpon>LauncherForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Patcher.resx">
+      <DependentUpon>Patcher.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Polymorphs.resx">
       <DependentUpon>Polymorphs.cs</DependentUpon>
