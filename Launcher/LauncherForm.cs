@@ -150,7 +150,14 @@ namespace Launcher
 
         private void playButton_Click(object sender, EventArgs e)
         {
-            this.updateChecker.RunWorkerAsync();
+            var patchForm = new Patcher(this._config);
+
+            if (!patchForm.IsDisposed)
+            {
+                patchForm.ShowDialog();
+            }
+
+            // this.updateChecker.RunWorkerAsync();
         }
 
         private void Launch(Server server)
