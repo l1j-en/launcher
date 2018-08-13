@@ -290,10 +290,10 @@ namespace Launcher
 
                         var updateCheckComplete = false;
 
-                        prgUpdates.Invoke(new Action(() =>
+                        /*prgUpdates.Invoke(new Action(() =>
                         {
                             updateCheckComplete = prgUpdates.Value == prgUpdates.Maximum;
-                        }));
+                        }));*/
 
                         if (updateCheckComplete)
                             Helpers.SetControlPropertyThreadSafe(this.btnPlay, "Enabled", true);
@@ -425,7 +425,7 @@ namespace Launcher
                 // checks for > 1 because the Updater.exe is always present.
                 if (versionInfo.Files != null && versionInfo.Files.Count > 1)
                 {
-                    Helpers.SetControlPropertyThreadSafe(this.prgUpdates, "Maximum", versionInfo.Files.Count);
+                   // Helpers.SetControlPropertyThreadSafe(this.prgUpdates, "Maximum", versionInfo.Files.Count);
 
                     for (var i = 1; i < versionInfo.Files.Count; i++)
                     {
@@ -469,7 +469,7 @@ namespace Launcher
             }
             finally
             {
-                this.updateChecker.ReportProgress(this.prgUpdates.Maximum);
+                //this.updateChecker.ReportProgress(this.prgUpdates.Maximum);
             } //end try/finally
         } //end updateChecker
 
@@ -485,22 +485,21 @@ namespace Launcher
 
         private void client_DownloadProgressChanged(object sender, DownloadProgressChangedEventArgs e)
         {
-            Helpers.SetControlPropertyThreadSafe(this.prgUpdateCurrent, "Maximum" , (int)e.TotalBytesToReceive / 100);
-            Helpers.SetControlPropertyThreadSafe(this.prgUpdateCurrent, "Value", (int)e.BytesReceived / 100);
+           // Helpers.SetControlPropertyThreadSafe(this.prgUpdateCurrent, "Maximum" , (int)e.TotalBytesToReceive / 100);
+           // Helpers.SetControlPropertyThreadSafe(this.prgUpdateCurrent, "Value", (int)e.BytesReceived / 100);
         } //end client_DownloadProgressChanged
 
         private void updateChecker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
             this.PatchFiles();
             this.btnPlay.Enabled = true;
-            this.btnCheck.Enabled = true;
 
             //this.Launch(this._config.Servers[this.cmbServer.SelectedItem.ToString()]);
         } //end updateChecker_RunWorkerCompleted
 
         private void updateChecker_ProgressChanged(object sender, ProgressChangedEventArgs e)
         {
-            this.prgUpdates.Value = e.ProgressPercentage;
+            // this.prgUpdates.Value = e.ProgressPercentage;
         } //end updateChecker_updateChecker_ProgressChanged
 
         private void btnCheck_Click(object sender, EventArgs e)
@@ -615,6 +614,11 @@ namespace Launcher
             } //end if
 
             Helpers.SetControlPropertyThreadSafe(this.btnPlay, "Enabled", true);
+        }
+
+        private void BannerBrowser_DocumentCompleted(object sender, WebBrowserDocumentCompletedEventArgs e)
+        {
+            this.BannerBrowser.Visible = true;
         }
     } //end class
 } //end namespace

@@ -36,25 +36,21 @@ namespace Launcher
             this.pctLinLogo = new System.Windows.Forms.PictureBox();
             this.cmbServer = new System.Windows.Forms.ComboBox();
             this.pctVote = new System.Windows.Forms.PictureBox();
-            this.prgUpdates = new System.Windows.Forms.ProgressBar();
             this.updateChecker = new System.ComponentModel.BackgroundWorker();
-            this.prgUpdateCurrent = new System.Windows.Forms.ProgressBar();
             this.tmrCheckProcess = new System.Windows.Forms.Timer(this.components);
             this.systemIcon = new System.Windows.Forms.NotifyIcon(this.components);
             this.systemTrayContextMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.Restore = new System.Windows.Forms.ToolStripMenuItem();
             this.Close = new System.Windows.Forms.ToolStripMenuItem();
+            this.configChecker = new System.ComponentModel.BackgroundWorker();
             this.lblVersion = new Launcher.Controls.OutlineLabel();
             this.lblVersionText = new Launcher.Controls.OutlineLabel();
             this.btnCheck = new Launcher.Controls.GlassButton();
-            this.lvlUpdateCurrent = new Launcher.Controls.OutlineLabel();
-            this.lblUpdates = new Launcher.Controls.OutlineLabel();
             this.btnPlay = new Launcher.Controls.GlassButton();
             this.btnSettings = new Launcher.Controls.GlassButton();
             this.btnClose = new Launcher.Controls.GlassButton();
             this.lblServerStatus = new Launcher.Controls.OutlineLabel();
             this.lblServerStatusText = new Launcher.Controls.OutlineLabel();
-            this.configChecker = new System.ComponentModel.BackgroundWorker();
             ((System.ComponentModel.ISupportInitialize)(this.pctLinLogo)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pctVote)).BeginInit();
             this.systemTrayContextMenu.SuspendLayout();
@@ -64,15 +60,16 @@ namespace Launcher
             // 
             this.BannerBrowser.CausesValidation = false;
             this.BannerBrowser.IsWebBrowserContextMenuEnabled = false;
-            this.BannerBrowser.Location = new System.Drawing.Point(32, 64);
+            this.BannerBrowser.Location = new System.Drawing.Point(32, 56);
             this.BannerBrowser.Name = "BannerBrowser";
             this.BannerBrowser.ScrollBarsEnabled = false;
-            this.BannerBrowser.Size = new System.Drawing.Size(608, 243);
+            this.BannerBrowser.Size = new System.Drawing.Size(608, 274);
             this.BannerBrowser.TabIndex = 19;
             this.BannerBrowser.TabStop = false;
-            this.BannerBrowser.Url = new System.Uri("", System.UriKind.Relative);
+            this.BannerBrowser.Url = new System.Uri("http://test.zelgo.net/linweb/default/news_raw", System.UriKind.Absolute);
             this.BannerBrowser.Visible = false;
             this.BannerBrowser.WebBrowserShortcutsEnabled = false;
+            this.BannerBrowser.DocumentCompleted += new System.Windows.Forms.WebBrowserDocumentCompletedEventHandler(this.BannerBrowser_DocumentCompleted);
             // 
             // pctLinLogo
             // 
@@ -90,7 +87,7 @@ namespace Launcher
             // 
             this.cmbServer.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cmbServer.FormattingEnabled = true;
-            this.cmbServer.Location = new System.Drawing.Point(310, 353);
+            this.cmbServer.Location = new System.Drawing.Point(256, 334);
             this.cmbServer.Name = "cmbServer";
             this.cmbServer.Size = new System.Drawing.Size(158, 21);
             this.cmbServer.TabIndex = 21;
@@ -100,19 +97,12 @@ namespace Launcher
             // 
             this.pctVote.Cursor = System.Windows.Forms.Cursors.Hand;
             this.pctVote.Image = global::Launcher.Properties.Resources.vote;
-            this.pctVote.Location = new System.Drawing.Point(474, 334);
+            this.pctVote.Location = new System.Drawing.Point(8, 334);
             this.pctVote.Name = "pctVote";
             this.pctVote.Size = new System.Drawing.Size(88, 53);
             this.pctVote.TabIndex = 25;
             this.pctVote.TabStop = false;
             this.pctVote.Click += new System.EventHandler(this.pctVote_Click);
-            // 
-            // prgUpdates
-            // 
-            this.prgUpdates.Location = new System.Drawing.Point(74, 362);
-            this.prgUpdates.Name = "prgUpdates";
-            this.prgUpdates.Size = new System.Drawing.Size(157, 23);
-            this.prgUpdates.TabIndex = 27;
             // 
             // updateChecker
             // 
@@ -120,13 +110,6 @@ namespace Launcher
             this.updateChecker.DoWork += new System.ComponentModel.DoWorkEventHandler(this.updateChecker_DoWork);
             this.updateChecker.ProgressChanged += new System.ComponentModel.ProgressChangedEventHandler(this.updateChecker_ProgressChanged);
             this.updateChecker.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.updateChecker_RunWorkerCompleted);
-            // 
-            // prgUpdateCurrent
-            // 
-            this.prgUpdateCurrent.Location = new System.Drawing.Point(100, 337);
-            this.prgUpdateCurrent.Name = "prgUpdateCurrent";
-            this.prgUpdateCurrent.Size = new System.Drawing.Size(131, 23);
-            this.prgUpdateCurrent.TabIndex = 29;
             // 
             // tmrCheckProcess
             // 
@@ -165,6 +148,11 @@ namespace Launcher
             this.Close.Text = "Close";
             this.Close.Click += new System.EventHandler(this.Close_Click);
             // 
+            // configChecker
+            // 
+            this.configChecker.WorkerReportsProgress = true;
+            this.configChecker.DoWork += new System.ComponentModel.DoWorkEventHandler(this.configChecker_DoWork);
+            // 
             // lblVersion
             // 
             this.lblVersion.AutoSize = true;
@@ -196,50 +184,21 @@ namespace Launcher
             // 
             // btnCheck
             // 
+            this.btnCheck.BackColor = System.Drawing.Color.Silver;
             this.btnCheck.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.btnCheck.Enabled = false;
             this.btnCheck.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnCheck.GlowColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(192)))), ((int)(((byte)(255)))));
+            this.btnCheck.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(90)))), ((int)(((byte)(90)))), ((int)(((byte)(90)))));
+            this.btnCheck.GlowColor = System.Drawing.Color.FromArgb(((int)(((byte)(184)))), ((int)(((byte)(184)))), ((int)(((byte)(184)))));
             this.btnCheck.InnerBorderColor = System.Drawing.Color.Transparent;
-            this.btnCheck.Location = new System.Drawing.Point(242, 346);
+            this.btnCheck.Location = new System.Drawing.Point(508, 5);
             this.btnCheck.Name = "btnCheck";
             this.btnCheck.OuterBorderColor = System.Drawing.Color.Transparent;
             this.btnCheck.ShineColor = System.Drawing.Color.Transparent;
-            this.btnCheck.Size = new System.Drawing.Size(62, 41);
+            this.btnCheck.Size = new System.Drawing.Size(131, 21);
             this.btnCheck.SpecialSymbolColor = System.Drawing.Color.Transparent;
             this.btnCheck.TabIndex = 30;
-            this.btnCheck.Text = "CHECK";
+            this.btnCheck.Text = "Force File Check";
             this.btnCheck.Click += new System.EventHandler(this.btnCheck_Click);
-            // 
-            // lvlUpdateCurrent
-            // 
-            this.lvlUpdateCurrent.AutoSize = true;
-            this.lvlUpdateCurrent.BackColor = System.Drawing.Color.Transparent;
-            this.lvlUpdateCurrent.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lvlUpdateCurrent.ForeColor = System.Drawing.Color.White;
-            this.lvlUpdateCurrent.ImeMode = System.Windows.Forms.ImeMode.NoControl;
-            this.lvlUpdateCurrent.Location = new System.Drawing.Point(8, 339);
-            this.lvlUpdateCurrent.Name = "lvlUpdateCurrent";
-            this.lvlUpdateCurrent.OutlineForeColor = System.Drawing.Color.Black;
-            this.lvlUpdateCurrent.OutlineWidth = 2F;
-            this.lvlUpdateCurrent.Size = new System.Drawing.Size(99, 20);
-            this.lvlUpdateCurrent.TabIndex = 28;
-            this.lvlUpdateCurrent.Text = "CURRENT:";
-            // 
-            // lblUpdates
-            // 
-            this.lblUpdates.AutoSize = true;
-            this.lblUpdates.BackColor = System.Drawing.Color.Transparent;
-            this.lblUpdates.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.lblUpdates.ForeColor = System.Drawing.Color.White;
-            this.lblUpdates.ImeMode = System.Windows.Forms.ImeMode.NoControl;
-            this.lblUpdates.Location = new System.Drawing.Point(8, 365);
-            this.lblUpdates.Name = "lblUpdates";
-            this.lblUpdates.OutlineForeColor = System.Drawing.Color.Black;
-            this.lblUpdates.OutlineWidth = 2F;
-            this.lblUpdates.Size = new System.Drawing.Size(69, 20);
-            this.lblUpdates.TabIndex = 26;
-            this.lblUpdates.Text = "TOTAL:";
             // 
             // btnPlay
             // 
@@ -266,7 +225,7 @@ namespace Launcher
             this.btnSettings.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(90)))), ((int)(((byte)(90)))), ((int)(((byte)(90)))));
             this.btnSettings.GlowColor = System.Drawing.Color.FromArgb(((int)(((byte)(184)))), ((int)(((byte)(184)))), ((int)(((byte)(184)))));
             this.btnSettings.InnerBorderColor = System.Drawing.Color.Transparent;
-            this.btnSettings.Location = new System.Drawing.Point(565, 5);
+            this.btnSettings.Location = new System.Drawing.Point(427, 4);
             this.btnSettings.Name = "btnSettings";
             this.btnSettings.OuterBorderColor = System.Drawing.Color.Transparent;
             this.btnSettings.ShineColor = System.Drawing.Color.Transparent;
@@ -299,7 +258,7 @@ namespace Launcher
             this.lblServerStatus.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lblServerStatus.ForeColor = System.Drawing.Color.Khaki;
             this.lblServerStatus.ImeMode = System.Windows.Forms.ImeMode.NoControl;
-            this.lblServerStatus.Location = new System.Drawing.Point(388, 316);
+            this.lblServerStatus.Location = new System.Drawing.Point(368, 361);
             this.lblServerStatus.Name = "lblServerStatus";
             this.lblServerStatus.OutlineForeColor = System.Drawing.Color.Black;
             this.lblServerStatus.OutlineWidth = 2F;
@@ -314,7 +273,7 @@ namespace Launcher
             this.lblServerStatusText.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lblServerStatusText.ForeColor = System.Drawing.Color.White;
             this.lblServerStatusText.ImeMode = System.Windows.Forms.ImeMode.NoControl;
-            this.lblServerStatusText.Location = new System.Drawing.Point(242, 316);
+            this.lblServerStatusText.Location = new System.Drawing.Point(222, 361);
             this.lblServerStatusText.Name = "lblServerStatusText";
             this.lblServerStatusText.OutlineForeColor = System.Drawing.Color.Black;
             this.lblServerStatusText.OutlineWidth = 2F;
@@ -322,24 +281,16 @@ namespace Launcher
             this.lblServerStatusText.TabIndex = 14;
             this.lblServerStatusText.Text = "SERVER STATUS:";
             // 
-            // configChecker
-            // 
-            this.configChecker.WorkerReportsProgress = true;
-            this.configChecker.DoWork += new System.ComponentModel.DoWorkEventHandler(this.configChecker_DoWork);
-            // 
             // LauncherForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackgroundImage = global::Launcher.Properties.Resources.launcherBg;
             this.ClientSize = new System.Drawing.Size(670, 389);
+            this.Controls.Add(this.BannerBrowser);
             this.Controls.Add(this.lblVersion);
             this.Controls.Add(this.lblVersionText);
             this.Controls.Add(this.btnCheck);
-            this.Controls.Add(this.prgUpdateCurrent);
-            this.Controls.Add(this.lvlUpdateCurrent);
-            this.Controls.Add(this.prgUpdates);
-            this.Controls.Add(this.lblUpdates);
             this.Controls.Add(this.pctVote);
             this.Controls.Add(this.btnPlay);
             this.Controls.Add(this.btnSettings);
@@ -347,7 +298,6 @@ namespace Launcher
             this.Controls.Add(this.lblServerStatus);
             this.Controls.Add(this.lblServerStatusText);
             this.Controls.Add(this.pctLinLogo);
-            this.Controls.Add(this.BannerBrowser);
             this.Controls.Add(this.cmbServer);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
@@ -376,11 +326,7 @@ namespace Launcher
         private System.Windows.Forms.PictureBox pctVote;
         private OutlineLabel lblServerStatusText;
         private OutlineLabel lblServerStatus;
-        private OutlineLabel lblUpdates;
-        private System.Windows.Forms.ProgressBar prgUpdates;
         private System.ComponentModel.BackgroundWorker updateChecker;
-        private System.Windows.Forms.ProgressBar prgUpdateCurrent;
-        private OutlineLabel lvlUpdateCurrent;
         private GlassButton btnCheck;
         private System.Windows.Forms.Timer tmrCheckProcess;
         private OutlineLabel lblVersionText;
