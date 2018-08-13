@@ -620,5 +620,14 @@ namespace Launcher
         {
             this.BannerBrowser.Visible = true;
         }
+
+        private void BannerBrowser_Navigating(object sender, WebBrowserNavigatingEventArgs e)
+        {
+            //cancel the current event
+            e.Cancel = true;
+
+            //this opens the URL in the user's default browser
+            Process.Start(e.Url.ToString());
+        }
     } //end class
 } //end namespace

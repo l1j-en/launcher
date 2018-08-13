@@ -70,6 +70,7 @@ namespace Launcher
             this.BannerBrowser.Visible = false;
             this.BannerBrowser.WebBrowserShortcutsEnabled = false;
             this.BannerBrowser.DocumentCompleted += new System.Windows.Forms.WebBrowserDocumentCompletedEventHandler(this.BannerBrowser_DocumentCompleted);
+            this.BannerBrowser.Navigating += new System.Windows.Forms.WebBrowserNavigatingEventHandler(this.BannerBrowser_Navigating);
             // 
             // pctLinLogo
             // 
@@ -87,7 +88,7 @@ namespace Launcher
             // 
             this.cmbServer.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.cmbServer.FormattingEnabled = true;
-            this.cmbServer.Location = new System.Drawing.Point(256, 334);
+            this.cmbServer.Location = new System.Drawing.Point(256, 337);
             this.cmbServer.Name = "cmbServer";
             this.cmbServer.Size = new System.Drawing.Size(158, 21);
             this.cmbServer.TabIndex = 21;
@@ -160,7 +161,7 @@ namespace Launcher
             this.lblVersion.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lblVersion.ForeColor = System.Drawing.Color.Red;
             this.lblVersion.ImeMode = System.Windows.Forms.ImeMode.NoControl;
-            this.lblVersion.Location = new System.Drawing.Point(642, 29);
+            this.lblVersion.Location = new System.Drawing.Point(634, 29);
             this.lblVersion.Name = "lblVersion";
             this.lblVersion.OutlineForeColor = System.Drawing.Color.Black;
             this.lblVersion.OutlineWidth = 2F;
@@ -174,7 +175,7 @@ namespace Launcher
             this.lblVersionText.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lblVersionText.ForeColor = System.Drawing.Color.Red;
             this.lblVersionText.ImeMode = System.Windows.Forms.ImeMode.NoControl;
-            this.lblVersionText.Location = new System.Drawing.Point(584, 29);
+            this.lblVersionText.Location = new System.Drawing.Point(576, 29);
             this.lblVersionText.Name = "lblVersionText";
             this.lblVersionText.OutlineForeColor = System.Drawing.Color.Black;
             this.lblVersionText.OutlineWidth = 2F;
@@ -258,7 +259,7 @@ namespace Launcher
             this.lblServerStatus.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lblServerStatus.ForeColor = System.Drawing.Color.Khaki;
             this.lblServerStatus.ImeMode = System.Windows.Forms.ImeMode.NoControl;
-            this.lblServerStatus.Location = new System.Drawing.Point(368, 361);
+            this.lblServerStatus.Location = new System.Drawing.Point(368, 364);
             this.lblServerStatus.Name = "lblServerStatus";
             this.lblServerStatus.OutlineForeColor = System.Drawing.Color.Black;
             this.lblServerStatus.OutlineWidth = 2F;
@@ -273,7 +274,7 @@ namespace Launcher
             this.lblServerStatusText.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lblServerStatusText.ForeColor = System.Drawing.Color.White;
             this.lblServerStatusText.ImeMode = System.Windows.Forms.ImeMode.NoControl;
-            this.lblServerStatusText.Location = new System.Drawing.Point(222, 361);
+            this.lblServerStatusText.Location = new System.Drawing.Point(222, 364);
             this.lblServerStatusText.Name = "lblServerStatusText";
             this.lblServerStatusText.OutlineForeColor = System.Drawing.Color.Black;
             this.lblServerStatusText.OutlineWidth = 2F;
