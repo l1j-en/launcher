@@ -161,7 +161,7 @@ namespace Launcher
             this.lblVersion.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lblVersion.ForeColor = System.Drawing.Color.Red;
             this.lblVersion.ImeMode = System.Windows.Forms.ImeMode.NoControl;
-            this.lblVersion.Location = new System.Drawing.Point(634, 29);
+            this.lblVersion.Location = new System.Drawing.Point(634, 32);
             this.lblVersion.Name = "lblVersion";
             this.lblVersion.OutlineForeColor = System.Drawing.Color.Black;
             this.lblVersion.OutlineWidth = 2F;
@@ -175,7 +175,7 @@ namespace Launcher
             this.lblVersionText.Font = new System.Drawing.Font("Microsoft Sans Serif", 8F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lblVersionText.ForeColor = System.Drawing.Color.Red;
             this.lblVersionText.ImeMode = System.Windows.Forms.ImeMode.NoControl;
-            this.lblVersionText.Location = new System.Drawing.Point(576, 29);
+            this.lblVersionText.Location = new System.Drawing.Point(576, 32);
             this.lblVersionText.Name = "lblVersionText";
             this.lblVersionText.OutlineForeColor = System.Drawing.Color.Black;
             this.lblVersionText.OutlineWidth = 2F;
