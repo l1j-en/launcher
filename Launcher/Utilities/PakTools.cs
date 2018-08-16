@@ -250,15 +250,17 @@ namespace Launcher.Utilities
             return indexRecord;
         } //end CreateIndexRecords
 
-        public static IndexRecord[] RebuildPak(string pakFileName, List<PakFile> files, bool isPackFileProtected)
+        public static IndexRecord[] RebuildPak(string pakFileName, List<PakFile> files, bool isPackFileProtected, Action<int> progressUpdate = null)
         {
-            var pakIndex = PakTools.CreateIndexRecords(PakTools.LoadIndexData(pakFileName.Replace(".pak", ".idx")), true);
+            var indexFile = pakFileName.Replace(".pak", ".idx");
+            var pakIndex = PakTools.CreateIndexRecords(PakTools.LoadIndexData(indexFile), true);
 
-            var fileStream1 = File.OpenWrite(pakFileName.Replace(".pak", ".idx"));
-            var fileStream2 = File.OpenWrite(pakFileName);
-            
-            foreach (var pakFile in files)
+            var fileStream1 = File.OpenWrite(pakFileName);
+            var fileStream2 = File.OpenWrite(indexFile);
+
+            for (var x = 0; x < files.Count; x++)
             {
+                var pakFile = files[x];
                 var updatedList = new List<PakTools.IndexRecord>();
 
                 byte[] numArray = File.ReadAllBytes(pakFile.FileName);
@@ -292,12 +294,18 @@ namespace Launcher.Utilities
 
                 Array.Resize<PakTools.IndexRecord>(ref pakIndex, updatedList.Count);
                 pakIndex = updatedList.ToArray();
+
+                if(progressUpdate != null)
+                {
+                    progressUpdate.Invoke(x + 1);
+                }
             }
 
             fileStream2.Seek(0L, SeekOrigin.Begin);
             fileStream2.Write(BitConverter.GetBytes(pakIndex.Length), 0, 4);
             fileStream2.Close();
             fileStream1.Close();
+            PakTools.RebuildIndex(indexFile, pakIndex, true);
 
             return pakIndex;
         } //end RebuildPak
@@ -316,7 +324,7 @@ namespace Launcher.Utilities
             }
 
             if (isPackFileProtected)
-                Array.Copy(PakTools.Encode(numArray, 4), 0, numArray, 4, (int)numArray.Length - 4);
+                Array.Copy(PakTools.Encode(numArray, 4), 0, numArray, 4, numArray.Length - 4);
 
             File.WriteAllBytes(indexFile, numArray);
         } //end RebuildIndex

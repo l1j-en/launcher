@@ -41,6 +41,7 @@ namespace Launcher
         private readonly object _lockObject = new object();
         private readonly LauncherConfig _config;
         private VersionInfo _versionInfo;
+        private bool _hasUpdates;
 
         private static readonly List<LineageClient> Clients = new List<LineageClient>();
 
@@ -144,20 +145,19 @@ namespace Launcher
             this.cmbServer.Items.AddRange(this._config.Servers.Keys.ToArray());
             this.cmbServer.SelectedIndex = 0;
 
-            var versionInfoThread = new Thread(() => this.configChecker.RunWorkerAsync()) { IsBackground = true };
-            versionInfoThread.Start();
+            this.configChecker.RunWorkerAsync();
         }
 
         private void playButton_Click(object sender, EventArgs e)
         {
-            var patchForm = new Patcher(this._config);
+            var patchForm = new Patcher(this._config, this._hasUpdates);
 
             if (!patchForm.IsDisposed)
             {
                 patchForm.ShowDialog();
             }
 
-            // this.updateChecker.RunWorkerAsync();
+            this.Launch(this._config.Servers[this.cmbServer.SelectedItem.ToString()]);
         }
 
         private void Launch(Server server)
@@ -379,7 +379,9 @@ namespace Launcher
                 if (versionInfo == null)
                     return;
 
-                var settings = Helpers.LoadSettings(this._config.KeyName);
+                this._hasUpdates = versionInfo.Files.Any(b => b.Value > updatesLastRun);
+
+               /* var settings = Helpers.LoadSettings(this._config.KeyName);
 
                 if (Helpers.UpdateConfig(versionInfo, settings.DisableServerUpdate))
                 {
@@ -472,23 +474,13 @@ namespace Launcher
                             @"Windows 10 Detected",
                             MessageBoxButtons.OK, MessageBoxIcon.Information);
                     } //end if
-                } //end if
+                } //end if*/
             }
             finally
             {
                 //this.updateChecker.ReportProgress(this.prgUpdates.Maximum);
             } //end try/finally
         } //end updateChecker
-
-        private void PatchFiles()
-        {
-           var patchForm = new Patcher(this._config);
-
-            if(!patchForm.IsDisposed)
-            {
-                patchForm.ShowDialog();
-            }
-        }
 
         private void client_DownloadProgressChanged(object sender, DownloadProgressChangedEventArgs e)
         {
@@ -498,10 +490,7 @@ namespace Launcher
 
         private void updateChecker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
-            this.PatchFiles();
             this.btnPlay.Enabled = true;
-
-            //this.Launch(this._config.Servers[this.cmbServer.SelectedItem.ToString()]);
         } //end updateChecker_RunWorkerCompleted
 
         private void updateChecker_ProgressChanged(object sender, ProgressChangedEventArgs e)
@@ -635,6 +624,11 @@ namespace Launcher
 
             //this opens the URL in the user's default browser
             Process.Start(e.Url.ToString());
+        }
+
+        private void configChecker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            this.updateChecker.RunWorkerAsync();
         }
     } //end class
 } //end namespace

@@ -105,6 +105,7 @@
     <Compile Include="Controls\OutlineLabel.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="Controls\RoundedRectangles.cs" />
     <Compile Include="CustomMessageBox.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -220,6 +221,12 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Lineage.ico" />
+    <None Include="Resources\progess_background5.png" />
+    <None Include="Resources\progess_background4.png" />
+    <None Include="Resources\progess_background3.png" />
+    <None Include="Resources\progess_background2.png" />
+    <None Include="Resources\progess_background.png" />
+    <None Include="Resources\progess_background1.png" />
     <None Include="Resources\uparrow.png" />
     <None Include="Resources\downarrow.png" />
     <None Include="Resources\Help_Big1.png" />

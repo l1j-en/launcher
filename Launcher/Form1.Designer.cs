@@ -153,6 +153,7 @@ namespace Launcher
             // 
             this.configChecker.WorkerReportsProgress = true;
             this.configChecker.DoWork += new System.ComponentModel.DoWorkEventHandler(this.configChecker_DoWork);
+            this.configChecker.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.configChecker_RunWorkerCompleted);
             // 
             // lblVersion
             // 
