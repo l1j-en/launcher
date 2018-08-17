@@ -220,7 +220,7 @@ namespace Launcher
 
         private void patchWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
-           // this.Close();
+            this.Close();
         }
     }
 }

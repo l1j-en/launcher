@@ -256,7 +256,6 @@ namespace Launcher.Utilities
             var pakIndex = PakTools.CreateIndexRecords(PakTools.LoadIndexData(indexFile), true);
 
             var fileStream1 = File.OpenWrite(pakFileName);
-            var fileStream2 = File.OpenWrite(indexFile);
 
             for (var x = 0; x < files.Count; x++)
             {
@@ -264,6 +263,8 @@ namespace Launcher.Utilities
                 var updatedList = new List<PakTools.IndexRecord>();
 
                 byte[] numArray = File.ReadAllBytes(pakFile.FileName);
+                numArray = PakTools.Encode(numArray, 0);
+                
                 int offset = (int)fileStream1.Seek(0L, SeekOrigin.End);
                 fileStream1.Write(numArray, 0, numArray.Length);
 
@@ -279,12 +280,13 @@ namespace Launcher.Utilities
                     if (oldRecord.FileName.Equals(filename))
                     {
                         updatedList.Add(newRecord);
+                        inserted = true;
                     } // if our filename comes before the records filename alphabetically
                     else if (!inserted && string.CompareOrdinal(filename, oldRecord.FileName) == -1)
                     {
-                        inserted = true;
                         updatedList.Add(newRecord);
                         updatedList.Add(oldRecord);
+                        inserted = true;
                     }
                     else
                     {
@@ -301,9 +303,7 @@ namespace Launcher.Utilities
                 }
             }
 
-            fileStream2.Seek(0L, SeekOrigin.Begin);
-            fileStream2.Write(BitConverter.GetBytes(pakIndex.Length), 0, 4);
-            fileStream2.Close();
+            fileStream1.Flush();
             fileStream1.Close();
             PakTools.RebuildIndex(indexFile, pakIndex, true);
 
