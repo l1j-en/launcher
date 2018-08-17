@@ -28,6 +28,7 @@ namespace Launcher.Models
         public string KeyName { get; private set; }
         public Dictionary<string, Server> Servers { get; set; }
         public Uri WebsiteUrl { get; set; }
+        public Uri NewsUrl { get; set; }
         public Uri VoteUrl { get; set; }
         public Uri UpdaterUrl { get; set; }
         public Uri VersionInfoUrl { get; set; }

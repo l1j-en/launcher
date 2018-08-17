@@ -51,6 +51,9 @@ namespace Launcher.Models
         public string WebsiteUrl { get; set; }
 
         [DataMember]
+        public string NewsUrl { get; set; }
+
+        [DataMember]
         public string UpdaterUrl { get; set; }
 
         [DataMember]

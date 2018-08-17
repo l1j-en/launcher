@@ -91,6 +91,7 @@ namespace Launcher
 
             this._isWin8OrHigher = Helpers.IsWin8OrHigher(out this._windowsVersion);
             InitializeComponent();
+            this.BannerBrowser.Url = this._config.NewsUrl;
         }
 
         private void btnClose_Click(object sender, EventArgs e)
@@ -512,16 +513,22 @@ namespace Launcher
 
         private void BannerBrowser_DocumentCompleted(object sender, WebBrowserDocumentCompletedEventArgs e)
         {
-            this.BannerBrowser.Visible = true;
+            if(e.Url.ToString().ToLower() != "about:blank")
+            {
+                this.BannerBrowser.Visible = true;
+            }
         }
 
         private void BannerBrowser_Navigating(object sender, WebBrowserNavigatingEventArgs e)
         {
-            //cancel the current event
-            e.Cancel = true;
+            if(e.Url.ToString() != this._config.NewsUrl.ToString())
+            {
+                //cancel the current event
+                e.Cancel = true;
 
-            //this opens the URL in the user's default browser
-            Process.Start(e.Url.ToString());
+                //this opens the URL in the user's default browser
+                Process.Start(e.Url.ToString());
+            }
         }
 
         private void configChecker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)

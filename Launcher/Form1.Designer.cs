@@ -66,7 +66,7 @@ namespace Launcher
             this.BannerBrowser.Size = new System.Drawing.Size(608, 274);
             this.BannerBrowser.TabIndex = 19;
             this.BannerBrowser.TabStop = false;
-            this.BannerBrowser.Url = new System.Uri("http://test.zelgo.net/linweb/default/news_raw", System.UriKind.Absolute);
+            this.BannerBrowser.Url = new System.Uri("", System.UriKind.Relative);
             this.BannerBrowser.Visible = false;
             this.BannerBrowser.WebBrowserShortcutsEnabled = false;
             this.BannerBrowser.DocumentCompleted += new System.Windows.Forms.WebBrowserDocumentCompletedEventHandler(this.BannerBrowser_DocumentCompleted);

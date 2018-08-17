@@ -81,6 +81,7 @@ namespace Launcher
                                   (configKey.GetValue("VersionInfoUrl") == null || configKey.GetValue("VersionInfoUrl").ToString() != versionInfo.VersionInfoUrl) ||
                                   (configKey.GetValue("VoteUrl") == null || configKey.GetValue("VoteUrl").ToString() != versionInfo.VoteUrl) ||
                                   (configKey.GetValue("WebsiteUrl") == null || configKey.GetValue("WebsiteUrl").ToString() != versionInfo.WebsiteUrl) ||
+                                  (configKey.GetValue("NewsUrl") == null || configKey.GetValue("NewsUrl").ToString() != versionInfo.NewsUrl) ||
                                   (configKey.GetValue("UpdaterUrl") == null || configKey.GetValue("UpdaterUrl").ToString() != versionInfo.UpdaterUrl) ||
                                   (configKey.GetValue("LauncherUrl") == null || configKey.GetValue("LauncherUrl").ToString() != versionInfo.LauncherUrl) ||
                                   (configKey.GetValue("UpdaterFilesRoot") == null || configKey.GetValue("UpdaterFilesRoot").ToString() != versionInfo.UpdaterFilesRoot);
@@ -94,6 +95,7 @@ namespace Launcher
             configKey.SetValue("VersionInfoUrl", versionInfo.VersionInfoUrl, RegistryValueKind.String);
             configKey.SetValue("VoteUrl", versionInfo.VoteUrl, RegistryValueKind.String);
             configKey.SetValue("WebsiteUrl", versionInfo.WebsiteUrl, RegistryValueKind.String);
+            configKey.SetValue("NewsUrl", versionInfo.NewsUrl, RegistryValueKind.String);
             configKey.SetValue("UpdaterUrl", versionInfo.UpdaterUrl, RegistryValueKind.String);
             configKey.SetValue("LauncherUrl", versionInfo.LauncherUrl, RegistryValueKind.String);
             configKey.SetValue("UpdaterFilesRoot", versionInfo.UpdaterFilesRoot, RegistryValueKind.String);
@@ -127,11 +129,14 @@ namespace Launcher
                 config.VersionInfoUrl = new Uri(configKey.GetValue("VersionInfoUrl").ToString());
                 config.VoteUrl = new Uri(configKey.GetValue("VoteUrl").ToString());
                 config.WebsiteUrl = new Uri(configKey.GetValue("WebsiteUrl").ToString());
+
+                var newsUrl = configKey.GetValue("NewsUrl");
+                config.NewsUrl = new Uri(newsUrl == null ? "https://zelgo.net" : newsUrl.ToString());
                 config.PublicKey = configKey.GetValue("PublicKey").ToString();
 
                 return config;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 return null;
             }
