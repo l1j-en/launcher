@@ -10,6 +10,7 @@ using Microsoft.Win32;
 using System.Net;
 using System.Linq;
 using System.ComponentModel;
+using System.Threading;
 
 namespace Launcher
 {
@@ -170,6 +171,7 @@ namespace Launcher
         private void updateChecker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
             this.lblUpdateStatus.Text = "Patching files...";
+            this.prgTotal.Value = 0;
             this.patchWorker.RunWorkerAsync();
         }
 
@@ -190,20 +192,16 @@ namespace Launcher
                     });
                 }
 
-                Helpers.SetControlPropertyThreadSafe(this.prgTotal, "Maximum", filesToPack.Count);
-                try
+                Helpers.SetControlPropertyThreadSafe(this.prgCurrent, "Maximum", filesToPack.Count);
+                Helpers.SetControlPropertyThreadSafe(this.prgTotal, "Maximum", PatchDirectories.Keys.Count);
+
+                PakTools.RebuildPak(Path.Combine(this._config.InstallDir, PatchDirectories[directory]),
+                filesToPack,
+                true,
+                (progress) =>
                 {
-                    PakTools.RebuildPak(Path.Combine(this._config.InstallDir, PatchDirectories[directory]),
-                    filesToPack,
-                    true,
-                    (progress) =>
-                    {
-                        this.patchWorker.ReportProgress(progress);
-                    });
-                } catch(Exception ex)
-                {
-                    MessageBox.Show(ex.Message);
-                }
+                    this.patchWorker.ReportProgress(progress);
+                });
 
                 var directoryInfo = new DirectoryInfo(directoryString);
                 foreach (FileInfo file in directoryInfo.GetFiles())
@@ -211,16 +209,29 @@ namespace Launcher
                     file.Delete();
                 }
             }
+
+            Helpers.SetControlPropertyThreadSafe(this.prgTotal, "Value", PatchDirectories.Keys.Count);
         }
 
         private void patchWorker_ProgressChanged(object sender, ProgressChangedEventArgs e)
         {
-            this.prgTotal.Value = e.ProgressPercentage;
+            this.prgCurrent.Value = e.ProgressPercentage;
         }
 
         private void patchWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
-            this.Close();
+            this.lblUpdateStatus.Text = "Patching Complete! Launching game...";
+            // wait 1 second after the worker has completed so the progress bar updates
+            var closeThread = new Thread(() =>
+            {
+                Thread.Sleep(1000);
+
+                this.Invoke((MethodInvoker)delegate
+                {
+                    this.Close();
+                });
+            }) { IsBackground = true };
+            closeThread.Start();
         }
     }
 }
