@@ -18,6 +18,7 @@ namespace Launcher
     {
         private readonly LauncherConfig _config;
         private static Image background = new Bitmap(Launcher.Properties.Resources.progess_background);
+        private readonly bool _force;
 
         public static Dictionary<string, string> PatchDirectories {
             get {
@@ -28,9 +29,10 @@ namespace Launcher
             }
         }
 
-        public Patcher(LauncherConfig config, bool hasUpdates)
+        public Patcher(LauncherConfig config, bool hasUpdates, bool force = false)
         {
             this._config = config;
+            this._force = force;
             var patchFiles = false;
 
             foreach (var path in Patcher.PatchDirectories.Keys)
@@ -50,7 +52,7 @@ namespace Launcher
 
             InitializeComponent();
             Region = Region.FromHrgn(Win32Api.CreateRoundRectRgn(0, 0, Width, Height, 8, 8));
-            this.updateChecker.RunWorkerAsync();
+            this.updateChecker.RunWorkerAsync(force);
         }
 
         private void btnClose_Click(object sender, EventArgs e)
@@ -98,16 +100,6 @@ namespace Launcher
                 if (versionInfo == null)
                     return;
 
-                var settings = Helpers.LoadSettings(this._config.KeyName);
-
-                if (Helpers.UpdateConfig(versionInfo, settings.DisableServerUpdate))
-                {
-                    MessageBox.Show("Configuration information was updated from the server.\n\nThe launcher will close. Please re-launch.",
-                        @"Configuration Updated", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    this.Close();
-                    return;
-                }
-
                 var applicationPath = Application.ExecutablePath;
                 var appDataPath = Directory.GetParent(Application.UserAppDataPath).ToString();
                 var updaterLocation = Path.Combine(appDataPath, "Updater.exe");
@@ -124,7 +116,8 @@ namespace Launcher
                     this.updateChecker.ReportProgress(1);
                 } //end if
 
-                var filesToUpdate = versionInfo.Files.Where(b => b.Value > updatesLastRun && b.Key != "Updater.exe").ToList();
+                var filesToUpdate = versionInfo.Files.Where(b => (b.Value > updatesLastRun || force)
+                                                    && b.Key != "Updater.exe").ToList();
                 // checks for > 1 because the Updater.exe is always present.
                 if (filesToUpdate.Any())
                 {
@@ -220,7 +213,7 @@ namespace Launcher
 
         private void patchWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
-            this.lblUpdateStatus.Text = "Patching Complete! Launching game...";
+            this.lblUpdateStatus.Text = "Patching Complete!" + (this._force ? "" : " Launching game...");
             // wait 1 second after the worker has completed so the progress bar updates
             var closeThread = new Thread(() =>
             {

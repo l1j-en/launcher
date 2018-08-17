@@ -109,7 +109,6 @@ namespace Launcher
             // 
             this.updateChecker.WorkerReportsProgress = true;
             this.updateChecker.DoWork += new System.ComponentModel.DoWorkEventHandler(this.updateChecker_DoWork);
-            this.updateChecker.ProgressChanged += new System.ComponentModel.ProgressChangedEventHandler(this.updateChecker_ProgressChanged);
             this.updateChecker.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.updateChecker_RunWorkerCompleted);
             // 
             // tmrCheckProcess
