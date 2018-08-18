@@ -513,7 +513,9 @@ namespace Launcher
 
         private void BannerBrowser_DocumentCompleted(object sender, WebBrowserDocumentCompletedEventArgs e)
         {
-            if(e.Url.ToString().ToLower() != "about:blank")
+            var browser = sender as WebBrowser;
+
+            if(browser != null && browser.Document.Url.ToString() == this._config.NewsUrl.ToString())
             {
                 this.BannerBrowser.Visible = true;
             }
