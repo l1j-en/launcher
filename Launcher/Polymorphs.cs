@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
+using static Launcher.Utilities.PakTools;
 
 namespace Launcher
 {
@@ -195,7 +196,7 @@ namespace Launcher
 
             var indexes = PakTools.LoadIndexData(idxFile);
             var records = PakTools.CreateIndexRecords(indexes, true);
-            var polyFile = records[11995]; //monlist0-e
+            var polyFile = new List<IndexRecord>(records).First(b => b.FileName == "monlist0-e.html");
 
             List<string> polyContents;
 
@@ -227,7 +228,7 @@ namespace Launcher
 
             var indexes = PakTools.LoadIndexData(idxFile);
             var records = PakTools.CreateIndexRecords(indexes, true);
-            var polyFile = records[11991]; //monlist-e
+            var polyFile  = new List<IndexRecord>(records).First(b => b.FileName == "monlist-e.html");
 
             using (var fileStream = File.Open(filePath, FileMode.Open, FileAccess.Read))
             {
@@ -235,8 +236,7 @@ namespace Launcher
                 fileStream.Seek((long)polyFile.Offset, SeekOrigin.Begin);
                 fileStream.Read(numArray, 0, polyFile.FileSize);
                 numArray = PakTools.Decode(numArray, 0);
-                var hmm = Encoding.GetEncoding("big5").GetString(numArray)
-                    .Replace("Ordinary Monsters", "Custom Polylist");
+
                 return Encoding.GetEncoding("big5").GetString(numArray)
                     .Replace("Ordinary Monsters", "Custom Polylist");
             }
@@ -358,38 +358,10 @@ namespace Launcher
             if(MessageBox.Show("This will overwrite the current ingame polymorph list. Do you wish to continue?", "Continue?",
                 MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.Yes)
             {
-                var filePath = Path.Combine(this._config.InstallDir, "text.pak");
-                var idxFile = filePath.Replace(".pak", ".idx");
+                File.WriteAllText(Path.Combine(this._config.InstallDir, "text\\monlist0-e.html"), this.CreatePolylistHtml());
+                File.WriteAllText(Path.Combine(this._config.InstallDir, "text\\monlist-e.html"), this.GetUpdatedMonlistContent());
 
-                // make a backup copy of the text.pak and text.idx
-                if (!File.Exists(filePath.Replace("text.pak", "text.pak.original")))
-                {
-                    File.Copy(filePath, filePath.Replace("text.pak", "text.pak.original"));
-                }
-
-                if (!File.Exists(idxFile.Replace("text.idx", "text.idx.original")))
-                {
-                    File.Copy(idxFile, idxFile.Replace("text.idx", "text.idx.original"));
-                }
-
-                var pakIndex = PakTools.RebuildPak(filePath, new List<PakFile>
-                {
-                    new PakFile
-                    {
-                        Id = 11996,
-                        FileName = "monlist0-e.html",
-                        Content = this.CreatePolylistHtml()
-                    }, new PakFile
-                    {
-                        Id = 11992,
-                        FileName = "monlist-e.html",
-                        Content = this.GetUpdatedMonlistContent()
-                    }
-                }, true);
-
-                PakTools.RebuildIndex(idxFile, pakIndex, true);
-
-                MessageBox.Show("The polymorph list has been updated!", "Polylist Updated!", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show("The polymorph will be updated next time you click PLAY!", "Polylist Updated!", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
         }
 

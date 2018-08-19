@@ -13,6 +13,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Windows.Forms;
@@ -229,25 +230,26 @@ namespace Launcher
 
         private void btn_revert_poly_Click(object sender, EventArgs e)
         {
-            var textFile = Path.Combine(this._config.InstallDir, "text.pak");
-            var idxFile = textFile.Replace(".pak", ".idx");
-
-            var originalTextPak = textFile.Replace("text.pak", "text.pak.original");
-            var originalIdxPak = idxFile.Replace("text.idx", "text.idx.original");
-
-            if (!File.Exists(originalTextPak) || !File.Exists(originalIdxPak))
+            var filesToUpdate = new List<string>
             {
-                MessageBox.Show(@"Unable to revert poly list. No backup found!", @"No Backup Found!", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
-            }
+                "text\\monlist0-e.html",
+                "text\\monlist-e.html"
+            };
 
-            if (MessageBox.Show(@"This will overwrite your custom poly list with the default. Continue?", @"Continue?", MessageBoxButtons.YesNo, MessageBoxIcon.Asterisk) != DialogResult.Yes)
-                return;
+            foreach (var file in filesToUpdate)
+            {
+                var filePath = Path.Combine(this._config.InstallDir, file);
 
-            File.Copy(originalTextPak, textFile, true);
-            File.Copy(originalIdxPak, idxFile, true);
+                var extension = Path.GetExtension(file);
+                using (var client = new System.Net.WebClient())
+                {
+                    client.DownloadFileAsyncSync(
+                        new Uri(this._config.UpdaterFilesRoot + file.Replace("\\", "/")),
+                        filePath);
+                }
+            } //end for
 
-            MessageBox.Show("Polymorph list reverted!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            MessageBox.Show("Polymorph list will be reverted next time you click PLAY!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
     }
 }
