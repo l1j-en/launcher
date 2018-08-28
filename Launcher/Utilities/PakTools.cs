@@ -201,7 +201,7 @@ namespace Launcher.Utilities
 			public IndexRecord(byte[] data, int index)
 			{
 				this.Offset = BitConverter.ToInt32(data, index);
-				this.FileName = Encoding.Default.GetString(data, index + 4, 20).TrimEnd(new char[1]);
+				this.FileName = Encoding.UTF8.GetString(data, index + 4, 20).TrimEnd(new char[1]);
 				this.FileSize = BitConverter.ToInt32(data, index + 24);
 			}
 
@@ -224,7 +224,7 @@ namespace Launcher.Utilities
             if (BitConverter.ToUInt32(numArray, 0) != length)
                 return null;
 
-            if (!Regex.IsMatch(Encoding.Default.GetString(numArray, 8, 20), "^([a-zA-Z0-9_\\-\\.']+)", RegexOptions.IgnoreCase))
+            if (!Regex.IsMatch(Encoding.UTF8.GetString(numArray, 8, 20), "^([a-zA-Z0-9_\\-\\.']+)", RegexOptions.IgnoreCase))
             {
                 if (!Regex.IsMatch(PakTools.Decode_Index_FirstRecord(numArray).FileName, "^([a-zA-Z0-9_\\-\\.']+)", RegexOptions.IgnoreCase))
                     return null;
@@ -282,7 +282,7 @@ namespace Launcher.Utilities
                         updatedList.Add(newRecord);
                         inserted = true;
                     } // if our filename comes before the records filename alphabetically
-                    else if (!inserted && string.CompareOrdinal(filename, oldRecord.FileName) == -1)
+                    else if (!inserted && string.CompareOrdinal(filename, oldRecord.FileName) < 0)
                     {
                         updatedList.Add(newRecord);
                         updatedList.Add(oldRecord);
@@ -319,7 +319,7 @@ namespace Launcher.Utilities
             {
                 var num = 4 + i * 28;
                 Array.Copy(BitConverter.GetBytes(indexRecords[i].Offset), 0, numArray, num, 4);
-                Encoding.Default.GetBytes(indexRecords[i].FileName, 0, indexRecords[i].FileName.Length, numArray, num + 4);
+                Encoding.UTF8.GetBytes(indexRecords[i].FileName, 0, indexRecords[i].FileName.Length, numArray, num + 4);
                 Array.Copy(BitConverter.GetBytes(indexRecords[i].FileSize), 0, numArray, num + 24, 4);
             }
 

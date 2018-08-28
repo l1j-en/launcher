@@ -126,16 +126,15 @@ namespace Launcher
 
             this.chkUseProxy.Checked = savedSettings.UseProxy;
 
+            FindBins();
             if (!string.IsNullOrEmpty(savedSettings.ClientBin))
-            {
-                FindBins();
-
                 this.cmbBin.Text = savedSettings.ClientBin;
-            }
             else
-                FindBins();
-                
-                
+            {
+                if(this._isWin8OrHigher)
+                    this.cmbBin.Text = "S3EP1U.bin";
+            }
+                 
             if (string.IsNullOrEmpty(savedSettings.MusicType))
                 this.cmbMusic.SelectedIndex = 0;
             else
