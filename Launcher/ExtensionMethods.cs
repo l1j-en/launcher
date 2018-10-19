@@ -48,7 +48,8 @@ namespace Launcher
             var obj = Activator.CreateInstance<T>();
             using (var ms = new MemoryStream(Encoding.Unicode.GetBytes(json)))
             {
-                var serializer = new DataContractJsonSerializer(obj.GetType(), new List<Type> { typeof(PakFile) });
+                var serializer = new DataContractJsonSerializer(obj.GetType(), 
+                    new List<Type> { typeof(PakFile), typeof(Server) });
                 obj = (T)serializer.ReadObject(ms);
             }
 

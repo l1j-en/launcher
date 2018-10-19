@@ -14,11 +14,20 @@
  */
 using System;
 using System.Collections.Generic;
+using System.Runtime.Serialization;
 
 namespace Launcher.Models
 {
+    public enum ConfigType
+    {
+        Registry,
+        FlatFile
+    }
+
+    [DataContract]
     public class LauncherConfig
     {
+        public LauncherConfig() { }
         public LauncherConfig(string keyName, string appPath)
         {
             this.KeyName = keyName;
@@ -26,14 +35,24 @@ namespace Launcher.Models
         }
 
         public string KeyName { get; private set; }
+        public string InstallDir { get; set; }
+        public ConfigType ConfigType { get; set; }
+
+        [DataMember]
         public Dictionary<string, Server> Servers { get; set; }
+        [DataMember]
         public Uri WebsiteUrl { get; set; }
+        [DataMember]
         public Uri NewsUrl { get; set; }
+        [DataMember]
         public Uri VoteUrl { get; set; }
+        [DataMember]
         public Uri UpdaterUrl { get; set; }
+        [DataMember]
         public Uri VersionInfoUrl { get; set; }
+        [DataMember]
         public Uri UpdaterFilesRoot { get; set; }
+        [DataMember]
         public string PublicKey { get; set; }
-        public string InstallDir { get; private set; }
     }
 }

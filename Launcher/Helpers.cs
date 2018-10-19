@@ -107,39 +107,58 @@ namespace Launcher
         {
             try
             {
-                var config = new LauncherConfig(keyName, appPath);
                 var configKey = Registry.CurrentUser.OpenSubKey(@"Software\" + keyName, true);
-                    
-                var servers = configKey.GetValue("Servers").ToString().Split(',');
-                config.Servers = new Dictionary<string, Server>();
 
-                foreach (var server in servers)
-                {
-                    var serverInfo = server.Split(':');
+                if(configKey != null)
+                    return LoadFromRegistry(appPath, configKey);
 
-                    config.Servers.Add(serverInfo[0].Trim(), new Server
-                    {
-                        IpOrDns = serverInfo[1],
-                        Port = int.Parse(serverInfo[2])
-                    });
-                }
-
-                config.UpdaterFilesRoot = new Uri(configKey.GetValue("UpdaterFilesRoot").ToString());
-                config.UpdaterUrl = new Uri(configKey.GetValue("UpdaterUrl").ToString());
-                config.VersionInfoUrl = new Uri(configKey.GetValue("VersionInfoUrl").ToString());
-                config.VoteUrl = new Uri(configKey.GetValue("VoteUrl").ToString());
-                config.WebsiteUrl = new Uri(configKey.GetValue("WebsiteUrl").ToString());
-
-                var newsUrl = configKey.GetValue("NewsUrl");
-                config.NewsUrl = new Uri(newsUrl == null ? "https://zelgo.net" : newsUrl.ToString());
-                config.PublicKey = configKey.GetValue("PublicKey").ToString();
-
-                return config;
+                return LoadFromFlatFile(appPath);
             }
             catch (Exception ex)
             {
                 return null;
             }
+        }
+
+        private static LauncherConfig LoadFromFlatFile(string appPath)
+        {
+            var configData = File.ReadAllText(Path.Combine(appPath, "l1jLauncher.cfg"));
+            var config = configData.JsonDeserialize<LauncherConfig>();
+            config.InstallDir = appPath;
+            config.ConfigType = ConfigType.FlatFile;
+
+            return config;
+        }
+
+        private static LauncherConfig LoadFromRegistry(string appPath, RegistryKey configKey)
+        {
+            var config = new LauncherConfig(configKey.Name, appPath);
+            var servers = configKey.GetValue("Servers").ToString().Split(',');
+            config.Servers = new Dictionary<string, Server>();
+
+            foreach (var server in servers)
+            {
+                var serverInfo = server.Split(':');
+
+                config.Servers.Add(serverInfo[0].Trim(), new Server
+                {
+                    IpOrDns = serverInfo[1],
+                    Port = int.Parse(serverInfo[2])
+                });
+            }
+
+            config.UpdaterFilesRoot = new Uri(configKey.GetValue("UpdaterFilesRoot").ToString());
+            config.UpdaterUrl = new Uri(configKey.GetValue("UpdaterUrl").ToString());
+            config.VersionInfoUrl = new Uri(configKey.GetValue("VersionInfoUrl").ToString());
+            config.VoteUrl = new Uri(configKey.GetValue("VoteUrl").ToString());
+            config.WebsiteUrl = new Uri(configKey.GetValue("WebsiteUrl").ToString());
+
+            var newsUrl = configKey.GetValue("NewsUrl");
+            config.NewsUrl = new Uri(newsUrl == null ? "https://zelgo.net" : newsUrl.ToString());
+            config.PublicKey = configKey.GetValue("PublicKey").ToString();
+            config.ConfigType = ConfigType.Registry;
+
+            return config;
         }
 
         public static List<string> GetAssociatedLaunchers(string appPath)
