@@ -70,9 +70,13 @@ namespace Launcher.Forms
 
             if (launcherConfig == null)
             {
-                MessageBox.Show("There was an error loading the config. Please re-install the launcher.");
-                this.Close();
-                return;
+                var initResponse = new AdminInit().ShowDialog();
+
+                if(initResponse != DialogResult.OK)
+                {
+                    this.Close();
+                    return;
+                }
             }
 
             this._config = launcherConfig;

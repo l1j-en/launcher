@@ -106,6 +106,12 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Controls\RoundedRectangles.cs" />
+    <Compile Include="Forms\AdminInit.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\AdminInit.Designer.cs">
+      <DependentUpon>AdminInit.cs</DependentUpon>
+    </Compile>
     <Compile Include="Forms\CustomMessageBox.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -175,6 +181,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Controls\GlassButton.resx">
       <DependentUpon>GlassButton.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\AdminInit.resx">
+      <DependentUpon>AdminInit.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\CustomMessageBox.resx">
       <DependentUpon>CustomMessageBox.cs</DependentUpon>
