@@ -1,7 +1,7 @@
 ﻿using System.Drawing;
 using System.Windows.Forms;
 
-namespace Launcher
+namespace Launcher.Forms
 {
     public partial class CustomMessageBox : Form
     {

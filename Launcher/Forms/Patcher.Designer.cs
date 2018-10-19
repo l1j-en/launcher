@@ -1,6 +1,6 @@
 ﻿using Launcher.Controls;
 
-namespace Launcher
+namespace Launcher.Forms
 {
     partial class Patcher
     {

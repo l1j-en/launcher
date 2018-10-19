@@ -12,7 +12,7 @@ using System.Linq;
 using System.ComponentModel;
 using System.Threading;
 
-namespace Launcher
+namespace Launcher.Forms
 {
     public partial class Patcher : Form
     {

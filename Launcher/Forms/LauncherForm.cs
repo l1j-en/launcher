@@ -29,7 +29,7 @@ using Microsoft.Win32;
 using System.Reflection;
 using Launcher.Utilities.Proxy;
 
-namespace Launcher
+namespace Launcher.Forms
 {
     public partial class LauncherForm : Form
     {
@@ -301,11 +301,6 @@ namespace Launcher
                         Helpers.SetControlPropertyThreadSafe(this.lblServerStatus, "ForeColor", Color.Green);
 
                         var updateCheckComplete = false;
-
-                        /*prgUpdates.Invoke(new Action(() =>
-                        {
-                            updateCheckComplete = prgUpdates.Value == prgUpdates.Maximum;
-                        }));*/
 
                         if (updateCheckComplete)
                             Helpers.SetControlPropertyThreadSafe(this.btnPlay, "Enabled", true);

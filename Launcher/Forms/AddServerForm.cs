@@ -16,7 +16,7 @@ using System;
 using System.Net;
 using System.Windows.Forms;
 
-namespace Launcher
+namespace Launcher.Forms
 {
     public partial class AddServerForm : Form
     {

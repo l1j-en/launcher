@@ -10,7 +10,7 @@ using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using static Launcher.Utilities.PakTools;
 
-namespace Launcher
+namespace Launcher.Forms
 {
     public partial class Polymorphs : Form
     {

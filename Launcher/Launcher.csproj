@@ -95,10 +95,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="AddServerForm.cs">
+    <Compile Include="Forms\AddServerForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="AddServerForm.Designer.cs">
+    <Compile Include="Forms\AddServerForm.Designer.cs">
       <DependentUpon>AddServerForm.cs</DependentUpon>
     </Compile>
     <Compile Include="ComboBoxItem.cs" />
@@ -106,25 +106,25 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="Controls\RoundedRectangles.cs" />
-    <Compile Include="CustomMessageBox.cs">
+    <Compile Include="Forms\CustomMessageBox.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="CustomMessageBox.Designer.cs">
+    <Compile Include="Forms\CustomMessageBox.Designer.cs">
       <DependentUpon>CustomMessageBox.cs</DependentUpon>
     </Compile>
     <Compile Include="Injector.cs" />
     <Compile Include="ExtensionMethods.cs" />
     <Compile Include="Helpers.cs" />
-    <Compile Include="InputBox.cs">
+    <Compile Include="Forms\InputBox.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="InputBox.Designer.cs">
+    <Compile Include="Forms\InputBox.Designer.cs">
       <DependentUpon>InputBox.cs</DependentUpon>
     </Compile>
-    <Compile Include="LauncherForm.cs">
+    <Compile Include="Forms\LauncherForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Form1.Designer.cs">
+    <Compile Include="Forms\Form1.Designer.cs">
       <DependentUpon>LauncherForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Controls\GlassButton.cs">
@@ -134,16 +134,16 @@
     <Compile Include="Models\LauncherConfig.cs" />
     <Compile Include="Models\PakFile.cs" />
     <Compile Include="Models\VersionInfo.cs" />
-    <Compile Include="Patcher.cs">
+    <Compile Include="Forms\Patcher.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Patcher.Designer.cs">
+    <Compile Include="Forms\Patcher.Designer.cs">
       <DependentUpon>Patcher.cs</DependentUpon>
     </Compile>
-    <Compile Include="Polymorphs.cs">
+    <Compile Include="Forms\Polymorphs.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Polymorphs.Designer.cs">
+    <Compile Include="Forms\Polymorphs.Designer.cs">
       <DependentUpon>Polymorphs.cs</DependentUpon>
     </Compile>
     <Compile Include="Program.cs" />
@@ -151,16 +151,16 @@
     <Compile Include="Models\Resolution.cs" />
     <Compile Include="Models\Server.cs" />
     <Compile Include="Models\Settings.cs" />
-    <Compile Include="SettingsForm.cs">
+    <Compile Include="Forms\SettingsForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="SettingsForm.Designer.cs">
+    <Compile Include="Forms\SettingsForm.Designer.cs">
       <DependentUpon>SettingsForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="UpdateForm.cs">
+    <Compile Include="Forms\UpdateForm.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="UpdateForm.Designer.cs">
+    <Compile Include="Forms\UpdateForm.Designer.cs">
       <DependentUpon>UpdateForm.cs</DependentUpon>
     </Compile>
     <Compile Include="Utilities\Encryption.cs" />
@@ -170,25 +170,25 @@
     <Compile Include="Utilities\Proxy\ProxyServer.cs" />
     <Compile Include="Utilities\Win32Api.cs" />
     <Compile Include="LineageClient.cs" />
-    <EmbeddedResource Include="AddServerForm.resx">
+    <EmbeddedResource Include="Forms\AddServerForm.resx">
       <DependentUpon>AddServerForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Controls\GlassButton.resx">
       <DependentUpon>GlassButton.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="CustomMessageBox.resx">
+    <EmbeddedResource Include="Forms\CustomMessageBox.resx">
       <DependentUpon>CustomMessageBox.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="InputBox.resx">
+    <EmbeddedResource Include="Forms\InputBox.resx">
       <DependentUpon>InputBox.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="LauncherForm.resx">
+    <EmbeddedResource Include="Forms\LauncherForm.resx">
       <DependentUpon>LauncherForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Patcher.resx">
+    <EmbeddedResource Include="Forms\Patcher.resx">
       <DependentUpon>Patcher.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Polymorphs.resx">
+    <EmbeddedResource Include="Forms\Polymorphs.resx">
       <DependentUpon>Polymorphs.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
@@ -196,10 +196,10 @@
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="SettingsForm.resx">
+    <EmbeddedResource Include="Forms\SettingsForm.resx">
       <DependentUpon>SettingsForm.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="UpdateForm.resx">
+    <EmbeddedResource Include="Forms\UpdateForm.resx">
       <DependentUpon>UpdateForm.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="app.config" />

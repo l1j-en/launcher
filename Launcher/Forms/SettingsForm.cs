@@ -19,7 +19,7 @@ using System.Linq;
 using System.Windows.Forms;
 using Launcher.Models;
 
-namespace Launcher
+namespace Launcher.Forms
 {
     public partial class SettingsForm : Form
     {
