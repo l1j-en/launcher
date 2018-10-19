@@ -85,7 +85,8 @@ namespace Launcher
                 return;
             }
                 
-            Helpers.SaveSettings(this._config.KeyName, settings, this._config.InstallDir, this._isWin8OrHigher);
+            Helpers.SaveSettings(this._config.KeyName, settings, this._config.InstallDir, this._isWin8OrHigher, 
+                this._config.ConfigType);
             this.Close();
         }
 
@@ -99,7 +100,9 @@ namespace Launcher
 
         private void SettingsForm_Load(object sender, EventArgs e)
         {
-            var savedSettings = Helpers.LoadSettings(this._config.KeyName) ?? new Settings(this._windowDelay);
+            var savedSettings = Helpers.LoadSettings(
+                this._config.ConfigType == ConfigType.Registry ? this._config.KeyName : this._config.InstallDir, 
+                this._config.ConfigType) ?? new Settings(this._windowDelay);
             var resolutions = LineageClient.GetResolutions(this._isWin8OrHigher);
 
             if (resolutions.Count > 0)

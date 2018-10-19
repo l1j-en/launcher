@@ -19,6 +19,7 @@ using System.Net;
 using System.Reflection;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
+using System.Runtime.Serialization.Json;
 using System.Security.Cryptography;
 using System.Text;
 using System.Windows.Forms;
@@ -176,33 +177,14 @@ namespace Launcher
             return associatedLaunchers;
         }
 
-        public static Settings LoadSettings(string keyName)
+        public static Settings LoadSettings(string keyOrDir, ConfigType configType)
         {
             try
             {
-                var settingsKey = Registry.CurrentUser.OpenSubKey(@"Software\" + keyName, true);
+                if(configType == ConfigType.Registry)
+                    return LoadSettingsFromRegistry(keyOrDir);
 
-                if (settingsKey == null)
-                    return new Settings();
-                var settings = (byte[])settingsKey.GetValue("AppSettings");
-
-                var ms = new MemoryStream((byte[])settingsKey.GetValue("AppSettings"));
-                var settingsObject = DeserializeFromStream<Settings>(ms);
-
-                var settingsString = Encoding.UTF8.GetString(settings).ToLower();
-                // TODO -- temporary fix because the delays didn't exist before and I don't want to use
-                // a nullable int
-                if(settingsString.IndexOf("windoweddelay") == -1)
-                {
-                    settingsObject.WindowedDelay = 500;
-                }
-
-                if (settingsString.IndexOf("logindelay") == -1)
-                {
-                    settingsObject.LoginDelay = 500;
-                }
-
-                return settingsObject;
+                return LoadSettingsFromFlatFile(keyOrDir);
             }
             catch (Exception)
             {
@@ -210,14 +192,51 @@ namespace Launcher
             }
         }
 
-        public static void SaveSettings(string keyName, Settings settings, string clientDirectory, bool isWin8OrHigher)
+        private static Settings LoadSettingsFromFlatFile(string installDir)
         {
-            var existingKey = Registry.CurrentUser.GetValue(@"Software\" + keyName);
+            var configData = File.ReadAllText(Path.Combine(installDir, "l1jSettings.cfg"));
+            var config = configData.JsonDeserialize<Settings>();
+            return config;
+        }
 
-            if (existingKey == null)
-                existingKey = Registry.CurrentUser.CreateSubKey(@"Software\" + keyName);
+        private static Settings LoadSettingsFromRegistry(string keyName)
+        {
+            var settingsKey = Registry.CurrentUser.OpenSubKey(@"Software\" + keyName, true);
 
-            ((RegistryKey)existingKey).SetValue("AppSettings", Serialize(settings), RegistryValueKind.Binary);
+            if (settingsKey == null)
+                return new Settings();
+            var settings = (byte[])settingsKey.GetValue("AppSettings");
+
+            var ms = new MemoryStream((byte[])settingsKey.GetValue("AppSettings"));
+            var settingsObject = DeserializeFromStream<Settings>(ms);
+
+            var settingsString = Encoding.UTF8.GetString(settings).ToLower();
+            // TODO -- temporary fix because the delays didn't exist before and I don't want to use
+            // a nullable int
+            if (settingsString.IndexOf("windoweddelay") == -1)
+            {
+                settingsObject.WindowedDelay = 500;
+            }
+
+            if (settingsString.IndexOf("logindelay") == -1)
+            {
+                settingsObject.LoginDelay = 500;
+            }
+
+            return settingsObject;
+        }
+
+        public static void SaveSettings(string keyName, Settings settings, string clientDirectory, 
+            bool isWin8OrHigher, ConfigType configType)
+        {
+
+            if(configType == ConfigType.Registry)
+            {
+                SaveSettingsToRegistry(keyName, settings);
+            } else
+            {
+                SaveSettingsToFlatFile(clientDirectory, settings);
+            }
 
             //set the windowed flag in the lineage.cfg file
             if (isWin8OrHigher && settings.Windowed)
@@ -252,6 +271,39 @@ namespace Launcher
 
             File.WriteAllText(musicFilePath, (settings.MusicType == "Original Midi Music" ? "1" : "0"));
         } //end SaveSettings
+
+        private static void SaveSettingsToFlatFile(string clientDirectory, Settings settings)
+        {
+            using (var fs = new FileStream(
+                Path.Combine(clientDirectory, "l1jSettings.cfg"),
+                FileMode.OpenOrCreate,
+                FileAccess.Write))
+            {
+                using (var ms = new MemoryStream())
+                {
+                    var serializer = new DataContractJsonSerializer(settings.GetType(),
+                        new List<Type> { typeof(Resolution) });
+
+                    serializer.WriteObject(ms, settings);
+                    ms.Flush();
+                    ms.Seek(0, SeekOrigin.Begin);
+
+                    var bytes = new byte[ms.Length];
+                    ms.Read(bytes, 0, (int)ms.Length);
+                    fs.Write(bytes, 0, bytes.Length);
+                }
+            }
+        }
+
+        private static void SaveSettingsToRegistry(string keyName, Settings settings)
+        {
+            var existingKey = Registry.CurrentUser.GetValue(@"Software\" + keyName);
+
+            if (existingKey == null)
+                existingKey = Registry.CurrentUser.CreateSubKey(@"Software\" + keyName);
+
+            ((RegistryKey)existingKey).SetValue("AppSettings", Serialize(settings), RegistryValueKind.Binary);
+        }
 
         public static byte[] Serialize(object objectToSerialize)
         {

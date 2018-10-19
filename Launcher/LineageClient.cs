@@ -36,10 +36,6 @@ namespace Launcher
         private static List<LineageClient> _hookedWindows;
         private const int MaxRetries = 10;
         private static Settings _appSettings = null;
-        private Socket _clientSocket;
-        private Socket _serverSocket;
-        private Thread _clientThread;
-        private Thread _serverThread;
         private readonly int _serverPort;
         private readonly IPAddress _serverIp;
         private readonly ProxyServer _proxyServer;
@@ -53,11 +49,12 @@ namespace Launcher
         } //end MoveWindowCallback
 
         public LineageClient(string settingsKeyName, string processName, string clientDirectory, ProxyServer proxyServer, IPAddress ip,
-            int port, List<LineageClient> hookedWindows)
+            int port, List<LineageClient> hookedWindows, ConfigType configType)
         {
             this._processName = processName;
             _hookedWindows = hookedWindows;
-            _appSettings = Helpers.LoadSettings(settingsKeyName);
+            _appSettings = Helpers.LoadSettings(configType == ConfigType.Registry ? settingsKeyName : clientDirectory,
+                configType);
             this._serverIp = ip;
             this._serverPort = port;
             this._proxyServer = proxyServer;
@@ -181,20 +178,5 @@ namespace Launcher
                 attempts++;
             } //end while
         } //end Initialize
-
-        public void Stop()
-        {
-            if(this._serverThread != null)
-                this._serverThread.Abort();
-
-            if(this._clientThread != null)
-                this._clientThread.Abort();
-
-            if(this._serverSocket != null)
-                this._serverSocket.Close();
-
-            if(this._clientSocket != null)
-                this._clientSocket.Close();
-        } //end Stop
     } //end class
 } //end namespace

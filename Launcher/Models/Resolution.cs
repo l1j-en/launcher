@@ -13,14 +13,19 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 using System;
+using System.Runtime.Serialization;
 
 namespace Launcher.Models
 {
     [Serializable]
+    [DataContract]
     public class Resolution
     {
+        [DataMember]
         public int Width { get; set; }
+        [DataMember]
         public int Height { get; set; }
+        [DataMember]
         public int Colour { get; set; }
 
         public override string ToString()

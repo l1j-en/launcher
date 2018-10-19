@@ -33,7 +33,7 @@ namespace Launcher
 {
     public partial class LauncherForm : Form
     {
-        private const string Version = "3.0.1";
+        private const string Version = "4.0.0";
         private readonly bool _isWin8OrHigher;
         private readonly string _windowsVersion;
         private Win32Api.DevMode _revertResolution;
@@ -116,7 +116,8 @@ namespace Launcher
 
         private void LauncherForm_Shown(object sender, EventArgs e)
         {
-            var settings = Helpers.LoadSettings(this._config.KeyName);
+            var settings = Helpers.LoadSettings(this._config.ConfigType == ConfigType.Registry ? this._config.KeyName : this._config.InstallDir, 
+                this._config.ConfigType);
 
             if (settings == null)
             {
@@ -132,7 +133,9 @@ namespace Launcher
 
                 if (dialogResult != DialogResult.OK)
                 {
-                    settings = Helpers.LoadSettings(this._config.KeyName);
+                    settings = Helpers.LoadSettings(
+                        this._config.ConfigType == ConfigType.Registry ? this._config.KeyName : this._config.InstallDir,
+                        this._config.ConfigType);
 
                     if (settings == null || string.IsNullOrEmpty(settings.ClientBin))
                     {
@@ -163,7 +166,8 @@ namespace Launcher
 
         private void Launch(Server server)
         {
-            var settings = Helpers.LoadSettings(this._config.KeyName);
+            var settings = Helpers.LoadSettings(this._config.ConfigType == ConfigType.Registry ? this._config.KeyName : this._config.InstallDir, 
+                this._config.ConfigType);
             var binFile = Path.GetFileNameWithoutExtension(settings.ClientBin);
             var binpath = Path.Combine(this._config.InstallDir, binFile);
 
@@ -207,7 +211,7 @@ namespace Launcher
                     (ushort)(settings.UseProxy ? proxyServer.LocalPort : server.Port), settings.UseProxy ? null : ipOrDns[0]))
                 {
                     var client = new LineageClient(this._config.KeyName, binFile, this._config.InstallDir, 
-                        proxyServer, ipOrDns[0], server.Port, Clients);
+                        proxyServer, ipOrDns[0], server.Port, Clients, this._config.ConfigType);
                     client.Initialize();
 
                     lock (this._lockObject)
@@ -402,7 +406,8 @@ namespace Launcher
         private void tmrCheckProcess_Tick(object sender, EventArgs e)
         {
             var revertResolution = this._revertResolution;
-            var settings = Helpers.LoadSettings(this._config.KeyName);
+            var settings = Helpers.LoadSettings(this._config.ConfigType == ConfigType.Registry ? this._config.KeyName : this._config.InstallDir, 
+                this._config.ConfigType);
 
             lock (this._lockObject)
             {
@@ -414,7 +419,6 @@ namespace Launcher
                     }
                     catch (Exception)
                     {
-                        Clients[i].Stop();
                         Clients.RemoveAt(i);
                     }
                 }
@@ -466,7 +470,9 @@ namespace Launcher
             if (this._versionInfo == null)
                 return;
 
-            var settings = Helpers.LoadSettings(this._config.KeyName);
+            var settings = Helpers.LoadSettings(
+                this._config.ConfigType == ConfigType.Registry ? this._config.KeyName : this._config.InstallDir, 
+                this._config.ConfigType);
 
             if (Helpers.UpdateConfig(this._versionInfo, settings.DisableServerUpdate))
             {
