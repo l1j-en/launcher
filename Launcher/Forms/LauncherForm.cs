@@ -164,11 +164,14 @@ namespace Launcher.Forms
 
         private void playButton_Click(object sender, EventArgs e)
         {
-            var patchForm = new Patcher(this._config, this._hasUpdates);
-
-            if (!patchForm.IsDisposed)
+            if(this._config.VersionInfoUrl != null)
             {
-                patchForm.ShowDialog();
+                var patchForm = new Patcher(this._config, this._hasUpdates);
+
+                if (!patchForm.IsDisposed)
+                {
+                    patchForm.ShowDialog();
+                }
             }
 
             this.Launch(this._config.Servers[this.cmbServer.SelectedItem.ToString()]);
