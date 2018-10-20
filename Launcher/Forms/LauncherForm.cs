@@ -101,6 +101,12 @@ namespace Launcher.Forms
                     this.btnSettings.Location.Y);
             }
 
+            if(this._config.WebsiteUrl == null)
+                this.pctLinLogo.Cursor = Cursors.Arrow;
+
+            if (this._config.VoteUrl == null)
+                this.pctVote.Visible = false;
+
             this.BannerBrowser.Url = this._config.NewsUrl;
         }
 
@@ -335,12 +341,18 @@ namespace Launcher.Forms
 
         private void pctVote_Click(object sender, EventArgs e)
         {
+            if (this._config.VoteUrl == null)
+                return;
+
             var voteUrl = new ProcessStartInfo(this._config.VoteUrl.ToString());
             Process.Start(voteUrl);
         } //end pctVote_Click
 
         private void pctLinLogo_Click(object sender, EventArgs e)
         {
+            if (this._config.WebsiteUrl == null)
+                return;
+
             var voteUrl = new ProcessStartInfo(this._config.WebsiteUrl.ToString());
             Process.Start(voteUrl);
         }//end pctLinLogo_Click
