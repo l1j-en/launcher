@@ -91,6 +91,16 @@ namespace Launcher.Forms
 
             this._isWin8OrHigher = Helpers.IsWin8OrHigher(out this._windowsVersion);
             InitializeComponent();
+
+            // if the version info url is null, then don't display the "check"
+            if(this._config.VersionInfoUrl == null)
+            {
+                this.btnCheck.Visible = false;
+                this.btnSettings.Location = new Point(
+                   this.btnClose.Location.X - this.btnSettings.Width - 5, 
+                    this.btnSettings.Location.Y);
+            }
+
             this.BannerBrowser.Url = this._config.NewsUrl;
         }
 
