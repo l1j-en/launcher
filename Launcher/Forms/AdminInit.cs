@@ -2,6 +2,8 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.IO;
+using System.Runtime.Serialization.Json;
 using System.Windows.Forms;
 
 namespace Launcher.Forms
@@ -9,9 +11,12 @@ namespace Launcher.Forms
     public partial class AdminInit : Form
     {
         private Dictionary<string, Server> _servers;
-        public AdminInit()
+        private readonly string _appDirectory;
+
+        public AdminInit(string appDirectory)
         {
             this._servers = new Dictionary<string, Server>();
+            this._appDirectory = appDirectory;
             InitializeComponent();
         }
 
@@ -119,6 +124,41 @@ namespace Launcher.Forms
             new CustomMessageBox("Public Key",
                "Some Info",
                new Bitmap(Properties.Resources.Help_Big)).ShowDialog();
+        }
+
+        private void btnSave_Click(object sender, EventArgs e)
+        {
+            var config = new LauncherConfig
+            {
+                Servers = this._servers,
+                NewsUrl = this.txtNewsUrl.Text.Trim() == string.Empty ? null : new Uri(this.txtNewsUrl.Text.Trim()),
+                UpdaterUrl = this.txtUpdaterUrl.Text.Trim() == string.Empty ? null : new Uri(this.txtUpdaterUrl.Text.Trim()),
+                VersionInfoUrl = this.txtVersionInfoUrl.Text.Trim() == string.Empty ? null : new Uri(this.txtVersionInfoUrl.Text.Trim()),
+                VoteUrl = this.txtVoteUrl.Text.Trim() == string.Empty ? null : new Uri(this.txtVoteUrl.Text.Trim()),
+                WebsiteUrl = this.txtWebsiteUrl.Text.Trim() == string.Empty ? null : new Uri(this.txtWebsiteUrl.Text.Trim()),
+                UpdaterFilesRoot = this.txtUpdaterFilesRoot.Text.Trim() == string.Empty ? null : new Uri(this.txtUpdaterFilesRoot.Text.Trim()),
+                PublicKey = this.txtPublicKey.Text.Trim() == string.Empty ? null : this.txtPublicKey.Text.Trim()
+            };
+
+            using (var fs = new FileStream(
+                Path.Combine(this._appDirectory, "l1jLauncher.cfg"),
+                FileMode.OpenOrCreate,
+                FileAccess.Write))
+            {
+                using (var ms = new MemoryStream())
+                {
+                    var serializer = new DataContractJsonSerializer(config.GetType(),
+                        new List<Type> { typeof(Server) });
+
+                    serializer.WriteObject(ms, config);
+                    ms.Flush();
+                    ms.Seek(0, SeekOrigin.Begin);
+
+                    var bytes = new byte[ms.Length];
+                    ms.Read(bytes, 0, (int)ms.Length);
+                    fs.Write(bytes, 0, bytes.Length);
+                }
+            }
         }
     }
 }

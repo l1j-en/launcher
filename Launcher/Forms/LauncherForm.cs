@@ -70,7 +70,7 @@ namespace Launcher.Forms
 
             if (launcherConfig == null)
             {
-                var initResponse = new AdminInit().ShowDialog();
+                var initResponse = new AdminInit(appLocation).ShowDialog();
 
                 if(initResponse != DialogResult.OK)
                 {
