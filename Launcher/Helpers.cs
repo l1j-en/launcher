@@ -124,6 +124,8 @@ namespace Launcher
         private static LauncherConfig LoadFromFlatFile(string appPath)
         {
             var configData = File.ReadAllText(Path.Combine(appPath, "l1jLauncher.cfg"));
+            configData = Encoding.UTF8.GetString(Convert.FromBase64String(configData));
+
             var config = configData.JsonDeserialize<LauncherConfig>();
             config.InstallDir = appPath;
             config.ConfigType = ConfigType.FlatFile;

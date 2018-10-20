@@ -3,7 +3,9 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
+using System.Linq;
 using System.Runtime.Serialization.Json;
+using System.Text;
 using System.Windows.Forms;
 
 namespace Launcher.Forms
@@ -128,17 +130,34 @@ namespace Launcher.Forms
 
         private void btnSave_Click(object sender, EventArgs e)
         {
-            var config = new LauncherConfig
+            LauncherConfig config;
+            try
             {
-                Servers = this._servers,
-                NewsUrl = this.txtNewsUrl.Text.Trim() == string.Empty ? null : new Uri(this.txtNewsUrl.Text.Trim()),
-                UpdaterUrl = this.txtUpdaterUrl.Text.Trim() == string.Empty ? null : new Uri(this.txtUpdaterUrl.Text.Trim()),
-                VersionInfoUrl = this.txtVersionInfoUrl.Text.Trim() == string.Empty ? null : new Uri(this.txtVersionInfoUrl.Text.Trim()),
-                VoteUrl = this.txtVoteUrl.Text.Trim() == string.Empty ? null : new Uri(this.txtVoteUrl.Text.Trim()),
-                WebsiteUrl = this.txtWebsiteUrl.Text.Trim() == string.Empty ? null : new Uri(this.txtWebsiteUrl.Text.Trim()),
-                UpdaterFilesRoot = this.txtUpdaterFilesRoot.Text.Trim() == string.Empty ? null : new Uri(this.txtUpdaterFilesRoot.Text.Trim()),
-                PublicKey = this.txtPublicKey.Text.Trim() == string.Empty ? null : this.txtPublicKey.Text.Trim()
-            };
+                config = new LauncherConfig
+                {
+                    Servers = this._servers,
+                    NewsUrl = this.txtNewsUrl.Text.Trim() == string.Empty ? null : new Uri(this.txtNewsUrl.Text.Trim()),
+                    UpdaterUrl = this.txtUpdaterUrl.Text.Trim() == string.Empty ? null : new Uri(this.txtUpdaterUrl.Text.Trim()),
+                    VersionInfoUrl = this.txtVersionInfoUrl.Text.Trim() == string.Empty ? null : new Uri(this.txtVersionInfoUrl.Text.Trim()),
+                    VoteUrl = this.txtVoteUrl.Text.Trim() == string.Empty ? null : new Uri(this.txtVoteUrl.Text.Trim()),
+                    WebsiteUrl = this.txtWebsiteUrl.Text.Trim() == string.Empty ? null : new Uri(this.txtWebsiteUrl.Text.Trim()),
+                    UpdaterFilesRoot = this.txtUpdaterFilesRoot.Text.Trim() == string.Empty ? null : new Uri(this.txtUpdaterFilesRoot.Text.Trim()),
+                    PublicKey = this.txtPublicKey.Text.Trim() == string.Empty ? null : this.txtPublicKey.Text.Trim()
+                };
+            }
+            catch(UriFormatException)
+            {
+                MessageBox.Show("Unable to save. Invalid URL entered.", "Invalid URL",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            if (!config.Servers.Any())
+            {
+                MessageBox.Show("Unable to save. No servers entered!", "No Servers",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
 
             using (var fs = new FileStream(
                 Path.Combine(this._appDirectory, "l1jLauncher.cfg"),
@@ -156,7 +175,12 @@ namespace Launcher.Forms
 
                     var bytes = new byte[ms.Length];
                     ms.Read(bytes, 0, (int)ms.Length);
-                    fs.Write(bytes, 0, bytes.Length);
+
+                    // To anyone using this, this is not any form of encryption or security!
+                    // This is only being done so the average user won't try to edit it and
+                    // possibly crap out their settings!
+                    var base64Bytes = Encoding.UTF8.GetBytes(Convert.ToBase64String(bytes));
+                    fs.Write(base64Bytes, 0, base64Bytes.Length);
                 }
             }
 
