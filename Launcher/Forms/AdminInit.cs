@@ -159,6 +159,10 @@ namespace Launcher.Forms
                     fs.Write(bytes, 0, bytes.Length);
                 }
             }
+
+            MessageBox.Show("l1jLauncher.cfg created successfully. Open the launcher again to play!", "Config Saved!",
+                 MessageBoxButtons.OK, MessageBoxIcon.Information);
+            this.Close();
         }
     }
 }

@@ -71,12 +71,8 @@ namespace Launcher.Forms
             if (launcherConfig == null)
             {
                 var initResponse = new AdminInit(appLocation).ShowDialog();
-
-                if(initResponse != DialogResult.OK)
-                {
-                    this.Close();
-                    return;
-                }
+                this.Close();
+                return;
             }
 
             this._config = launcherConfig;
