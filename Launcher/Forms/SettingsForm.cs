@@ -232,6 +232,14 @@ namespace Launcher.Forms
 
         private void btn_revert_poly_Click(object sender, EventArgs e)
         {
+
+            if(this._config.UpdaterFilesRoot == null)
+            {
+                MessageBox.Show("No update server configured. Unable to revert.", "Unable to revert",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
             var filesToUpdate = new List<string>
             {
                 "text\\monlist0-e.html",
