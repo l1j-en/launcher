@@ -34,8 +34,6 @@ namespace Launcher.Forms
     public partial class LauncherForm : Form
     {
         private const string Version = "4.0.0";
-        private readonly bool _isWin8OrHigher;
-        private readonly string _windowsVersion;
         private Win32Api.DevMode _revertResolution;
 
         private readonly object _lockObject = new object();
@@ -43,11 +41,9 @@ namespace Launcher.Forms
         private VersionInfo _versionInfo;
         private bool _hasUpdates;
 
-        private static readonly List<LineageClient> Clients = new List<LineageClient>();
-
         public LauncherForm()
         {
-            var appLocation = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            var appLocation = @"C:\Program Files (x86)\Lineage Justice"; //Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             var associatedLaunchers = Helpers.GetAssociatedLaunchers(appLocation);
             
             if (!Helpers.LauncherInLineageDirectory(appLocation))
@@ -89,7 +85,6 @@ namespace Launcher.Forms
                 };
             }
 
-            this._isWin8OrHigher = Helpers.IsWin8OrHigher(out this._windowsVersion);
             InitializeComponent();
 
             // if the version info url is null, then don't display the "check"
@@ -112,20 +107,12 @@ namespace Launcher.Forms
 
         private void btnClose_Click(object sender, EventArgs e)
         {
-            if(Clients.Count > 0)
-            {
-                systemIcon.Visible = true;
-                systemIcon.ShowBalloonTip(500);
-                this.Hide();
-            } else
-            {
-                Application.Exit();
-            }
+            Application.Exit();
         }
 
         private void btnSettings_Click(object sender, EventArgs e)
         {
-            var settingsForm = new SettingsForm(this._config, this._isWin8OrHigher, this._windowsVersion);
+            var settingsForm = new SettingsForm(this._config);
             settingsForm.ShowDialog();
             settingsForm.Dispose();
         }
@@ -139,28 +126,9 @@ namespace Launcher.Forms
             {
                 MessageBox.Show(@"There was an error loading your settings. If this was after an update, it may be intentional, however, " +
                 @"if it happens often please file a bug report.", @"Error Loading Settings", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                settings = new Settings(500);
+                settings = new Settings();
             }
                 
-            if (string.IsNullOrEmpty(settings.ClientBin))
-            {
-                var settingsDialog = new SettingsForm(this._config, this._isWin8OrHigher, this._windowsVersion);
-                var dialogResult = settingsDialog.ShowDialog();
-
-                if (dialogResult != DialogResult.OK)
-                {
-                    settings = Helpers.LoadSettings(
-                        this._config.ConfigType == ConfigType.Registry ? this._config.KeyName : this._config.InstallDir,
-                        this._config.ConfigType);
-
-                    if (settings == null || string.IsNullOrEmpty(settings.ClientBin))
-                    {
-                        MessageBox.Show("You must configure your settings before continuing. Closing launcher.");
-                        Application.Exit();
-                    } //end if
-                } //end if
-            } //end if
-
             this.lblVersion.Text = Version;
             this.cmbServer.Items.AddRange(this._config.Servers.Keys.ToArray());
             this.cmbServer.SelectedIndex = 0;
@@ -187,7 +155,7 @@ namespace Launcher.Forms
         {
             var settings = Helpers.LoadSettings(this._config.ConfigType == ConfigType.Registry ? this._config.KeyName : this._config.InstallDir, 
                 this._config.ConfigType);
-            var binFile = Path.GetFileNameWithoutExtension(settings.ClientBin);
+            var binFile = Path.GetFileNameWithoutExtension("TW13032701.bin");
             var binpath = Path.Combine(this._config.InstallDir, binFile);
 
             IPAddress[] ipOrDns;
@@ -205,55 +173,10 @@ namespace Launcher.Forms
                 return;
             }
 
-            var revertResolution = new Win32Api.DevMode();
-
-            if (settings.Resize)
-                revertResolution = LineageClient.ChangeDisplaySettings(settings.Resolution.Width, settings.Resolution.Height, settings.Resolution.Colour);
-            else if (settings.Windowed)
-                revertResolution = LineageClient.ChangeDisplayColour(this._isWin8OrHigher ? 32 : 16);
-
-            try
+            if (!Lineage.Run(settings, binFile))
             {
-                ProxyServer proxyServer = null;
-                if(settings.UseProxy)
-                {
-                    proxyServer = new ProxyServer();
-                    proxyServer.LocalAddress = "127.0.0.1";
-                    proxyServer.LocalPort = new Random().Next(1025, 50000);
-
-                    proxyServer.RemoteAddress = server.IpOrDns;
-                    proxyServer.RemotePort = server.Port;
-                    proxyServer.Start();
-                }
-
-                if(Lineage.Run(settings, this._config.InstallDir, settings.ClientBin,
-                    (ushort)(settings.UseProxy ? proxyServer.LocalPort : server.Port), settings.UseProxy ? null : ipOrDns[0]))
-                {
-                    var client = new LineageClient(this._config.KeyName, binFile, this._config.InstallDir, 
-                        proxyServer, ipOrDns[0], server.Port, Clients, this._config.ConfigType);
-                    client.Initialize();
-
-                    lock (this._lockObject)
-                        Clients.Add(client);
-
-                    if (!tmrCheckProcess.Enabled)
-                    {
-                        this._revertResolution = revertResolution;
-                        this.tmrCheckProcess.Enabled = true;
-                    }
-
-                    if (!settings.Windowed && this._isWin8OrHigher)
-                        this.Win10SetClientFocus();
-                } else
-                {
-                    MessageBox.Show("There was an error injecting into the Lineage client. Try running it again!", "Error Launching!",
-                    MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
-            }
-            catch(Exception)
-            {
-                MessageBox.Show("An unknown error occurred launching the Lineage client. Try running it again!", "Error Launching!",
-                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show("There was an error applying your settings to the Lineage client. Try running it again!", "Error!",
+                MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -264,12 +187,6 @@ namespace Launcher.Forms
 
             var statusThread = new Thread(() => this.CheckServerStatus(true)) { IsBackground = true };
             statusThread.Start();
-        }
-
-        private void Win10SetClientFocus()
-        {
-            Win32Api.ShowWindow(Clients[Clients.Count - 1].Process.MainWindowHandle, 0); // hide
-            Win32Api.ShowWindow(Clients[Clients.Count - 1].Process.MainWindowHandle, 5); // show
         }
 
         private bool CheckServerStatus(bool threaded)  
@@ -423,38 +340,6 @@ namespace Launcher.Forms
             this.btnCheck.Enabled = true;
         } //end btnCheck_Click
 
-        private void tmrCheckProcess_Tick(object sender, EventArgs e)
-        {
-            var revertResolution = this._revertResolution;
-            var settings = Helpers.LoadSettings(this._config.ConfigType == ConfigType.Registry ? this._config.KeyName : this._config.InstallDir, 
-                this._config.ConfigType);
-
-            lock (this._lockObject)
-            {
-                for (var i = Clients.Count - 1; i >= 0; i--)
-                {
-                    try
-                    {
-                        var runningProcess = Process.GetProcessById(Clients[i].Process.Id);
-                    }
-                    catch (Exception)
-                    {
-                        Clients.RemoveAt(i);
-                    }
-                }
-
-                if (Clients.Count == 0)
-                {
-                    this.tmrCheckProcess.Enabled = false;
-
-                    if(settings.Windowed || settings.Resize)
-                        LineageClient.ChangeDisplaySettings(revertResolution);
-
-                    tmrCheckProcess.Stop();
-                }
-            }
-        }
-
         private void systemIcon_MouseDoubleClick(object sender, MouseEventArgs e)
         {
             systemIcon.Visible = false;
@@ -469,13 +354,7 @@ namespace Launcher.Forms
 
         private void Close_Click(object sender, EventArgs e)
         {
-            if(Clients.Count > 0)
-            {
-                MessageBox.Show("You cannot close the launcher while a client is running!", "Client Still Running!",
-                    MessageBoxButtons.OK, MessageBoxIcon.Error);
-            } else {
-                Application.Exit();
-            }
+            Application.Exit();
         }
 
         private void configChecker_DoWork(object sender, DoWorkEventArgs e)
@@ -494,7 +373,7 @@ namespace Launcher.Forms
                 this._config.ConfigType == ConfigType.Registry ? this._config.KeyName : this._config.InstallDir, 
                 this._config.ConfigType);
 
-            if (Helpers.UpdateConfig(this._versionInfo, settings.DisableServerUpdate))
+            if (Helpers.UpdateConfig(this._versionInfo))
             {
                 MessageBox.Show("Configuration information was updated from the server.\n\nThe launcher will close. Please re-launch.",
                     @"Configuration Updated", MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -541,7 +420,7 @@ namespace Launcher.Forms
         {
             var browser = sender as WebBrowser;
 
-            if(browser != null && browser.Document.Url.ToString() == this._config.NewsUrl.ToString())
+            if(this._config.NewsUrl != null && browser != null && browser.Document.Url.ToString() == this._config.NewsUrl.ToString())
             {
                 this.BannerBrowser.Visible = true;
             }
@@ -549,7 +428,7 @@ namespace Launcher.Forms
 
         private void BannerBrowser_Navigating(object sender, WebBrowserNavigatingEventArgs e)
         {
-            if(e.Url.ToString() != this._config.NewsUrl.ToString())
+            if(this._config.NewsUrl != null && e.Url.ToString() != this._config.NewsUrl.ToString())
             {
                 //cancel the current event
                 e.Cancel = true;

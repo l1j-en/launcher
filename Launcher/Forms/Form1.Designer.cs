@@ -37,7 +37,6 @@ namespace Launcher.Forms
             this.cmbServer = new System.Windows.Forms.ComboBox();
             this.pctVote = new System.Windows.Forms.PictureBox();
             this.updateChecker = new System.ComponentModel.BackgroundWorker();
-            this.tmrCheckProcess = new System.Windows.Forms.Timer(this.components);
             this.systemIcon = new System.Windows.Forms.NotifyIcon(this.components);
             this.systemTrayContextMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.Restore = new System.Windows.Forms.ToolStripMenuItem();
@@ -110,11 +109,6 @@ namespace Launcher.Forms
             this.updateChecker.WorkerReportsProgress = true;
             this.updateChecker.DoWork += new System.ComponentModel.DoWorkEventHandler(this.updateChecker_DoWork);
             this.updateChecker.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.updateChecker_RunWorkerCompleted);
-            // 
-            // tmrCheckProcess
-            // 
-            this.tmrCheckProcess.Interval = 500;
-            this.tmrCheckProcess.Tick += new System.EventHandler(this.tmrCheckProcess_Tick);
             // 
             // systemIcon
             // 
@@ -329,7 +323,6 @@ namespace Launcher.Forms
         private OutlineLabel lblServerStatus;
         private System.ComponentModel.BackgroundWorker updateChecker;
         private GlassButton btnCheck;
-        private System.Windows.Forms.Timer tmrCheckProcess;
         private OutlineLabel lblVersionText;
         private OutlineLabel lblVersion;
         private System.Windows.Forms.NotifyIcon systemIcon;

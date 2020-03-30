@@ -18,119 +18,84 @@ using Launcher.Models;
 using Launcher.Utilities;
 using System.Net;
 using System.Diagnostics;
+using System.Linq;
 
 namespace Launcher
 {
     class Lineage
     {
-        private static uint localHost = (uint)IPAddress.NetworkToHostOrder(BitConverter.ToInt32(IPAddress.Parse("127.0.0.1").GetAddressBytes(), 0));
-        private static byte[] runtimeExpired = { 0x75, 0x3B };
-
-        public static bool Run(Settings settings, string clientDirectory, string bin, ushort port, IPAddress serverIp)
+        public static bool Run(Settings settings, string bin)
         {
-            var binpath = Path.Combine(clientDirectory, bin);
-            uint connectionIp;
-
-            if (serverIp == null)
-                connectionIp = localHost;
-            else
-                connectionIp = (uint)IPAddress.NetworkToHostOrder(BitConverter.ToInt32(serverIp.GetAddressBytes(), 0));
-
             var startupInfo = new Win32Api.Startupinfo();
-            var processInfo = new Win32Api.ProcessInformation();
+            /*var processInfo = new Win32Api.ProcessInformation();
 
-            var success = Win32Api.CreateProcess(binpath, string.Format("\"{0}\" {1} {2}", binpath.Trim(), connectionIp, port),
-                IntPtr.Zero, IntPtr.Zero, false,
-                Win32Api.ProcessCreationFlags.CreateSuspended | Win32Api.ProcessCreationFlags.CreateDefaultErrorMode,
-                IntPtr.Zero, null, ref startupInfo, out processInfo);
+          var success = Win32Api.CreateProcess(binpath, string.Format("\"{0}\" {1} {2}", binpath.Trim(), connectionIp, port),
+               IntPtr.Zero, IntPtr.Zero, false,
+               Win32Api.ProcessCreationFlags.CreateSuspended | Win32Api.ProcessCreationFlags.CreateDefaultErrorMode,
+               IntPtr.Zero, null, ref startupInfo, out processInfo);
 
             var tHandle = processInfo.HThread;
             var buffer = new byte[2];
 
             System.Threading.Thread.Sleep(settings.LoginDelay);
             Injector.GetInstance.BInject(processInfo.DwProcessId, Path.Combine(clientDirectory, "login.dll"));
-            Win32Api.ResumeThread(tHandle);
+            Win32Api.ResumeThread(tHandle);*/
 
-            for (var tries = 0; tries < 20; tries++)
-            {
-                Win32Api.ReadProcessMemory(processInfo.HProcess, (IntPtr)0x0045CF2F, buffer, (uint)buffer.Length, 0);
-                if (Helpers.ByteArrayCompare(runtimeExpired, buffer))
-                {
-                    // gameguard and runtime expired
-                    Win32Api.WriteProcessMemory(processInfo.HProcess, (IntPtr)0x0045CF2F, new byte[] { 0xEB }, 1, 0);
-                    Win32Api.WriteProcessMemory(processInfo.HProcess, (IntPtr)0x0045E3AC, new byte[] { 0x90, 0xE9 }, 2, 0);
-                    Win32Api.WriteProcessMemory(processInfo.HProcess, (IntPtr)0x004DE45A, new byte[] { 0x90, 0x90 }, 2, 0);
-                    Win32Api.WriteProcessMemory(processInfo.HProcess, (IntPtr)0x0045BA71, new byte[] { 0x90, 0x90, 0x90, 0x90, 0x90, 0x90 }, 6, 0);
-                    Win32Api.WriteProcessMemory(processInfo.HProcess, (IntPtr)0x0045EABA, new byte[] { 0xEB }, 1, 0);
-                    Win32Api.WriteProcessMemory(processInfo.HProcess, (IntPtr)0x00474AC4, new byte[] { 0x90, 0x90, 0x90, 0x90, 0x90, 0x84, 0xC0, 0x5E, 0x5B, 0xEB }, 10, 0);
-                    break;
-                }
-
-                System.Threading.Thread.Sleep(100);
-            }
-
-            Win32Api.ResumeThread(tHandle);
-            Win32Api.CloseHandle(tHandle);
+            var startProcess = Process.GetProcesses().FirstOrDefault(b => b.ProcessName.Contains(bin));
+            Win32Api.SuspendThread(startProcess.Handle);
+            System.Threading.Thread.Sleep(1000);
 
             // open the process after it is created so we can add the appropriate flags to write to the process
-            var hndProc = Win32Api.OpenProcess((uint)(Win32Api.ProcessAccessFlags.CreateProcess | Win32Api.ProcessAccessFlags.VirtualMemoryOperation
-                                                | Win32Api.ProcessAccessFlags.VirtualMemoryRead | Win32Api.ProcessAccessFlags.VirtualMemoryWrite
-                                                | Win32Api.ProcessAccessFlags.QueryInformation), 0, processInfo.DwProcessId);
+            var hndProc = Win32Api.OpenProcess((uint)(Win32Api.ProcessAccessFlags.CreateThread | Win32Api.ProcessAccessFlags.VirtualMemoryOperation
+                                    | Win32Api.ProcessAccessFlags.VirtualMemoryRead | Win32Api.ProcessAccessFlags.VirtualMemoryWrite
+                                    | Win32Api.ProcessAccessFlags.QueryInformation), 0, (uint)startProcess.Id);
 
-                
+
+            Win32Api.CloseHandle(startProcess.Handle);
             Win32Api.SuspendThread(hndProc);
 
-            var process = Process.GetProcessById((int)processInfo.DwProcessId);
-            var timeSpan = DateTime.Now - process.StartTime;
+            var process = Process.GetProcesses().FirstOrDefault(b => b.MainWindowTitle.Contains("Lineage Windows Client"));
+            //var timeSpan = DateTime.Now - process.StartTime;
 
             try
             {
                 var i = 0;
-                var maxIterations = 600;
+                var maxIterations = 6000;
                 // wait for the window to initialize before continuing the injection process
-                while (i <= maxIterations && process.MainWindowTitle != "Lineage Windows Client")
+                while (i <= maxIterations && process == null)
                 {
                     System.Threading.Thread.Sleep(5);
-                    process.Refresh();
+                    process = Process.GetProcesses().FirstOrDefault(b => b.MainWindowTitle.Contains("Lineage Windows Client")); ;
                     i++;
                 }
 
-                if(i == maxIterations)
+                if (i == maxIterations)
                 {
                     return false;
                 }
-            } catch(Exception) {
-                return false;
             }
-
-            // remove water
-            if(settings.DisableUnderwater)
+            catch (Exception)
             {
-                Win32Api.WriteProcessMemory(hndProc, (IntPtr)0x004675DA, new byte[] { 0xEB }, 1, 0);
+                return false;
             }
 
             // Remove darkness
             if (settings.DisableDark)
             {
-                Win32Api.WriteProcessMemory(hndProc, (IntPtr)0x0046690B, new byte[] { 0x90, 0xE9 }, 2, 0);
+                //TODO -- check what this address looks like before it changes!!!
+                Win32Api.WriteProcessMemory(hndProc, (IntPtr)0x004E4320, new byte[] { 0x90, 0xE9 }, 2, 0);
             }
 
             // Mob level highlight toggle
             if (settings.EnableMobColours)
             {
-                Win32Api.WriteProcessMemory(hndProc, (IntPtr)0x0046786E, new byte[] { 0x90, 0x90, 0x90, 0x90, 0x90, 0x90 }, 6, 0);
+                Win32Api.WriteProcessMemory(hndProc, (IntPtr)0x004E5D94 , new byte[] { 0x90, 0x90, 0x90, 0x90, 0x90, 0x90 }, 6, 0);
             }
-            
-            // Needed to get the lance master poly working properly
-            var zelgoPak = File.ReadAllBytes(Path.Combine(clientDirectory, "zelgo.pak"));
-            Win32Api.WriteProcessMemory(hndProc, (IntPtr)0x004B6CE0, new byte[] { 0xEB }, 1, 0);
-            Win32Api.WriteProcessMemory(hndProc, (IntPtr)0x00504538, zelgoPak, (uint)zelgoPak.Length - 1, 0);
-            Win32Api.WriteProcessMemory(hndProc, (IntPtr)0x006DA508, new byte[] { 0x0F, 0x27 }, 2, 0);
-            Win32Api.ResumeThread(hndProc);
 
             Win32Api.CloseHandle(hndProc);
             hndProc = IntPtr.Zero;
 
+            System.Threading.Thread.Sleep(1000);
             return true;
         }
     }

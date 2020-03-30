@@ -175,7 +175,6 @@
     <Compile Include="Utilities\Proxy\Client.cs" />
     <Compile Include="Utilities\Proxy\ProxyServer.cs" />
     <Compile Include="Utilities\Win32Api.cs" />
-    <Compile Include="LineageClient.cs" />
     <EmbeddedResource Include="Forms\AddServerForm.resx">
       <DependentUpon>AddServerForm.cs</DependentUpon>
     </EmbeddedResource>

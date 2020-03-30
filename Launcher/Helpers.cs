@@ -64,7 +64,7 @@ namespace Launcher
             configKey.SetValue(field, newValue, RegistryValueKind.String);
         }
 
-        public static bool UpdateConfig(VersionInfo versionInfo, bool ignoreServers = false)
+        public static bool UpdateConfig(VersionInfo versionInfo)
         {
             var actuallyUpdated = false;
 
@@ -78,7 +78,7 @@ namespace Launcher
 
             if (!actuallyUpdated)
             {
-                actuallyUpdated = (configKey.GetValue("Servers") == null || (configKey.GetValue("Servers").ToString() != versionInfo.Servers && !ignoreServers)) ||
+                actuallyUpdated = (configKey.GetValue("Servers") == null || (configKey.GetValue("Servers").ToString() != versionInfo.Servers)) ||
                                   (configKey.GetValue("VersionInfoUrl") == null || configKey.GetValue("VersionInfoUrl").ToString() != versionInfo.VersionInfoUrl) ||
                                   (configKey.GetValue("VoteUrl") == null || configKey.GetValue("VoteUrl").ToString() != versionInfo.VoteUrl) ||
                                   (configKey.GetValue("WebsiteUrl") == null || configKey.GetValue("WebsiteUrl").ToString() != versionInfo.WebsiteUrl) ||
@@ -88,11 +88,7 @@ namespace Launcher
                                   (configKey.GetValue("UpdaterFilesRoot") == null || configKey.GetValue("UpdaterFilesRoot").ToString() != versionInfo.UpdaterFilesRoot);
             }
 
-            if(!ignoreServers)
-            {
-                configKey.SetValue("Servers", versionInfo.Servers, RegistryValueKind.String);
-            }
-            
+            configKey.SetValue("Servers", versionInfo.Servers, RegistryValueKind.String);
             configKey.SetValue("VersionInfoUrl", versionInfo.VersionInfoUrl, RegistryValueKind.String);
             configKey.SetValue("VoteUrl", versionInfo.VoteUrl, RegistryValueKind.String);
             configKey.SetValue("WebsiteUrl", versionInfo.WebsiteUrl, RegistryValueKind.String);
@@ -212,24 +208,10 @@ namespace Launcher
             var ms = new MemoryStream((byte[])settingsKey.GetValue("AppSettings"));
             var settingsObject = DeserializeFromStream<Settings>(ms);
 
-            var settingsString = Encoding.UTF8.GetString(settings).ToLower();
-            // TODO -- temporary fix because the delays didn't exist before and I don't want to use
-            // a nullable int
-            if (settingsString.IndexOf("windoweddelay") == -1)
-            {
-                settingsObject.WindowedDelay = 500;
-            }
-
-            if (settingsString.IndexOf("logindelay") == -1)
-            {
-                settingsObject.LoginDelay = 500;
-            }
-
             return settingsObject;
         }
 
-        public static void SaveSettings(string keyName, Settings settings, string clientDirectory, 
-            bool isWin8OrHigher, ConfigType configType)
+        public static void SaveSettings(string keyName, Settings settings, string clientDirectory, ConfigType configType)
         {
 
             if(configType == ConfigType.Registry)
@@ -239,46 +221,13 @@ namespace Launcher
             {
                 SaveSettingsToFlatFile(clientDirectory, settings);
             }
-
-            //set the windowed flag in the lineage.cfg file
-            if (isWin8OrHigher && settings.Windowed)
-            {
-                var compatRegKey = Registry.CurrentUser.CreateSubKey(@"Software\Microsoft\Windows NT\CurrentVersion\AppCompatFlags\Layers");
-                if (compatRegKey != null)
-                    ((RegistryKey)compatRegKey).SetValue(Path.Combine(clientDirectory, settings.ClientBin),
-                        "~ DWM8And16BitMitigation 16BITCOLOR WINXPSP3", RegistryValueKind.String);
-            }
-
-            var lincfgPath = Path.Combine(clientDirectory, "lineage.cfg");
-
-            if (!File.Exists(lincfgPath))
-            {
-                MessageBox.Show(@"Lineage.cfg file not found. Unable to update Windowed settings.");
-                return;
-            }
-
-            using (var cfgFile = File.Open(lincfgPath, FileMode.Open))
-            {
-                var windowedByte = settings.Windowed ? (byte)0 : (byte)1;
-
-                cfgFile.Seek(0xe4, SeekOrigin.Begin);
-                cfgFile.WriteByte(windowedByte);
-                cfgFile.Close();
-            }
-
-            var musicFilePath = Path.Combine(clientDirectory, "music.cfg");
-
-            if (!File.Exists(musicFilePath))
-                using (File.Create(musicFilePath)){ }
-
-            File.WriteAllText(musicFilePath, (settings.MusicType == "Original Midi Music" ? "1" : "0"));
         } //end SaveSettings
 
         private static void SaveSettingsToFlatFile(string clientDirectory, Settings settings)
         {
             using (var fs = new FileStream(
                 Path.Combine(clientDirectory, "l1jSettings.cfg"),
-                FileMode.OpenOrCreate,
+                FileMode.Truncate,
                 FileAccess.Write))
             {
                 using (var ms = new MemoryStream())
@@ -293,6 +242,7 @@ namespace Launcher
                     var bytes = new byte[ms.Length];
                     ms.Read(bytes, 0, (int)ms.Length);
                     fs.Write(bytes, 0, bytes.Length);
+                    fs.Close();
                 }
             }
         }
@@ -368,24 +318,6 @@ namespace Launcher
                 using (var md5 = MD5.Create())
                     return BitConverter.ToString(md5.ComputeHash(stream)).Replace("-", "").ToUpper();
         } //end GetChecksum
-
-        public static bool IsWin8OrHigher(out string versionName)
-        {
-            var win8Version = new Version(6, 2, 9200, 0);
-            versionName = WindowsVersion.Windows8;
-
-            if (Environment.OSVersion.Version.Major >= 10)
-                versionName = WindowsVersion.Windows10;
-
-            return Environment.OSVersion.Platform == PlatformID.Win32NT &&
-                   Environment.OSVersion.Version >= win8Version;
-        } //end IsWin8OrHigher
-
-        public static bool IsWin8OrHigher()
-        {
-            string versionName;
-            return IsWin8OrHigher(out versionName);
-        } //end IsWin8OrHigher 
 
         public static bool ByteArrayCompare(byte[] a1, byte[] a2)
         {

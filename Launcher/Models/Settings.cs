@@ -21,41 +21,11 @@ namespace Launcher.Models
     [DataContract]
     public class Settings
     {
-        public Settings(int delay)
-        {
-            this.WindowedDelay = delay;
-            this.LoginDelay = delay;
-        }
-
-        public Settings() { }
-
-        [DataMember]
-        public bool Windowed { get; set; }
-        [DataMember]
-        public bool Resize { get; set; }
         [DataMember]
         public bool DisableDark { get; set; }
         [DataMember]
         public bool EnableMobColours { get; set; }
         [DataMember]
         public bool DisableUnderwater { get; set; }
-
-        [DataMember]
-        public Resolution Resolution { get; set; }
-
-        [DataMember]
-        public string MusicType { get; set; }
-        [DataMember]
-        public string ClientBin { get; set; }
-
-        [DataMember]
-        public bool UseProxy { get; set; }
-
-        [DataMember]
-        public bool DisableServerUpdate { get; set; }
-        [DataMember]
-        public int WindowedDelay { get; set; }
-        [DataMember]
-        public int LoginDelay { get; set; }
     }
 }
