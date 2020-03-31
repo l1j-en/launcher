@@ -93,6 +93,7 @@ namespace Launcher
                 Win32Api.WriteProcessMemory(hndProc, (IntPtr)0x004E5D94 , new byte[] { 0x90, 0x90, 0x90, 0x90, 0x90, 0x90 }, 6, 0);
             }
 
+            //TODO -- probably a better way to do this than a hard-coded sleep
             // have to sleep to ensure the darkness toggle is done after the login.exe sets it
             // because in 363 it seems to disable darkness by default
             System.Threading.Thread.Sleep(1000);

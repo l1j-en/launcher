@@ -241,21 +241,21 @@ namespace Launcher
 
                     switch(settings.WindowSize)
                     {
-                        case "400 X 300":
+                        case "400x300":
                             stream.WriteByte(0xa0);
                             stream.WriteByte(0xb2);
 
                             stream.Seek(0x102, SeekOrigin.Begin);
-                            stream.WriteByte(0x04); // 6 for 1200, 5 for 800, 5 for 400, 7 for 1600
+                            stream.WriteByte(0x04);
                             break;
-                        case "1200 X 900":
+                        case "1200x900":
                             stream.WriteByte(0x45);
                             stream.WriteByte(0x85);
 
                             stream.Seek(0x102, SeekOrigin.Begin);
                             stream.WriteByte(0x06);
                             break;
-                        case "1600 X 1200":
+                        case "1600x1200":
                             stream.WriteByte(0x9e);
                             stream.WriteByte(0x6d);
 
