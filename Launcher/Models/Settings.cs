@@ -27,5 +27,9 @@ namespace Launcher.Models
         public bool EnableMobColours { get; set; }
         [DataMember]
         public bool DisableUnderwater { get; set; }
+        [DataMember]
+        public bool Windowed { get; set; }
+        [DataMember]
+        public string WindowSize { get; set; }
     }
 }

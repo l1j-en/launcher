@@ -15,6 +15,7 @@
 using System;
 using System.Windows.Forms;
 using Launcher.Models;
+using System.Linq;
 
 namespace Launcher.Forms
 {
@@ -44,8 +45,15 @@ namespace Launcher.Forms
             {
                 DisableDark = this.chkDisableDark.Checked,
                 EnableMobColours = this.chkMobColours.Checked,
-                DisableUnderwater = this.chkDisableUnderwater.Checked
+                DisableUnderwater = this.chkDisableUnderwater.Checked,
+                Windowed = this.rdioWindowed.Checked
             };
+
+            foreach(RadioButton resolution in this.grpWindowSize.Controls)
+            {
+                if (resolution.Checked)
+                    settings.WindowSize = resolution.Text.Replace(" ","").ToLower();
+            }
                 
             Helpers.SaveSettings(this._config.KeyName, settings, this._config.InstallDir, this._config.ConfigType);
             this.Close();
@@ -60,6 +68,31 @@ namespace Launcher.Forms
             this.chkDisableDark.Checked = savedSettings.DisableDark;
             this.chkMobColours.Checked = savedSettings.EnableMobColours;
             this.chkDisableUnderwater.Checked = savedSettings.DisableUnderwater;
+            this.rdioWindowed.Checked = savedSettings.Windowed;
+            this.rdioFullscreen.Checked = !savedSettings.Windowed;
+
+            if(!savedSettings.Windowed)
+                ToggleResolutions(false);
+
+            if (string.IsNullOrEmpty(savedSettings.WindowSize))
+                this.rdio800x600.Checked = true;
+            else
+            {
+                var resolution = this.grpWindowSize.Controls.Find($"rdio{savedSettings.WindowSize}", false);
+                if (resolution.Length > 0)
+                    ((RadioButton)resolution[0]).Checked = true;
+            }
+        }
+
+        private void ToggleResolutions(bool enable)
+        {
+            foreach (RadioButton resolution in this.grpWindowSize.Controls)
+                resolution.Enabled = enable;
+        }
+
+        private void rdioWindowed_CheckedChanged(object sender, EventArgs e)
+        {
+            ToggleResolutions(this.rdioWindowed.Checked);
         }
     }
 }

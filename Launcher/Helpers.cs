@@ -221,6 +221,76 @@ namespace Launcher
             {
                 SaveSettingsToFlatFile(clientDirectory, settings);
             }
+
+            var lincfgPath = Path.Combine(clientDirectory, "lineage.cfg");
+
+            if (!File.Exists(lincfgPath))
+            {
+                MessageBox.Show(@"Lineage.cfg file not found. Unable to update Window settings.");
+                return;
+            }
+
+            using (var stream = new FileStream(lincfgPath, FileMode.Open, FileAccess.ReadWrite))
+            {
+                if(settings.Windowed)
+                {
+                    stream.Seek(0xa5, SeekOrigin.Begin);
+                    stream.WriteByte(0);
+
+                    stream.Seek(0x99, SeekOrigin.Begin);
+
+                    switch(settings.WindowSize)
+                    {
+                        case "400 X 300":
+                            stream.WriteByte(0xa0);
+                            stream.WriteByte(0xb2);
+
+                            stream.Seek(0x102, SeekOrigin.Begin);
+                            stream.WriteByte(0x04); // 6 for 1200, 5 for 800, 5 for 400, 7 for 1600
+                            break;
+                        case "1200 X 900":
+                            stream.WriteByte(0x45);
+                            stream.WriteByte(0x85);
+
+                            stream.Seek(0x102, SeekOrigin.Begin);
+                            stream.WriteByte(0x06);
+                            break;
+                        case "1600 X 1200":
+                            stream.WriteByte(0x9e);
+                            stream.WriteByte(0x6d);
+
+                            stream.Seek(0x102, SeekOrigin.Begin);
+                            stream.WriteByte(0x07);
+                            break;
+                        default:
+                            stream.WriteByte(0x60);
+                            stream.WriteByte(0xb9);
+
+                            stream.Seek(0x102, SeekOrigin.Begin);
+                            stream.WriteByte(0x05);
+                            break;
+                    }
+
+                    stream.Seek(0xe4, SeekOrigin.Begin);
+                    stream.WriteByte(0x00);
+                } else {
+                    stream.Seek(0xa5, SeekOrigin.Begin);
+                    stream.WriteByte(1);
+
+                    stream.Seek(0x99, SeekOrigin.Begin);
+                    stream.WriteByte(0x9b);
+                    stream.WriteByte(0x97);
+
+                    stream.Seek(0xe4, SeekOrigin.Begin);
+                    stream.WriteByte(0x01);
+
+                    stream.Seek(0x102, SeekOrigin.Begin);
+                    stream.WriteByte(0x05);
+                }
+
+                stream.Close();
+            }
+
         } //end SaveSettings
 
         private static void SaveSettingsToFlatFile(string clientDirectory, Settings settings)
