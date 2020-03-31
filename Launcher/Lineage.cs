@@ -13,10 +13,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 using System;
-using System.IO;
 using Launcher.Models;
 using Launcher.Utilities;
-using System.Net;
 using System.Diagnostics;
 using System.Linq;
 
@@ -24,11 +22,11 @@ namespace Launcher
 {
     class Lineage
     {
-        public static bool Run(Settings settings, string bin)
+        public static bool Run(Settings settings, string bin, string chosenServer)
         {
             var startInfo = new ProcessStartInfo
             {
-                FileName = @"C:\Program Files (x86)\Lineage Justice\Login.exe",
+                FileName = "Login.exe",
                 WindowStyle = ProcessWindowStyle.Hidden,
                 CreateNoWindow = true,
                 UseShellExecute = false
@@ -43,7 +41,7 @@ namespace Launcher
 
             Win32Api.ShowWindow(loginProcess.MainWindowHandle, 0);
 
-            var buttonHandle = Win32Api.FindWindowEx(loginProcess.MainWindowHandle, IntPtr.Zero, "Button", "Home Test");
+            var buttonHandle = Win32Api.FindWindowEx(loginProcess.MainWindowHandle, IntPtr.Zero, "Button", chosenServer);
             Win32Api.SendMessage(buttonHandle, 0x0201, IntPtr.Zero, IntPtr.Zero);
             Win32Api.SendMessage(buttonHandle, 0x0202, IntPtr.Zero, IntPtr.Zero);
 
@@ -55,8 +53,6 @@ namespace Launcher
             }
 
             Win32Api.SuspendThread(startProcess.Handle);
-
-            System.Threading.Thread.Sleep(1000);
 
             // open the process after it is created so we can add the appropriate flags to write to the process
             var hndProc = Win32Api.OpenProcess((uint)(Win32Api.ProcessAccessFlags.CreateThread | Win32Api.ProcessAccessFlags.VirtualMemoryOperation
@@ -91,24 +87,29 @@ namespace Launcher
                 return false;
             }
 
-            // Remove darkness
-            if (settings.DisableDark)
-            {
-                Win32Api.WriteProcessMemory(hndProc, (IntPtr)0x004E4320, new byte[] { 0x90, 0xE9 }, 2, 0);
-            } else {
-                Win32Api.WriteProcessMemory(hndProc, (IntPtr)0x004E4320, new byte[] { 0x0F, 0x8D }, 2, 0);
-            }
-
             // Mob level highlight toggle
             if (settings.EnableMobColours)
             {
                 Win32Api.WriteProcessMemory(hndProc, (IntPtr)0x004E5D94 , new byte[] { 0x90, 0x90, 0x90, 0x90, 0x90, 0x90 }, 6, 0);
             }
 
+            // have to sleep to ensure the darkness toggle is done after the login.exe sets it
+            // because in 363 it seems to disable darkness by default
+            System.Threading.Thread.Sleep(1000);
+            // Remove darkness
+            if (settings.DisableDark)
+            {
+                Win32Api.WriteProcessMemory(hndProc, (IntPtr)0x004E4320, new byte[] { 0x90, 0xE9 }, 2, 0);
+            }
+            else
+            {
+                Win32Api.WriteProcessMemory(hndProc, (IntPtr)0x004E4320, new byte[] { 0x0F, 0x8D }, 2, 0);
+            }
+
+            Win32Api.ResumeThread(hndProc);
             Win32Api.CloseHandle(hndProc);
             hndProc = IntPtr.Zero;
 
-            System.Threading.Thread.Sleep(1000);
             return true;
         }
     }

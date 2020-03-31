@@ -38,7 +38,7 @@ namespace Launcher.Forms
 
         public LauncherForm()
         {
-            var appLocation = @"C:\Program Files (x86)\Lineage Justice";// Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            var appLocation = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             var associatedLaunchers = Helpers.GetAssociatedLaunchers(appLocation);
             
             if (!Helpers.LauncherInLineageDirectory(appLocation))
@@ -168,7 +168,7 @@ namespace Launcher.Forms
                 return;
             }
 
-            if (!Lineage.Run(settings, binFile))
+            if (!Lineage.Run(settings, binFile, this.cmbServer.SelectedItem.ToString()))
             {
                 MessageBox.Show("There was an error applying your settings to the Lineage client. Try running it again!", "Error!",
                 MessageBoxButtons.OK, MessageBoxIcon.Error);
