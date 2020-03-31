@@ -13,7 +13,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
@@ -24,26 +23,22 @@ using System.Net.Sockets;
 using System.Threading;
 using System.Windows.Forms;
 using Launcher.Models;
-using Launcher.Utilities;
 using Microsoft.Win32;
 using System.Reflection;
-using Launcher.Utilities.Proxy;
 
 namespace Launcher.Forms
 {
     public partial class LauncherForm : Form
     {
-        private const string Version = "4.0.0";
-        private Win32Api.DevMode _revertResolution;
+        private const string Version = "5.0.0";
 
-        private readonly object _lockObject = new object();
         private readonly LauncherConfig _config;
         private VersionInfo _versionInfo;
         private bool _hasUpdates;
 
         public LauncherForm()
         {
-            var appLocation = @"C:\Program Files (x86)\Lineage Justice"; //Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            var appLocation = @"C:\Program Files (x86)\Lineage Justice";// Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             var associatedLaunchers = Helpers.GetAssociatedLaunchers(appLocation);
             
             if (!Helpers.LauncherInLineageDirectory(appLocation))
@@ -57,7 +52,7 @@ namespace Launcher.Forms
 
             // If no launchers are available, let's assume resurrection
             if (associatedLaunchers.Count == 0)
-                associatedLaunchers.Add("Lineage Resurrection");
+                associatedLaunchers.Add("L1J Server");
 
             if (associatedLaunchers.Count > 1)
                 MessageBox.Show("More than one launcher associated with this folder! Using the first one found.");

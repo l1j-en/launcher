@@ -26,23 +26,36 @@ namespace Launcher
     {
         public static bool Run(Settings settings, string bin)
         {
-            var startupInfo = new Win32Api.Startupinfo();
-            /*var processInfo = new Win32Api.ProcessInformation();
+            var startInfo = new ProcessStartInfo
+            {
+                FileName = @"C:\Program Files (x86)\Lineage Justice\Login.exe",
+                WindowStyle = ProcessWindowStyle.Hidden,
+                CreateNoWindow = true,
+                UseShellExecute = false
+            };
 
-          var success = Win32Api.CreateProcess(binpath, string.Format("\"{0}\" {1} {2}", binpath.Trim(), connectionIp, port),
-               IntPtr.Zero, IntPtr.Zero, false,
-               Win32Api.ProcessCreationFlags.CreateSuspended | Win32Api.ProcessCreationFlags.CreateDefaultErrorMode,
-               IntPtr.Zero, null, ref startupInfo, out processInfo);
+            var loginProcess = Process.Start(startInfo);
+            while (loginProcess.MainWindowTitle != "Login")
+            {
+                System.Threading.Thread.Sleep(100);
+                loginProcess.Refresh();
+            }
 
-            var tHandle = processInfo.HThread;
-            var buffer = new byte[2];
+            Win32Api.ShowWindow(loginProcess.MainWindowHandle, 0);
 
-            System.Threading.Thread.Sleep(settings.LoginDelay);
-            Injector.GetInstance.BInject(processInfo.DwProcessId, Path.Combine(clientDirectory, "login.dll"));
-            Win32Api.ResumeThread(tHandle);*/
+            var buttonHandle = Win32Api.FindWindowEx(loginProcess.MainWindowHandle, IntPtr.Zero, "Button", "Home Test");
+            Win32Api.SendMessage(buttonHandle, 0x0201, IntPtr.Zero, IntPtr.Zero);
+            Win32Api.SendMessage(buttonHandle, 0x0202, IntPtr.Zero, IntPtr.Zero);
 
             var startProcess = Process.GetProcesses().FirstOrDefault(b => b.ProcessName.Contains(bin));
+            while(startProcess == null)
+            {
+                startProcess = Process.GetProcesses().FirstOrDefault(b => b.ProcessName.Contains(bin));
+                System.Threading.Thread.Sleep(50);
+            }
+
             Win32Api.SuspendThread(startProcess.Handle);
+
             System.Threading.Thread.Sleep(1000);
 
             // open the process after it is created so we can add the appropriate flags to write to the process
@@ -54,8 +67,7 @@ namespace Launcher
             Win32Api.CloseHandle(startProcess.Handle);
             Win32Api.SuspendThread(hndProc);
 
-            var process = Process.GetProcesses().FirstOrDefault(b => b.MainWindowTitle.Contains("Lineage Windows Client"));
-            //var timeSpan = DateTime.Now - process.StartTime;
+            var process = Process.GetProcesses().FirstOrDefault(b => b.MainWindowTitle.Contains("Lineage Windows Client"));;
 
             try
             {
@@ -82,8 +94,9 @@ namespace Launcher
             // Remove darkness
             if (settings.DisableDark)
             {
-                //TODO -- check what this address looks like before it changes!!!
                 Win32Api.WriteProcessMemory(hndProc, (IntPtr)0x004E4320, new byte[] { 0x90, 0xE9 }, 2, 0);
+            } else {
+                Win32Api.WriteProcessMemory(hndProc, (IntPtr)0x004E4320, new byte[] { 0x0F, 0x8D }, 2, 0);
             }
 
             // Mob level highlight toggle
