@@ -35,7 +35,7 @@ namespace Launcher
             var loginProcess = Process.Start(startInfo);
             while (loginProcess.MainWindowTitle != "Login")
             {
-                System.Threading.Thread.Sleep(100);
+                System.Threading.Thread.Sleep(50);
                 loginProcess.Refresh();
             }
 
@@ -87,10 +87,17 @@ namespace Launcher
                 return false;
             }
 
+
             // Mob level highlight toggle
             if (settings.EnableMobColours)
             {
                 Win32Api.WriteProcessMemory(hndProc, (IntPtr)0x004E5D94 , new byte[] { 0x90, 0x90, 0x90, 0x90, 0x90, 0x90 }, 6, 0);
+            }
+
+            if (settings.DisableUnderwater)
+            {
+                Win32Api.WriteProcessMemory(hndProc, (IntPtr)0x0051E948, new byte[] { 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90 }, 7, 0);
+                Win32Api.WriteProcessMemory(hndProc, (IntPtr)0x0051E96B, new byte[] { 0x75 }, 1, 0);
             }
 
             //TODO -- probably a better way to do this than a hard-coded sleep

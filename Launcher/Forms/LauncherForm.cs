@@ -151,7 +151,6 @@ namespace Launcher.Forms
             var settings = Helpers.LoadSettings(this._config.ConfigType == ConfigType.Registry ? this._config.KeyName : this._config.InstallDir, 
                 this._config.ConfigType);
             var binFile = Path.GetFileNameWithoutExtension("TW13032701.bin");
-            var binpath = Path.Combine(this._config.InstallDir, binFile);
 
             IPAddress[] ipOrDns;
 
