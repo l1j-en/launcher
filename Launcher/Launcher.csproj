@@ -169,11 +169,7 @@
     <Compile Include="Forms\UpdateForm.Designer.cs">
       <DependentUpon>UpdateForm.cs</DependentUpon>
     </Compile>
-    <Compile Include="Utilities\Encryption.cs" />
-    <Compile Include="Utilities\OpCodes.cs" />
     <Compile Include="Utilities\PakTools.cs" />
-    <Compile Include="Utilities\Proxy\Client.cs" />
-    <Compile Include="Utilities\Proxy\ProxyServer.cs" />
     <Compile Include="Utilities\Win32Api.cs" />
     <EmbeddedResource Include="Forms\AddServerForm.resx">
       <DependentUpon>AddServerForm.cs</DependentUpon>
