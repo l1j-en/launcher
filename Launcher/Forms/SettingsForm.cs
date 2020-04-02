@@ -23,10 +23,18 @@ namespace Launcher.Forms
     {
         private readonly LauncherConfig _config;
 
-        public SettingsForm(LauncherConfig config)
+        public SettingsForm(LauncherConfig config, bool forceSave = false)
         {
             InitializeComponent();
             this._config = config;
+
+            if (forceSave)
+            {
+                this.btnCancel.Enabled = false;
+                this.lblInitialLoad.Visible = true;
+                this.btnClose.Enabled = false;
+            }
+                
         }
 
         private void btnClose_Click(object sender, EventArgs e)
@@ -55,15 +63,13 @@ namespace Launcher.Forms
                     settings.WindowSize = resolution.Text.Replace(" ","").ToLower();
             }
                 
-            Helpers.SaveSettings(this._config.KeyName, settings, this._config.InstallDir, this._config.ConfigType);
+            Helpers.SaveSettings(settings, this._config.InstallDir);
             this.Close();
         }
 
         private void SettingsForm_Load(object sender, EventArgs e)
         {
-            var savedSettings = Helpers.LoadSettings(
-                this._config.ConfigType == ConfigType.Registry ? this._config.KeyName : this._config.InstallDir, 
-                this._config.ConfigType) ?? new Settings();
+            var savedSettings = Helpers.LoadSettings(this._config.InstallDir) ?? new Settings();
 
             this.chkDisableDark.Checked = savedSettings.DisableDark;
             this.chkMobColours.Checked = savedSettings.EnableMobColours;

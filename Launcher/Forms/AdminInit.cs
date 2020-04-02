@@ -82,7 +82,7 @@ namespace Launcher.Forms
         private void hlpUpdaterFilesRoot_Click(object sender, EventArgs e)
         {
             new CustomMessageBox("Updater Files Root",
-               "Some Info",
+               "This is the root path.. something",
                new Bitmap(Properties.Resources.Help_Big)).ShowDialog();
         }
 
@@ -96,35 +96,40 @@ namespace Launcher.Forms
         private void hlpVersionInfoUrl_Click(object sender, EventArgs e)
         {
             new CustomMessageBox("Version Info Url",
-               "Some Info",
+               "This is the URL that returns the version information. It gives the data the launcher reads to know what updates it needs to apply to the user's system. \n\n" + 
+               "Leave this blank if you do not wish to push updates.",
                new Bitmap(Properties.Resources.Help_Big)).ShowDialog();
         }
 
         private void hlpVoteUrl_Click(object sender, EventArgs e)
         {
             new CustomMessageBox("Vote Url",
-               "Some Info",
+               "This is the vote URL the icon at the bottom left will go to. Typically linked to lineage.extreme-gamerz.org.\n\n" + 
+               "Leave this blank and the vote icon will not appear.",
                new Bitmap(Properties.Resources.Help_Big)).ShowDialog();
         }
 
         private void hlpWebsiteUrl_Click(object sender, EventArgs e)
         {
             new CustomMessageBox("Website Url",
-               "Some Info",
+               "The server website. Clicking on the 'Lineage' logo at the top left will bring you there.\n\n" + 
+               "Leave this blank if you do not want the logo to link anywhere.",
                new Bitmap(Properties.Resources.Help_Big)).ShowDialog();
         }
 
         private void hlpNewsUrl_Click(object sender, EventArgs e)
         {
             new CustomMessageBox("News Url",
-               "Some Info",
+               "The website to load up in the news section.\n\n" + 
+               "Leave this blank and the news section will not appear.",
                new Bitmap(Properties.Resources.Help_Big)).ShowDialog();
         }
 
         private void hlpPublicKey_Click(object sender, EventArgs e)
         {
             new CustomMessageBox("Public Key",
-               "Some Info",
+               "This is the key used to verify the data came from the expected server. It means if someone hacks the user's machine, the launcher won't pull down dangerous files.\n\n" + 
+               "Leave this blank if you don't want the data to be verified",
                new Bitmap(Properties.Resources.Help_Big)).ShowDialog();
         }
 

@@ -175,14 +175,11 @@ namespace Launcher
             return associatedLaunchers;
         }
 
-        public static Settings LoadSettings(string keyOrDir, ConfigType configType)
+        public static Settings LoadSettings(string directory)
         {
             try
             {
-                if(configType == ConfigType.Registry)
-                    return LoadSettingsFromRegistry(keyOrDir);
-
-                return LoadSettingsFromFlatFile(keyOrDir);
+                return LoadSettingsFromFlatFile(directory);
             }
             catch (Exception)
             {
@@ -197,31 +194,9 @@ namespace Launcher
             return config;
         }
 
-        private static Settings LoadSettingsFromRegistry(string keyName)
+        public static void SaveSettings(Settings settings, string clientDirectory)
         {
-            var settingsKey = Registry.CurrentUser.OpenSubKey(@"Software\" + keyName, true);
-
-            if (settingsKey == null)
-                return new Settings();
-            var settings = (byte[])settingsKey.GetValue("AppSettings");
-
-            var ms = new MemoryStream((byte[])settingsKey.GetValue("AppSettings"));
-            var settingsObject = DeserializeFromStream<Settings>(ms);
-
-            return settingsObject;
-        }
-
-        public static void SaveSettings(string keyName, Settings settings, string clientDirectory, ConfigType configType)
-        {
-
-            if(configType == ConfigType.Registry)
-            {
-                SaveSettingsToRegistry(keyName, settings);
-            } else
-            {
-                SaveSettingsToFlatFile(clientDirectory, settings);
-            }
-
+            SaveSettingsToFlatFile(clientDirectory, settings);
             var lincfgPath = Path.Combine(clientDirectory, "lineage.cfg");
 
             if (!File.Exists(lincfgPath))
@@ -295,10 +270,16 @@ namespace Launcher
 
         private static void SaveSettingsToFlatFile(string clientDirectory, Settings settings)
         {
+            if (!File.Exists(Path.Combine(clientDirectory, "l1jSettings.cfg")))
+            {
+                using (var settingsFile = File.Create(Path.Combine(clientDirectory, "l1jSettings.cfg")))
+                    settingsFile.Close();
+            }
+                
             using (var fs = new FileStream(
                 Path.Combine(clientDirectory, "l1jSettings.cfg"),
                 FileMode.Truncate,
-                FileAccess.Write))
+                FileAccess.ReadWrite))
             {
                 using (var ms = new MemoryStream())
                 {
@@ -316,34 +297,6 @@ namespace Launcher
                 }
             }
         }
-
-        private static void SaveSettingsToRegistry(string keyName, Settings settings)
-        {
-            var existingKey = Registry.CurrentUser.GetValue(@"Software\" + keyName);
-
-            if (existingKey == null)
-                existingKey = Registry.CurrentUser.CreateSubKey(@"Software\" + keyName);
-
-            ((RegistryKey)existingKey).SetValue("AppSettings", Serialize(settings), RegistryValueKind.Binary);
-        }
-
-        public static byte[] Serialize(object objectToSerialize)
-        {
-            using (var ms = new MemoryStream())
-            {
-                var formatter = new BinaryFormatter();
-                formatter.Serialize(ms, objectToSerialize);
-                return ms.ToArray();
-            }
-        } //end Serialize
-
-        public static T DeserializeFromStream<T>(MemoryStream stream)
-        {
-            IFormatter formatter = new BinaryFormatter();
-            stream.Seek(0, SeekOrigin.Begin);
-
-            return (T)formatter.Deserialize(stream);
-        } //end DeserializeFromStream
 
         public static VersionInfo GetVersionInfo(Uri versionInfoUrl, string pubKey)
         {

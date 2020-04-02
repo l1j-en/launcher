@@ -44,22 +44,23 @@ namespace Launcher.Forms
             this.tabSettings = new System.Windows.Forms.TabControl();
             this.tabInGame = new System.Windows.Forms.TabPage();
             this.tabWindowed = new System.Windows.Forms.TabPage();
+            this.grpWindowSize = new System.Windows.Forms.GroupBox();
+            this.rdio1600x1200 = new System.Windows.Forms.RadioButton();
+            this.rdio1200x900 = new System.Windows.Forms.RadioButton();
+            this.rdio800x600 = new System.Windows.Forms.RadioButton();
+            this.rdio400x300 = new System.Windows.Forms.RadioButton();
             this.grpWindowType = new System.Windows.Forms.GroupBox();
             this.rdioWindowed = new System.Windows.Forms.RadioButton();
             this.rdioFullscreen = new System.Windows.Forms.RadioButton();
-            this.grpWindowSize = new System.Windows.Forms.GroupBox();
-            this.rdio400x300 = new System.Windows.Forms.RadioButton();
-            this.rdio800x600 = new System.Windows.Forms.RadioButton();
-            this.rdio1200x900 = new System.Windows.Forms.RadioButton();
-            this.rdio1600x1200 = new System.Windows.Forms.RadioButton();
+            this.lblInitialLoad = new System.Windows.Forms.Label();
             this.grpUnderwater.SuspendLayout();
             this.grpMobColours.SuspendLayout();
             this.grpDisableDark.SuspendLayout();
             this.tabSettings.SuspendLayout();
             this.tabInGame.SuspendLayout();
             this.tabWindowed.SuspendLayout();
-            this.grpWindowType.SuspendLayout();
             this.grpWindowSize.SuspendLayout();
+            this.grpWindowType.SuspendLayout();
             this.SuspendLayout();
             // 
             // lblSettings
@@ -79,7 +80,7 @@ namespace Launcher.Forms
             this.btnSave.Cursor = System.Windows.Forms.Cursors.Hand;
             this.btnSave.GlowColor = System.Drawing.Color.Blue;
             this.btnSave.InnerBorderColor = System.Drawing.Color.Transparent;
-            this.btnSave.Location = new System.Drawing.Point(107, 274);
+            this.btnSave.Location = new System.Drawing.Point(107, 292);
             this.btnSave.Name = "btnSave";
             this.btnSave.OuterBorderColor = System.Drawing.Color.Transparent;
             this.btnSave.Size = new System.Drawing.Size(75, 23);
@@ -93,7 +94,7 @@ namespace Launcher.Forms
             this.btnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
             this.btnCancel.GlowColor = System.Drawing.Color.Red;
             this.btnCancel.InnerBorderColor = System.Drawing.Color.Transparent;
-            this.btnCancel.Location = new System.Drawing.Point(183, 274);
+            this.btnCancel.Location = new System.Drawing.Point(183, 292);
             this.btnCancel.Name = "btnCancel";
             this.btnCancel.OuterBorderColor = System.Drawing.Color.Transparent;
             this.btnCancel.Size = new System.Drawing.Size(75, 23);
@@ -186,7 +187,7 @@ namespace Launcher.Forms
             this.tabSettings.Location = new System.Drawing.Point(7, 34);
             this.tabSettings.Name = "tabSettings";
             this.tabSettings.SelectedIndex = 0;
-            this.tabSettings.Size = new System.Drawing.Size(255, 226);
+            this.tabSettings.Size = new System.Drawing.Size(255, 205);
             this.tabSettings.TabIndex = 8;
             // 
             // tabInGame
@@ -198,7 +199,7 @@ namespace Launcher.Forms
             this.tabInGame.Location = new System.Drawing.Point(4, 22);
             this.tabInGame.Name = "tabInGame";
             this.tabInGame.Padding = new System.Windows.Forms.Padding(3);
-            this.tabInGame.Size = new System.Drawing.Size(247, 200);
+            this.tabInGame.Size = new System.Drawing.Size(247, 179);
             this.tabInGame.TabIndex = 0;
             this.tabInGame.Text = "In Game";
             // 
@@ -210,9 +211,66 @@ namespace Launcher.Forms
             this.tabWindowed.Location = new System.Drawing.Point(4, 22);
             this.tabWindowed.Name = "tabWindowed";
             this.tabWindowed.Padding = new System.Windows.Forms.Padding(3);
-            this.tabWindowed.Size = new System.Drawing.Size(247, 200);
+            this.tabWindowed.Size = new System.Drawing.Size(247, 179);
             this.tabWindowed.TabIndex = 1;
             this.tabWindowed.Text = "Window";
+            // 
+            // grpWindowSize
+            // 
+            this.grpWindowSize.Controls.Add(this.rdio1600x1200);
+            this.grpWindowSize.Controls.Add(this.rdio1200x900);
+            this.grpWindowSize.Controls.Add(this.rdio800x600);
+            this.grpWindowSize.Controls.Add(this.rdio400x300);
+            this.grpWindowSize.Location = new System.Drawing.Point(7, 68);
+            this.grpWindowSize.Name = "grpWindowSize";
+            this.grpWindowSize.Size = new System.Drawing.Size(234, 105);
+            this.grpWindowSize.TabIndex = 1;
+            this.grpWindowSize.TabStop = false;
+            this.grpWindowSize.Text = "Window Size";
+            // 
+            // rdio1600x1200
+            // 
+            this.rdio1600x1200.AutoSize = true;
+            this.rdio1600x1200.Location = new System.Drawing.Point(122, 67);
+            this.rdio1600x1200.Name = "rdio1600x1200";
+            this.rdio1600x1200.Size = new System.Drawing.Size(86, 17);
+            this.rdio1600x1200.TabIndex = 4;
+            this.rdio1600x1200.TabStop = true;
+            this.rdio1600x1200.Text = "1600 X 1200";
+            this.rdio1600x1200.UseVisualStyleBackColor = true;
+            // 
+            // rdio1200x900
+            // 
+            this.rdio1200x900.AutoSize = true;
+            this.rdio1200x900.Location = new System.Drawing.Point(29, 67);
+            this.rdio1200x900.Name = "rdio1200x900";
+            this.rdio1200x900.Size = new System.Drawing.Size(80, 17);
+            this.rdio1200x900.TabIndex = 3;
+            this.rdio1200x900.TabStop = true;
+            this.rdio1200x900.Text = "1200 X 900";
+            this.rdio1200x900.UseVisualStyleBackColor = true;
+            // 
+            // rdio800x600
+            // 
+            this.rdio800x600.AutoSize = true;
+            this.rdio800x600.Location = new System.Drawing.Point(122, 44);
+            this.rdio800x600.Name = "rdio800x600";
+            this.rdio800x600.Size = new System.Drawing.Size(74, 17);
+            this.rdio800x600.TabIndex = 2;
+            this.rdio800x600.TabStop = true;
+            this.rdio800x600.Text = "800 X 600";
+            this.rdio800x600.UseVisualStyleBackColor = true;
+            // 
+            // rdio400x300
+            // 
+            this.rdio400x300.AutoSize = true;
+            this.rdio400x300.Location = new System.Drawing.Point(28, 44);
+            this.rdio400x300.Name = "rdio400x300";
+            this.rdio400x300.Size = new System.Drawing.Size(74, 17);
+            this.rdio400x300.TabIndex = 1;
+            this.rdio400x300.TabStop = true;
+            this.rdio400x300.Text = "400 X 300";
+            this.rdio400x300.UseVisualStyleBackColor = true;
             // 
             // grpWindowType
             // 
@@ -236,7 +294,6 @@ namespace Launcher.Forms
             this.rdioWindowed.Text = "Windowed";
             this.rdioWindowed.UseVisualStyleBackColor = true;
             this.rdioWindowed.CheckedChanged += new System.EventHandler(this.rdioWindowed_CheckedChanged);
-            this.rdioFullscreen.CheckedChanged += new System.EventHandler(this.rdioWindowed_CheckedChanged);
             // 
             // rdioFullscreen
             // 
@@ -248,63 +305,17 @@ namespace Launcher.Forms
             this.rdioFullscreen.TabStop = true;
             this.rdioFullscreen.Text = "Fullscreen";
             this.rdioFullscreen.UseVisualStyleBackColor = true;
+            this.rdioFullscreen.CheckedChanged += new System.EventHandler(this.rdioWindowed_CheckedChanged);
             // 
-            // grpWindowSize
+            // lblInitialLoad
             // 
-            this.grpWindowSize.Controls.Add(this.rdio1600x1200);
-            this.grpWindowSize.Controls.Add(this.rdio1200x900);
-            this.grpWindowSize.Controls.Add(this.rdio800x600);
-            this.grpWindowSize.Controls.Add(this.rdio400x300);
-            this.grpWindowSize.Location = new System.Drawing.Point(7, 68);
-            this.grpWindowSize.Name = "grpWindowSize";
-            this.grpWindowSize.Size = new System.Drawing.Size(234, 126);
-            this.grpWindowSize.TabIndex = 1;
-            this.grpWindowSize.TabStop = false;
-            this.grpWindowSize.Text = "Window Size";
-            // 
-            // rdio400x300
-            // 
-            this.rdio400x300.AutoSize = true;
-            this.rdio400x300.Location = new System.Drawing.Point(28, 44);
-            this.rdio400x300.Name = "rdio400x300";
-            this.rdio400x300.Size = new System.Drawing.Size(74, 17);
-            this.rdio400x300.TabIndex = 1;
-            this.rdio400x300.TabStop = true;
-            this.rdio400x300.Text = "400 X 300";
-            this.rdio400x300.UseVisualStyleBackColor = true;
-            // 
-            // rdio800x600
-            // 
-            this.rdio800x600.AutoSize = true;
-            this.rdio800x600.Location = new System.Drawing.Point(122, 44);
-            this.rdio800x600.Name = "rdio800x600";
-            this.rdio800x600.Size = new System.Drawing.Size(74, 17);
-            this.rdio800x600.TabIndex = 2;
-            this.rdio800x600.TabStop = true;
-            this.rdio800x600.Text = "800 X 600";
-            this.rdio800x600.UseVisualStyleBackColor = true;
-            // 
-            // rdio1200x900
-            // 
-            this.rdio1200x900.AutoSize = true;
-            this.rdio1200x900.Location = new System.Drawing.Point(29, 67);
-            this.rdio1200x900.Name = "rdio1200x900";
-            this.rdio1200x900.Size = new System.Drawing.Size(80, 17);
-            this.rdio1200x900.TabIndex = 3;
-            this.rdio1200x900.TabStop = true;
-            this.rdio1200x900.Text = "1200 X 900";
-            this.rdio1200x900.UseVisualStyleBackColor = true;
-            // 
-            // rdio1600x1200
-            // 
-            this.rdio1600x1200.AutoSize = true;
-            this.rdio1600x1200.Location = new System.Drawing.Point(122, 67);
-            this.rdio1600x1200.Name = "rdio1600x1200";
-            this.rdio1600x1200.Size = new System.Drawing.Size(86, 17);
-            this.rdio1600x1200.TabIndex = 4;
-            this.rdio1600x1200.TabStop = true;
-            this.rdio1600x1200.Text = "1600 X 1200";
-            this.rdio1600x1200.UseVisualStyleBackColor = true;
+            this.lblInitialLoad.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.lblInitialLoad.Location = new System.Drawing.Point(21, 251);
+            this.lblInitialLoad.Name = "lblInitialLoad";
+            this.lblInitialLoad.Size = new System.Drawing.Size(237, 28);
+            this.lblInitialLoad.TabIndex = 9;
+            this.lblInitialLoad.Text = "This is the first load of the launcher. You must save your initial settings.";
+            this.lblInitialLoad.Visible = false;
             // 
             // SettingsForm
             // 
@@ -313,7 +324,8 @@ namespace Launcher.Forms
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(206)))), ((int)(((byte)(203)))), ((int)(((byte)(203)))));
             this.CancelButton = this.btnCancel;
-            this.ClientSize = new System.Drawing.Size(270, 309);
+            this.ClientSize = new System.Drawing.Size(270, 324);
+            this.Controls.Add(this.lblInitialLoad);
             this.Controls.Add(this.tabSettings);
             this.Controls.Add(this.btnCancel);
             this.Controls.Add(this.btnSave);
@@ -334,10 +346,10 @@ namespace Launcher.Forms
             this.tabSettings.ResumeLayout(false);
             this.tabInGame.ResumeLayout(false);
             this.tabWindowed.ResumeLayout(false);
-            this.grpWindowType.ResumeLayout(false);
-            this.grpWindowType.PerformLayout();
             this.grpWindowSize.ResumeLayout(false);
             this.grpWindowSize.PerformLayout();
+            this.grpWindowType.ResumeLayout(false);
+            this.grpWindowType.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -367,5 +379,6 @@ namespace Launcher.Forms
         private System.Windows.Forms.RadioButton rdio1200x900;
         private System.Windows.Forms.RadioButton rdio800x600;
         private System.Windows.Forms.RadioButton rdio400x300;
+        private System.Windows.Forms.Label lblInitialLoad;
     }
 }

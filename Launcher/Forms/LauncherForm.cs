@@ -114,14 +114,11 @@ namespace Launcher.Forms
 
         private void LauncherForm_Shown(object sender, EventArgs e)
         {
-            var settings = Helpers.LoadSettings(this._config.ConfigType == ConfigType.Registry ? this._config.KeyName : this._config.InstallDir, 
-                this._config.ConfigType);
+            var settings = Helpers.LoadSettings( this._config.InstallDir);
 
             if (settings == null)
             {
-                MessageBox.Show(@"There was an error loading your settings. If this was after an update, it may be intentional, however, " +
-                @"if it happens often please file a bug report.", @"Error Loading Settings", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                settings = new Settings();
+                new SettingsForm(this._config, true).ShowDialog();
             }
                 
             this.lblVersion.Text = Version;
@@ -148,8 +145,7 @@ namespace Launcher.Forms
 
         private void Launch(Server server)
         {
-            var settings = Helpers.LoadSettings(this._config.ConfigType == ConfigType.Registry ? this._config.KeyName : this._config.InstallDir, 
-                this._config.ConfigType);
+            var settings = Helpers.LoadSettings(this._config.InstallDir);
             var binFile = Path.GetFileNameWithoutExtension("TW13032701.bin");
 
             IPAddress[] ipOrDns;
@@ -363,9 +359,7 @@ namespace Launcher.Forms
             if (this._versionInfo == null)
                 return;
 
-            var settings = Helpers.LoadSettings(
-                this._config.ConfigType == ConfigType.Registry ? this._config.KeyName : this._config.InstallDir, 
-                this._config.ConfigType);
+            var settings = Helpers.LoadSettings(this._config.InstallDir);
 
             if (Helpers.UpdateConfig(this._versionInfo))
             {
