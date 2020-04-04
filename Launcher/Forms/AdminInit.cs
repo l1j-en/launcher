@@ -82,7 +82,8 @@ namespace Launcher.Forms
         private void hlpUpdaterFilesRoot_Click(object sender, EventArgs e)
         {
             new CustomMessageBox("Updater Files Root",
-               "This is the root path.. something",
+               "This is the root path for the updater. It is combined with the files listed in VersionInfo to download the file from your webserver.\n\n" +
+               "Example: Your Updater Files Root value is http://updates.launcher.com, and you have a file Text.pak, it would download a file from http://updates.launcher.com/Text.pak",
                new Bitmap(Properties.Resources.Help_Big)).ShowDialog();
         }
 

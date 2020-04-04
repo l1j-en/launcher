@@ -17,11 +17,14 @@ using Launcher.Models;
 using Launcher.Utilities;
 using System.Diagnostics;
 using System.Linq;
+using System.Collections.Generic;
 
 namespace Launcher
 {
     class Lineage
     {
+        private static List<int> InjectedProcesses = new List<int>();
+        private const int maxIterations = 6000;
         public static bool Run(Settings settings, string bin, string chosenServer)
         {
             var startInfo = new ProcessStartInfo
@@ -33,11 +36,14 @@ namespace Launcher
             };
 
             var loginProcess = Process.Start(startInfo);
-            while (loginProcess.MainWindowTitle != "Login")
+            for (var i = 0; loginProcess.MainWindowTitle != "Login" && i < maxIterations; i++)
             {
-                System.Threading.Thread.Sleep(50);
+                System.Threading.Thread.Sleep(5);
                 loginProcess.Refresh();
             }
+
+            if (loginProcess.MainWindowTitle != "Login")
+                return false;
 
             Win32Api.ShowWindow(loginProcess.MainWindowHandle, 0);
 
@@ -45,10 +51,10 @@ namespace Launcher
             Win32Api.SendMessage(buttonHandle, 0x0201, IntPtr.Zero, IntPtr.Zero);
             Win32Api.SendMessage(buttonHandle, 0x0202, IntPtr.Zero, IntPtr.Zero);
 
-            var startProcess = Process.GetProcesses().FirstOrDefault(b => b.ProcessName.Contains(bin));
+            var startProcess = Process.GetProcesses().FirstOrDefault(b => b.ProcessName.Contains(bin) && !InjectedProcesses.Contains(b.Id));
             while(startProcess == null)
             {
-                startProcess = Process.GetProcesses().FirstOrDefault(b => b.ProcessName.Contains(bin));
+                startProcess = Process.GetProcesses().FirstOrDefault(b => b.ProcessName.Contains(bin) && !InjectedProcesses.Contains(b.Id));
                 System.Threading.Thread.Sleep(50);
             }
 
@@ -60,20 +66,17 @@ namespace Launcher
                                     | Win32Api.ProcessAccessFlags.QueryInformation), 0, (uint)startProcess.Id);
 
 
-            Win32Api.CloseHandle(startProcess.Handle);
             Win32Api.SuspendThread(hndProc);
-
-            var process = Process.GetProcesses().FirstOrDefault(b => b.MainWindowTitle.Contains("Lineage Windows Client"));;
+            var process = Process.GetProcesses().FirstOrDefault(b => b.MainWindowTitle.Contains("Lineage Windows Client") && !InjectedProcesses.Contains(b.Id));
 
             try
             {
                 var i = 0;
-                var maxIterations = 6000;
                 // wait for the window to initialize before continuing the injection process
                 while (i <= maxIterations && process == null)
                 {
                     System.Threading.Thread.Sleep(5);
-                    process = Process.GetProcesses().FirstOrDefault(b => b.MainWindowTitle.Contains("Lineage Windows Client")); ;
+                    process = Process.GetProcesses().FirstOrDefault(b => b.MainWindowTitle.Contains("Lineage Windows Client") && !InjectedProcesses.Contains(b.Id));
                     i++;
                 }
 
@@ -86,7 +89,6 @@ namespace Launcher
             {
                 return false;
             }
-
 
             // Mob level highlight toggle
             if (settings.EnableMobColours)
@@ -114,9 +116,8 @@ namespace Launcher
                 Win32Api.WriteProcessMemory(hndProc, (IntPtr)0x004E4320, new byte[] { 0x0F, 0x8D }, 2, 0);
             }
 
+            InjectedProcesses.Add(process.Id);
             Win32Api.ResumeThread(hndProc);
-            Win32Api.CloseHandle(hndProc);
-            hndProc = IntPtr.Zero;
 
             return true;
         }

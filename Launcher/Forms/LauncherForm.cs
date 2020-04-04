@@ -30,7 +30,7 @@ namespace Launcher.Forms
 {
     public partial class LauncherForm : Form
     {
-        private const string Version = "5.0.0";
+        private const string Version = "5.0.1";
 
         private readonly LauncherConfig _config;
         private VersionInfo _versionInfo;
