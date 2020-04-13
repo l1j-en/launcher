@@ -28,9 +28,8 @@ namespace Launcher.Models
     public class LauncherConfig
     {
         public LauncherConfig() { }
-        public LauncherConfig(string keyName, string appPath)
+        public LauncherConfig(string appPath)
         {
-            this.KeyName = keyName;
             this.InstallDir = appPath;
         }
 
@@ -38,6 +37,8 @@ namespace Launcher.Models
         public string InstallDir { get; set; }
         public ConfigType ConfigType { get; set; }
 
+        [DataMember]
+        public Uri LauncherUrl { get; set; }
         [DataMember]
         public Dictionary<string, Server> Servers { get; set; }
         [DataMember]

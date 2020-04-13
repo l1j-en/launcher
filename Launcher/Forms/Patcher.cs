@@ -100,11 +100,10 @@ namespace Launcher.Forms
                 if (versionInfo == null)
                     return;
 
-                var applicationPath = Application.ExecutablePath;
                 var appDataPath = Directory.GetParent(Application.UserAppDataPath).ToString();
                 var updaterLocation = Path.Combine(appDataPath, "Updater.exe");
 
-                if (!File.Exists(updaterLocation) || versionInfo.Files["Updater.exe"] > updatesLastRun)
+                if (this._config.UpdaterUrl != null && (!File.Exists(updaterLocation) || versionInfo.Files["Updater.exe"].Updated > updatesLastRun))
                 {
                     using (var client = new WebClient())
                     {
@@ -116,7 +115,7 @@ namespace Launcher.Forms
                     this.updateChecker.ReportProgress(1);
                 } //end if
 
-                var filesToUpdate = versionInfo.Files.Where(b => (b.Value > updatesLastRun || force)
+                var filesToUpdate = versionInfo.Files.Where(b => (b.Value.Updated > updatesLastRun || force)
                                                     && b.Key != "Updater.exe").ToList();
                 // checks for > 1 because the Updater.exe is always present.
                 if (filesToUpdate.Any())
@@ -125,16 +124,19 @@ namespace Launcher.Forms
 
                     for (var i = 0; i < filesToUpdate.Count; i++)
                     {
-                        var file = filesToUpdate.ElementAt(i).Key;
-                        var filePath = Path.Combine(this._config.InstallDir, file);
+                        var file = filesToUpdate.ElementAt(i);
+                        var filePath = Path.Combine(this._config.InstallDir, file.Key);
+                        var localChecksum = Helpers.GetChecksum(filePath);
 
-                        var extension = Path.GetExtension(file);
-                        using (var client = new WebClient())
+                        if (localChecksum != file.Value.Checksum)
                         {
-                            client.DownloadProgressChanged += client_DownloadProgressChanged;
-                            client.DownloadFileAsyncSync(
-                                new Uri(this._config.UpdaterFilesRoot + file.Replace("\\", "/")),
-                                filePath);
+                            using (var client = new WebClient())
+                            {
+                                client.DownloadProgressChanged += client_DownloadProgressChanged;
+                                client.DownloadFileAsyncSync(
+                                    new Uri(this._config.UpdaterFilesRoot + file.Key.Replace("\\", "/")),
+                                    filePath);
+                            }
                         }
 
                         this.updateChecker.ReportProgress(i);
@@ -188,13 +190,16 @@ namespace Launcher.Forms
                 Helpers.SetControlPropertyThreadSafe(this.prgCurrent, "Maximum", filesToPack.Count);
                 Helpers.SetControlPropertyThreadSafe(this.prgTotal, "Maximum", PatchDirectories.Keys.Count);
 
-                PakTools.RebuildPak(Path.Combine(this._config.InstallDir, PatchDirectories[directory]),
-                filesToPack,
-                true,
-                (progress) =>
+                if(filesToPack.Any())
                 {
-                    this.patchWorker.ReportProgress(progress);
-                });
+                    PakTools.RebuildPak(Path.Combine(this._config.InstallDir, PatchDirectories[directory]),
+                    filesToPack,
+                    true,
+                    (progress) =>
+                    {
+                        this.patchWorker.ReportProgress(progress);
+                    });
+                }
 
                 var directoryInfo = new DirectoryInfo(directoryString);
                 foreach (FileInfo file in directoryInfo.GetFiles())

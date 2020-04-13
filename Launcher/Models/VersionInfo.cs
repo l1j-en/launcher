@@ -12,6 +12,7 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
+using System;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
 
@@ -33,13 +34,13 @@ namespace Launcher.Models
         public long LastUpdated { get; set; }
 
         [DataMember]
-        public Dictionary<string, long> Files { get; set; } 
+        public Dictionary<string, FileData> Files { get; set; } 
 
         [DataMember]
         public string ServerName { get; set; }
 
         [DataMember]
-        public string Servers { get; set; }
+        public Dictionary<string, Server> Servers { get; set; }
 
         [DataMember]
         public string VersionInfoUrl { get; set; }
@@ -61,5 +62,21 @@ namespace Launcher.Models
 
         [DataMember]
         public string UpdaterFilesRoot { get; set; }
+
+        public static implicit operator LauncherConfig(VersionInfo versionInfo)
+        {
+            return new LauncherConfig
+            {
+                LauncherUrl = string.IsNullOrEmpty(versionInfo.LauncherUrl) ? null : new Uri(versionInfo.LauncherUrl),
+                Servers = versionInfo.Servers,
+                NewsUrl = string.IsNullOrEmpty(versionInfo.NewsUrl) ? null : new Uri(versionInfo.NewsUrl),
+                //PublicKey = versionInfo.PublicKey,
+                UpdaterFilesRoot = string.IsNullOrEmpty(versionInfo.UpdaterFilesRoot) ? null : new Uri(versionInfo.UpdaterFilesRoot),
+                UpdaterUrl = string.IsNullOrEmpty(versionInfo.UpdaterUrl) ? null : new Uri(versionInfo.UpdaterUrl),
+                VersionInfoUrl = string.IsNullOrEmpty(versionInfo.VersionInfoUrl) ? null : new Uri(versionInfo.VersionInfoUrl),
+                VoteUrl = string.IsNullOrEmpty(versionInfo.VoteUrl) ? null : new Uri(versionInfo.VoteUrl),
+                WebsiteUrl = string.IsNullOrEmpty(versionInfo.WebsiteUrl) ? null : new Uri(versionInfo.WebsiteUrl)
+            };
+        }
     }
 }

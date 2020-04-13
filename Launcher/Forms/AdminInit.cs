@@ -165,30 +165,7 @@ namespace Launcher.Forms
                 return;
             }
 
-            using (var fs = new FileStream(
-                Path.Combine(this._appDirectory, "l1jLauncher.cfg"),
-                FileMode.OpenOrCreate,
-                FileAccess.Write))
-            {
-                using (var ms = new MemoryStream())
-                {
-                    var serializer = new DataContractJsonSerializer(config.GetType(),
-                        new List<Type> { typeof(Server) });
-
-                    serializer.WriteObject(ms, config);
-                    ms.Flush();
-                    ms.Seek(0, SeekOrigin.Begin);
-
-                    var bytes = new byte[ms.Length];
-                    ms.Read(bytes, 0, (int)ms.Length);
-
-                    // To anyone using this, this is not any form of encryption or security!
-                    // This is only being done so the average user won't try to edit it and
-                    // possibly crap out their settings!
-                    var base64Bytes = Encoding.UTF8.GetBytes(Convert.ToBase64String(bytes));
-                    fs.Write(base64Bytes, 0, base64Bytes.Length);
-                }
-            }
+            Helpers.SaveLauncherConfig(this._appDirectory, config);
 
             MessageBox.Show("l1jLauncher.cfg created successfully. Open the launcher again to play!", "Config Saved!",
                  MessageBoxButtons.OK, MessageBoxIcon.Information);

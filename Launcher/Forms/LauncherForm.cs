@@ -38,8 +38,7 @@ namespace Launcher.Forms
 
         public LauncherForm()
         {
-            var appLocation = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            var associatedLaunchers = Helpers.GetAssociatedLaunchers(appLocation);
+            var appLocation = @"C:\Program Files (x86)\Lineage Justice\";// Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             
             if (!Helpers.LauncherInLineageDirectory(appLocation))
             {
@@ -50,15 +49,7 @@ namespace Launcher.Forms
                 return;
             }
 
-            // If no launchers are available, let's assume resurrection
-            if (associatedLaunchers.Count == 0)
-                associatedLaunchers.Add("L1J Server");
-
-            if (associatedLaunchers.Count > 1)
-                MessageBox.Show("More than one launcher associated with this folder! Using the first one found.");
-
-            var launcherConfig = Helpers.GetLauncherConfig(associatedLaunchers[0], appLocation);
-
+            var launcherConfig = Helpers.GetLauncherConfig(appLocation);
             if (launcherConfig == null)
             {
                 var initResponse = new AdminInit(appLocation).ShowDialog();
@@ -130,17 +121,17 @@ namespace Launcher.Forms
 
         private void playButton_Click(object sender, EventArgs e)
         {
-            if(this._config.VersionInfoUrl != null)
-            {
-                var patchForm = new Patcher(this._config, this._hasUpdates);
+             if(this._config.VersionInfoUrl != null)
+             {
+                 var patchForm = new Patcher(this._config, this._hasUpdates);
 
-                if (!patchForm.IsDisposed)
-                {
-                    patchForm.ShowDialog();
-                }
-            }
-
-            this.Launch(this._config.Servers[this.cmbServer.SelectedItem.ToString()]);
+                 if (!patchForm.IsDisposed)
+                 {
+                     patchForm.ShowDialog();
+                 }
+             }
+             
+           // this.Launch(this._config.Servers[this.cmbServer.SelectedItem.ToString()]);
         }
 
         private void Launch(Server server)
@@ -308,7 +299,7 @@ namespace Launcher.Forms
             if (versionInfo == null)
                 return;
 
-            this._hasUpdates = versionInfo.Files.Any(b => b.Value > updatesLastRun);
+            this._hasUpdates = versionInfo.Files.Any(b => b.Value.Updated > updatesLastRun);
         } //end updateChecker
 
         private void updateChecker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
@@ -361,7 +352,7 @@ namespace Launcher.Forms
 
             var settings = Helpers.LoadSettings(this._config.InstallDir);
 
-            if (Helpers.UpdateConfig(this._versionInfo))
+            if (Helpers.UpdateConfig(this._versionInfo, this._config.InstallDir))
             {
                 MessageBox.Show("Configuration information was updated from the server.\n\nThe launcher will close. Please re-launch.",
                     @"Configuration Updated", MessageBoxButtons.OK, MessageBoxIcon.Information);

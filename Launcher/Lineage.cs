@@ -29,7 +29,7 @@ namespace Launcher
         {
             var startInfo = new ProcessStartInfo
             {
-                FileName = "Login.exe",
+                FileName = @"C:\Program Files (x86)\Lineage Justice\Login.exe",
                 WindowStyle = ProcessWindowStyle.Hidden,
                 CreateNoWindow = true,
                 UseShellExecute = false

@@ -17,14 +17,13 @@ using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Reflection;
-using System.Runtime.Serialization;
-using System.Runtime.Serialization.Formatters.Binary;
 using System.Runtime.Serialization.Json;
 using System.Security.Cryptography;
 using System.Text;
 using System.Windows.Forms;
 using Launcher.Models;
 using Microsoft.Win32;
+using System.Linq;
 
 namespace Launcher
 {
@@ -64,115 +63,112 @@ namespace Launcher
             configKey.SetValue(field, newValue, RegistryValueKind.String);
         }
 
-        public static bool UpdateConfig(VersionInfo versionInfo)
+        public static bool UpdateConfig(VersionInfo versionInfo, string appPath)
         {
             var actuallyUpdated = false;
+            var launcherConfig = GetLauncherConfig(appPath);
 
-            var configKey = Registry.CurrentUser.OpenSubKey(@"Software\" + versionInfo.ServerName, true);
-
-            if (configKey == null)
+            if ((launcherConfig.NewsUrl?.ToString() ?? string.Empty) != versionInfo.NewsUrl ||
+               (launcherConfig.VoteUrl?.ToString() ?? string.Empty) != versionInfo.VoteUrl ||
+               (launcherConfig.WebsiteUrl?.ToString() ?? string.Empty) != versionInfo.WebsiteUrl ||
+               (launcherConfig.UpdaterUrl?.ToString() ?? string.Empty) != versionInfo.UpdaterUrl ||
+               (launcherConfig.LauncherUrl?.ToString() ?? string.Empty) != versionInfo.LauncherUrl ||
+               launcherConfig.UpdaterFilesRoot.ToString() != versionInfo.UpdaterFilesRoot ||
+               launcherConfig.Servers.Count != versionInfo.Servers.Count)
             {
                 actuallyUpdated = true;
-                configKey = Registry.CurrentUser.CreateSubKey(@"Software\" + versionInfo.ServerName);
             }
-
-            if (!actuallyUpdated)
+            
+            // if nothing else has changed, make sure the servers have not changed
+            if(!actuallyUpdated)
             {
-                actuallyUpdated = (configKey.GetValue("Servers") == null || (configKey.GetValue("Servers").ToString() != versionInfo.Servers)) ||
-                                  (configKey.GetValue("VersionInfoUrl") == null || configKey.GetValue("VersionInfoUrl").ToString() != versionInfo.VersionInfoUrl) ||
-                                  (configKey.GetValue("VoteUrl") == null || configKey.GetValue("VoteUrl").ToString() != versionInfo.VoteUrl) ||
-                                  (configKey.GetValue("WebsiteUrl") == null || configKey.GetValue("WebsiteUrl").ToString() != versionInfo.WebsiteUrl) ||
-                                  (configKey.GetValue("NewsUrl") == null || configKey.GetValue("NewsUrl").ToString() != versionInfo.NewsUrl) ||
-                                  (configKey.GetValue("UpdaterUrl") == null || configKey.GetValue("UpdaterUrl").ToString() != versionInfo.UpdaterUrl) ||
-                                  (configKey.GetValue("LauncherUrl") == null || configKey.GetValue("LauncherUrl").ToString() != versionInfo.LauncherUrl) ||
-                                  (configKey.GetValue("UpdaterFilesRoot") == null || configKey.GetValue("UpdaterFilesRoot").ToString() != versionInfo.UpdaterFilesRoot);
+                foreach(var currentServer in launcherConfig.Servers)
+                {
+                    if(!versionInfo.Servers.ContainsKey(currentServer.Key))
+                    {
+                        actuallyUpdated = true;
+                        break;
+                    }
+
+                    var matchedServer = launcherConfig.Servers[currentServer.Key];
+                    if(matchedServer.IpOrDns != currentServer.Value.IpOrDns || matchedServer.Port != currentServer.Value.Port)
+                    {
+                        actuallyUpdated = true;
+                        break;
+                    }
+                }
+
+                foreach (var newServer in versionInfo.Servers)
+                {
+                    if (!launcherConfig.Servers.ContainsKey(newServer.Key))
+                    {
+                        actuallyUpdated = true;
+                        break;
+                    }
+
+                    var matchedServer = launcherConfig.Servers[newServer.Key];
+                    if (matchedServer.IpOrDns != newServer.Value.IpOrDns || matchedServer.Port != newServer.Value.Port)
+                    {
+                        actuallyUpdated = true;
+                        break;
+                    }
+                }
             }
 
-            configKey.SetValue("Servers", versionInfo.Servers, RegistryValueKind.String);
-            configKey.SetValue("VersionInfoUrl", versionInfo.VersionInfoUrl, RegistryValueKind.String);
-            configKey.SetValue("VoteUrl", versionInfo.VoteUrl, RegistryValueKind.String);
-            configKey.SetValue("WebsiteUrl", versionInfo.WebsiteUrl, RegistryValueKind.String);
-            configKey.SetValue("NewsUrl", versionInfo.NewsUrl, RegistryValueKind.String);
-            configKey.SetValue("UpdaterUrl", versionInfo.UpdaterUrl, RegistryValueKind.String);
-            configKey.SetValue("LauncherUrl", versionInfo.LauncherUrl, RegistryValueKind.String);
-            configKey.SetValue("UpdaterFilesRoot", versionInfo.UpdaterFilesRoot, RegistryValueKind.String);
+            // actual changes were made, so write them to the config
+            if(actuallyUpdated)
+            {
+                SaveLauncherConfig(appPath, (LauncherConfig)versionInfo);
+            }
 
             return actuallyUpdated;
         }
 
-        public static LauncherConfig GetLauncherConfig(string keyName, string appPath)
+        public static LauncherConfig GetLauncherConfig(string appPath)
         {
             try
             {
-                var configKey = Registry.CurrentUser.OpenSubKey(@"Software\" + keyName, true);
+                var configData = File.ReadAllText(Path.Combine(appPath, "l1jLauncher.cfg"));
+                configData = Encoding.UTF8.GetString(Convert.FromBase64String(configData));
 
-                if(configKey != null)
-                    return LoadFromRegistry(appPath, configKey);
+                var config = configData.JsonDeserialize<LauncherConfig>();
+                config.InstallDir = appPath;
+                config.ConfigType = ConfigType.FlatFile;
 
-                return LoadFromFlatFile(appPath);
+                return config;
             }
             catch (Exception ex)
             {
-                return null;
+                throw new Exception("Unable to read l1jLauncher.cfg. Please ensure it is in your Lineage directory.");
             }
         }
 
-        private static LauncherConfig LoadFromFlatFile(string appPath)
+        public static void SaveLauncherConfig(string appDir, LauncherConfig config)
         {
-            var configData = File.ReadAllText(Path.Combine(appPath, "l1jLauncher.cfg"));
-            configData = Encoding.UTF8.GetString(Convert.FromBase64String(configData));
-
-            var config = configData.JsonDeserialize<LauncherConfig>();
-            config.InstallDir = appPath;
-            config.ConfigType = ConfigType.FlatFile;
-
-            return config;
-        }
-
-        private static LauncherConfig LoadFromRegistry(string appPath, RegistryKey configKey)
-        {
-            var config = new LauncherConfig(configKey.Name, appPath);
-            var servers = configKey.GetValue("Servers").ToString().Split(',');
-            config.Servers = new Dictionary<string, Server>();
-
-            foreach (var server in servers)
+            using (var fs = new FileStream(
+                Path.Combine(appDir, "l1jLauncher.cfg"),
+                FileMode.Truncate,
+                FileAccess.ReadWrite))
             {
-                var serverInfo = server.Split(':');
-
-                config.Servers.Add(serverInfo[0].Trim(), new Server
+                using (var ms = new MemoryStream())
                 {
-                    IpOrDns = serverInfo[1],
-                    Port = int.Parse(serverInfo[2])
-                });
+                    var serializer = new DataContractJsonSerializer(config.GetType(),
+                        new List<Type> { typeof(Server) });
+
+                    serializer.WriteObject(ms, config);
+                    ms.Flush();
+                    ms.Seek(0, SeekOrigin.Begin);
+
+                    var bytes = new byte[ms.Length];
+                    ms.Read(bytes, 0, (int)ms.Length);
+
+                    // To anyone using this, this is not any form of encryption or security!
+                    // This is only being done so the average user won't try to edit it and
+                    // possibly crap out their settings!
+                    var base64Bytes = Encoding.UTF8.GetBytes(Convert.ToBase64String(bytes));
+                    fs.Write(base64Bytes, 0, base64Bytes.Length);
+                }
             }
-
-            config.UpdaterFilesRoot = new Uri(configKey.GetValue("UpdaterFilesRoot").ToString());
-            config.UpdaterUrl = new Uri(configKey.GetValue("UpdaterUrl").ToString());
-            config.VersionInfoUrl = new Uri(configKey.GetValue("VersionInfoUrl").ToString());
-            config.VoteUrl = new Uri(configKey.GetValue("VoteUrl").ToString());
-            config.WebsiteUrl = new Uri(configKey.GetValue("WebsiteUrl").ToString());
-
-            var newsUrl = configKey.GetValue("NewsUrl");
-            config.NewsUrl = new Uri(newsUrl == null ? "https://zelgo.net" : newsUrl.ToString());
-            config.PublicKey = configKey.GetValue("PublicKey").ToString();
-            config.ConfigType = ConfigType.Registry;
-
-            return config;
-        }
-
-        public static List<string> GetAssociatedLaunchers(string appPath)
-        {
-            var associatedLaunchers = new List<string>();
-            var settingsKey = Registry.CurrentUser.OpenSubKey(@"Software\LineageLauncher", true);
-
-            if (settingsKey == null)
-                return associatedLaunchers;
-
-            foreach(var valueName in settingsKey.GetValueNames())
-                if (string.Equals(settingsKey.GetValue(valueName).ToString(), appPath, StringComparison.CurrentCultureIgnoreCase))
-                    associatedLaunchers.Add(valueName);
-
-            return associatedLaunchers;
         }
 
         public static Settings LoadSettings(string directory)
@@ -303,7 +299,9 @@ namespace Launcher
             try
             {
                 var rsa = new RSACryptoServiceProvider();
-                rsa.FromXmlString(pubKey);
+
+                if(pubKey != null)
+                    rsa.FromXmlString(pubKey);
 
                 var request = (HttpWebRequest) WebRequest.Create(versionInfoUrl);
                 request.Timeout = 2000;
@@ -319,9 +317,11 @@ namespace Launcher
                     json = sr.ReadToEnd();
 
                 //needed to drop this to SHA1 because WinXP doesn't always support higher by default
-                var result = rsa.VerifyData(Encoding.UTF8.GetBytes(json), CryptoConfig.MapNameToOID("SHA1"), signature); 
+                var verifiedData = true; 
+                if(pubKey != null)
+                    verifiedData = rsa.VerifyData(Encoding.UTF8.GetBytes(json), CryptoConfig.MapNameToOID("SHA1"), signature); 
 
-                if (result)
+                if (verifiedData)
                     return json.JsonDeserialize<VersionInfo>();
 
                 return null;
@@ -337,9 +337,11 @@ namespace Launcher
             if (!File.Exists(file))
                 return "";
 
-            using (var stream = File.OpenRead(file))
-                using (var md5 = MD5.Create())
-                    return BitConverter.ToString(md5.ComputeHash(stream)).Replace("-", "").ToUpper();
+            using (var md5 = MD5.Create())
+            {
+                using (var stream = File.OpenRead(file))
+                    return BitConverter.ToString(md5.ComputeHash(stream)).Replace("-", "").ToLowerInvariant();
+            }
         } //end GetChecksum
 
         public static bool ByteArrayCompare(byte[] a1, byte[] a2)
@@ -358,26 +360,6 @@ namespace Launcher
         public static int StringToNumber(string versionNumber)
         {
             return int.Parse(versionNumber.Replace(".", ""));
-        }
-
-        public static bool HasUpdates(string expectedUpdaterChecksum, long lastUpdated, LauncherConfig config)
-        {
-            var appDataPath = Directory.GetParent(Application.UserAppDataPath).ToString();
-            var updaterLocation = Path.Combine(appDataPath, "Updater.exe");
-            var updaterChecksum = Helpers.GetChecksum(updaterLocation);
-
-            if (!File.Exists(updaterLocation) || updaterChecksum != expectedUpdaterChecksum)
-                return true;
-
-            var versionInfo = Helpers.GetVersionInfo(config.VersionInfoUrl, config.PublicKey);
-            var launcherKey = Registry.CurrentUser.OpenSubKey(@"Software\" + config.KeyName, true);
-            var lastUpdatedCheck = launcherKey.GetValue("LastUpdated");
-            var updatesLastRun = (int?)lastUpdatedCheck ?? 0;
-
-            if (updatesLastRun < lastUpdated)
-                return true;
-
-            return false;
         }
     } //end class
 } //end namespace
