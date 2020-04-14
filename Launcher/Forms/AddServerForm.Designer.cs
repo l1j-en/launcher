@@ -79,7 +79,7 @@
             this.txtIpAddress.Name = "txtIpAddress";
             this.txtIpAddress.Size = new System.Drawing.Size(154, 20);
             this.txtIpAddress.TabIndex = 4;
-            this.txtIpAddress.Text = "127.0.0.1";
+            this.txtIpAddress.Text = "";
             // 
             // txtPort
             // 

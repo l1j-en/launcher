@@ -118,7 +118,6 @@
     <Compile Include="Forms\CustomMessageBox.Designer.cs">
       <DependentUpon>CustomMessageBox.cs</DependentUpon>
     </Compile>
-    <Compile Include="Injector.cs" />
     <Compile Include="ExtensionMethods.cs" />
     <Compile Include="Helpers.cs" />
     <Compile Include="Forms\InputBox.cs">
@@ -146,12 +145,6 @@
     </Compile>
     <Compile Include="Forms\Patcher.Designer.cs">
       <DependentUpon>Patcher.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Forms\Polymorphs.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Forms\Polymorphs.Designer.cs">
-      <DependentUpon>Polymorphs.cs</DependentUpon>
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -192,9 +185,6 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Forms\Patcher.resx">
       <DependentUpon>Patcher.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="Forms\Polymorphs.resx">
-      <DependentUpon>Polymorphs.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
