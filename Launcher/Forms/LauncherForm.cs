@@ -35,6 +35,7 @@ namespace Launcher.Forms
         private readonly LauncherConfig _config;
         private VersionInfo _versionInfo;
         private bool _hasUpdates;
+        private DateTime _lastUpdateCheck;
 
         public LauncherForm()
         {
@@ -132,7 +133,9 @@ namespace Launcher.Forms
         {
              if(this._config.VersionInfoUrl != null)
              {
-                 var patchForm = new Patcher(this._config, this._hasUpdates);
+                // if it has been more than 30 minutes since we last checked for updates,
+                // then run another check before launching the game
+                var patchForm = new Patcher(this._config, this._hasUpdates || (DateTime.Now - this._lastUpdateCheck).TotalMinutes > 30);
 
                  if (!patchForm.IsDisposed)
                  {
@@ -299,6 +302,7 @@ namespace Launcher.Forms
 
         private void updateChecker_DoWork(object sender, DoWorkEventArgs e)
         {
+            this._lastUpdateCheck = DateTime.Now;
             var versionInfo = Helpers.GetVersionInfo(this._config.VersionInfoUrl, this._config.PublicKey);
 
             if (versionInfo == null)

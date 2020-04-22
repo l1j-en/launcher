@@ -17,6 +17,7 @@ namespace Launcher.Forms
     {
         private readonly LauncherConfig _config;
         private readonly bool _force;
+        private bool _hadUpdates;
 
         public static Dictionary<string, string> PatchDirectories {
             get {
@@ -115,7 +116,7 @@ namespace Launcher.Forms
 
                 var filesToUpdate = versionInfo.Files.Where(b => (b.Value.Updated > updatesLastRun || force)
                                                     && b.Key != "Updater.exe").ToList();
-                // checks for > 1 because the Updater.exe is always present.
+                
                 if (filesToUpdate.Any())
                 {
                     Helpers.SetControlPropertyThreadSafe(this.prgTotal, "Maximum", filesToUpdate.Count);
@@ -157,6 +158,10 @@ namespace Launcher.Forms
 
         private void updateChecker_ProgressChanged(object sender, ProgressChangedEventArgs e)
         {
+            // if we did any updates to the progress, then it had files to download, so set the flag
+            if (e.ProgressPercentage < this.prgTotal.Maximum)
+                this._hadUpdates = true;
+
              this.prgTotal.Value = e.ProgressPercentage;
         } //end updateChecker_updateChecker_ProgressChanged
 
@@ -216,6 +221,10 @@ namespace Launcher.Forms
         private void patchWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
             this.lblUpdateStatus.Text = "Patching Complete!" + (this._force ? "" : " Launching game...");
+
+            if (!this._hadUpdates)
+                this.lblUpdateStatus.Text = "Nothing to update!" + (this._force ? "" : " Launching game...");
+
             // wait 1 second after the worker has completed so the progress bar updates
             var closeThread = new Thread(() =>
             {
