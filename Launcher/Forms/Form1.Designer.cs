@@ -50,6 +50,7 @@ namespace Launcher.Forms
             this.btnClose = new Launcher.Controls.GlassButton();
             this.lblServerStatus = new Launcher.Controls.OutlineLabel();
             this.lblServerStatusText = new Launcher.Controls.OutlineLabel();
+            this.runWorker = new System.ComponentModel.BackgroundWorker();
             ((System.ComponentModel.ISupportInitialize)(this.pctLinLogo)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pctVote)).BeginInit();
             this.systemTrayContextMenu.SuspendLayout();
@@ -276,6 +277,11 @@ namespace Launcher.Forms
             this.lblServerStatusText.TabIndex = 14;
             this.lblServerStatusText.Text = "SERVER STATUS:";
             // 
+            // runWorker
+            // 
+            this.runWorker.DoWork += new System.ComponentModel.DoWorkEventHandler(this.runWorker_DoWork);
+            this.runWorker.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.runWorker_RunWorkerCompleted);
+            // 
             // LauncherForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -330,6 +336,7 @@ namespace Launcher.Forms
         private System.Windows.Forms.ToolStripMenuItem Restore;
         private System.Windows.Forms.ToolStripMenuItem Close;
         private System.ComponentModel.BackgroundWorker configChecker;
+        private System.ComponentModel.BackgroundWorker runWorker;
     }
 }
 

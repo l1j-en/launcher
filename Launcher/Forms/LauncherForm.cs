@@ -23,7 +23,6 @@ using System.Net.Sockets;
 using System.Threading;
 using System.Windows.Forms;
 using Launcher.Models;
-using Microsoft.Win32;
 using System.Reflection;
 
 namespace Launcher.Forms
@@ -131,26 +130,21 @@ namespace Launcher.Forms
 
         private void playButton_Click(object sender, EventArgs e)
         {
-             if(this._config.VersionInfoUrl != null)
-             {
-                // if it has been more than 30 minutes since we last checked for updates,
-                // then run another check before launching the game
-                var patchForm = new Patcher(this._config, this._hasUpdates || (DateTime.Now - this._lastUpdateCheck).TotalMinutes > 30);
+            if(this._config.VersionInfoUrl != null)
+            {
+            // if it has been more than 30 minutes since we last checked for updates,
+            // then run another check before launching the game
+            var patchForm = new Patcher(this._config, this._hasUpdates || (DateTime.Now - this._lastUpdateCheck).TotalMinutes > 30);
 
-                 if (!patchForm.IsDisposed)
-                 {
-                     patchForm.ShowDialog();
-                 }
-             }
-             
-            this.Launch(this._config.Servers[this.cmbServer.SelectedItem.ToString()]);
-        }
+                if (!patchForm.IsDisposed)
+                {
+                    patchForm.ShowDialog();
+                }
+            }
 
-        private void Launch(Server server)
-        {
-            var settings = Helpers.LoadSettings(this._config.InstallDir);
-            var binFile = Path.GetFileNameWithoutExtension("TW13032701.bin");
+            this.btnPlay.Enabled = false;
 
+            var server = this._config.Servers[this.cmbServer.SelectedItem.ToString()];
             IPAddress[] ipOrDns;
 
             try
@@ -166,11 +160,15 @@ namespace Launcher.Forms
                 return;
             }
 
-            if (!Lineage.Run(settings, binFile, this.cmbServer.SelectedItem.ToString()))
-            {
-                MessageBox.Show("There was an error applying your settings to the Lineage client. Try running it again!", "Error!",
-                MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
+            this.runWorker.RunWorkerAsync(new Tuple<string, string>(this.cmbServer.SelectedItem.ToString(), this._config.InstallDir));
+        }
+
+        private void Launch(string serverName, string installDir)
+        {
+            var settings = Helpers.LoadSettings(installDir);
+            var binFile = Path.GetFileNameWithoutExtension("TW13032701.bin");
+
+            Lineage.Run(settings, binFile, serverName);
         }
 
         private void cmbServer_SelectedIndexChanged(object sender, EventArgs e)
@@ -428,6 +426,17 @@ namespace Launcher.Forms
         private void configChecker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
             this.updateChecker.RunWorkerAsync();
+        }
+
+        private void runWorker_DoWork(object sender, DoWorkEventArgs e)
+        {
+            var arguments = (Tuple<string, string>)e.Argument;
+            this.Launch(arguments.Item1, arguments.Item2);
+        }
+
+        private void runWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            this.btnPlay.Enabled = true;
         }
     } //end class
 } //end namespace
