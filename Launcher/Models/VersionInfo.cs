@@ -31,9 +31,6 @@ namespace Launcher.Models
         public string VersionDetails { get; set; }
 
         [DataMember]
-        public long LastUpdated { get; set; }
-
-        [DataMember]
         public Dictionary<string, FileData> Files { get; set; } 
 
         [DataMember]
