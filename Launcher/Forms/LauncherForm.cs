@@ -29,7 +29,7 @@ namespace Launcher.Forms
 {
     public partial class LauncherForm : Form
     {
-        private const string Version = "5.0.1";
+        private const string Version = "5.0.2";
 
         private readonly LauncherConfig _config;
         private VersionInfo _versionInfo;
@@ -132,9 +132,10 @@ namespace Launcher.Forms
         {
             if(this._config.VersionInfoUrl != null)
             {
-            // if it has been more than 30 minutes since we last checked for updates,
-            // then run another check before launching the game
-            var patchForm = new Patcher(this._config, this._hasUpdates || (DateTime.Now - this._lastUpdateCheck).TotalMinutes > 30);
+                // if it has been more than 30 minutes since we last checked for updates,
+                // then run another check before launching the game
+                var patchForm = new Patcher(this._config, this._hasUpdates || (DateTime.Now - this._lastUpdateCheck).TotalMinutes > 30);
+                this._lastUpdateCheck = DateTime.Now;
 
                 if (!patchForm.IsDisposed)
                 {
@@ -367,14 +368,13 @@ namespace Launcher.Forms
                 {
                     this.Close();
                 });
+
+                return;
             }
 
             if (Helpers.StringToNumber(this._versionInfo.Version) > Helpers.StringToNumber(Version))
             {
-                var applicationPath = Application.ExecutablePath;
-                var appDataPath = Directory.GetParent(Application.UserAppDataPath).ToString();
-                var updaterLocation = Path.Combine(appDataPath, "Updater.exe");
-                var updaterChecksum = Helpers.GetChecksum(updaterLocation);
+                var updaterChecksum = Helpers.GetChecksum("Updater.exe");
 
                 var result = DialogResult.Cancel;
 
@@ -388,8 +388,8 @@ namespace Launcher.Forms
 
                 if (result == DialogResult.OK)
                 {
-                    var info = new ProcessStartInfo(updaterLocation);
-                    info.Arguments = "\"" + applicationPath + "\"";
+                    var info = new ProcessStartInfo("Updater.exe");
+                    info.Arguments = string.Format("\"{0}\" \"{1}\"", this._config.LauncherUrl, this._config.InstallDir);
 
                     if (Environment.OSVersion.Version.Major >= 6)
                         info.Verb = "runas";
