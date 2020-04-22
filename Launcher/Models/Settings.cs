@@ -13,6 +13,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 using System;
+using System.Collections.Generic;
 using System.Runtime.Serialization;
 
 namespace Launcher.Models
@@ -31,5 +32,9 @@ namespace Launcher.Models
         public bool Windowed { get; set; }
         [DataMember]
         public string WindowSize { get; set; }
+        [DataMember]
+        public Dictionary<string, Server> Servers { get; set; }
+        [DataMember]
+        public long LastUpdateCheck { get; set; }
     }
 }

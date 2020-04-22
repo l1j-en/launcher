@@ -22,19 +22,11 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Windows.Forms;
 using Launcher.Models;
-using Microsoft.Win32;
-using System.Linq;
 
 namespace Launcher
 {
     public static class Helpers
     {
-        public struct WindowsVersion
-        {
-            public static string Windows8 { get { return "Windows 8"; } private set { } }
-            public static string Windows10 { get { return "Windows 10"; } private set { } }
-        };
-
         //this is a delegate used to access the UI from another thread
         private delegate void SetControlPropertyThreadSafeDelegate(Control control, string propertyName, object propertyValue);
         public static void SetControlPropertyThreadSafe(Control control, string propertyName, object propertyValue)
@@ -50,17 +42,27 @@ namespace Launcher
             return File.Exists(Path.Combine(directory, "Login.dll"));
         }
 
-        public static void SetConfigValue(string serverName, string field, string value, bool append = false)
+        public static void AddUserServer(string directory, string name, Server server)
         {
-            var configKey = Registry.CurrentUser.OpenSubKey(@"Software\" + serverName, true);
-
-            var newValue = value;
-            if(append)
+            var currentSettings = Helpers.LoadSettings(directory);
+            if(currentSettings.Servers == null)
             {
-                newValue = configKey.GetValue(field).ToString() + value;
+                currentSettings.Servers = new Dictionary<string, Server>();
             }
 
-            configKey.SetValue(field, newValue, RegistryValueKind.String);
+            currentSettings.Servers.Add(name, server);
+
+            Helpers.SaveSettingsToFlatFile(directory, currentSettings);
+        }
+
+        public static void SetLastUpdated(string directory)
+        {
+            var currentSettings = Helpers.LoadSettings(directory);
+            var currentTime = DateTime.UtcNow - new DateTime(1970, 1, 1);
+
+            currentSettings.LastUpdateCheck = (long)currentTime.TotalSeconds;
+
+            Helpers.SaveSettingsToFlatFile(directory, currentSettings);
         }
 
         public static bool UpdateConfig(VersionInfo versionInfo, string appPath)
@@ -175,19 +177,14 @@ namespace Launcher
         {
             try
             {
-                return LoadSettingsFromFlatFile(directory);
+                var configData = File.ReadAllText(Path.Combine(directory, "l1jSettings.cfg"));
+                var config = configData.JsonDeserialize<Settings>();
+                return config;
             }
             catch (Exception)
             {
                 return null;
             }
-        }
-
-        private static Settings LoadSettingsFromFlatFile(string installDir)
-        {
-            var configData = File.ReadAllText(Path.Combine(installDir, "l1jSettings.cfg"));
-            var config = configData.JsonDeserialize<Settings>();
-            return config;
         }
 
         public static void SaveSettings(Settings settings, string clientDirectory)
@@ -343,19 +340,6 @@ namespace Launcher
                     return BitConverter.ToString(md5.ComputeHash(stream)).Replace("-", "").ToLowerInvariant();
             }
         } //end GetChecksum
-
-        public static bool ByteArrayCompare(byte[] a1, byte[] a2)
-        {
-            if (a1.Length != a2.Length)
-                return false;
-
-            for (int i = 0; i < a1.Length; i++)
-            {
-                if (a1[i] != a2[i])
-                    return false;
-            }
-            return true;
-        }
 
         public static int StringToNumber(string versionNumber)
         {

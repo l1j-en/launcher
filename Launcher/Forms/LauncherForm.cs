@@ -38,7 +38,7 @@ namespace Launcher.Forms
 
         public LauncherForm()
         {
-            var appLocation = @"C:\Program Files (x86)\Lineage Justice\";// Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            var appLocation = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             
             if (!Helpers.LauncherInLineageDirectory(appLocation))
             {
@@ -107,11 +107,20 @@ namespace Launcher.Forms
         {
             var settings = Helpers.LoadSettings( this._config.InstallDir);
 
-            if (settings == null)
+            while (settings == null)
             {
                 new SettingsForm(this._config, true).ShowDialog();
+                settings = Helpers.LoadSettings(this._config.InstallDir);
             }
-                
+
+            if (settings.Servers != null && settings.Servers.Count > 0)
+            {
+                foreach(var server in settings.Servers)
+                {
+                    this._config.Servers.Add(server.Key, server.Value);
+                }
+            }
+
             this.lblVersion.Text = Version;
             this.cmbServer.Items.AddRange(this._config.Servers.Keys.ToArray());
             this.cmbServer.SelectedIndex = 0;
@@ -131,7 +140,7 @@ namespace Launcher.Forms
                  }
              }
              
-           // this.Launch(this._config.Servers[this.cmbServer.SelectedItem.ToString()]);
+            this.Launch(this._config.Servers[this.cmbServer.SelectedItem.ToString()]);
         }
 
         private void Launch(Server server)
@@ -270,18 +279,17 @@ namespace Launcher.Forms
                     return;
                 }
 
-                this._config.Servers.Add(addServerForm.txtName.Text, new Server
+                var newServer = new Server
                 {
                     IpOrDns = addServerForm.txtIpAddress.Text,
                     Port = Convert.ToInt32(addServerForm.txtPort.Text)
-                });
+                };
+
+                this._config.Servers.Add(addServerForm.txtName.Text, newServer);
 
                 if(addServerForm.chkPermanent.Checked)
                 {
-                    Helpers.SetConfigValue(this._config.KeyName,
-                        "Servers",
-                        string.Format(",{0}:{1}:{2}", addServerForm.txtName.Text, addServerForm.txtIpAddress.Text, addServerForm.txtPort.Text)
-                        , true);
+                    Helpers.AddUserServer(this._config.InstallDir, addServerForm.txtName.Text, newServer);
                 }
                 
                 this.cmbServer.Items.Add(addServerForm.txtName.Text);
@@ -292,14 +300,12 @@ namespace Launcher.Forms
         private void updateChecker_DoWork(object sender, DoWorkEventArgs e)
         {
             var versionInfo = Helpers.GetVersionInfo(this._config.VersionInfoUrl, this._config.PublicKey);
-            var launcherKey = Registry.CurrentUser.OpenSubKey(@"Software\" + this._config.KeyName, true);
-            var lastUpdatedCheck = launcherKey.GetValue("LastUpdated");
-            var updatesLastRun = (int?)lastUpdatedCheck ?? 0;
 
             if (versionInfo == null)
                 return;
 
-            this._hasUpdates = versionInfo.Files.Any(b => b.Value.Updated > updatesLastRun);
+            var settings = Helpers.LoadSettings(this._config.InstallDir);
+            this._hasUpdates = versionInfo.Files.Any(b => b.Value.Updated > settings.LastUpdateCheck);
         } //end updateChecker
 
         private void updateChecker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
@@ -343,14 +349,12 @@ namespace Launcher.Forms
             this._versionInfo = Helpers.GetVersionInfo(this._config.VersionInfoUrl, this._config.PublicKey);
 
             var force = e.Argument != null && (bool)e.Argument;
-            var launcherKey = Registry.CurrentUser.OpenSubKey(@"Software\" + this._config.KeyName, true);
-            var lastUpdatedCheck = launcherKey.GetValue("LastUpdated");
-            var updatesLastRun = (int?)lastUpdatedCheck ?? 0;
 
             if (this._versionInfo == null)
                 return;
 
             var settings = Helpers.LoadSettings(this._config.InstallDir);
+            var updatesLastRun = settings.LastUpdateCheck;
 
             if (Helpers.UpdateConfig(this._versionInfo, this._config.InstallDir))
             {

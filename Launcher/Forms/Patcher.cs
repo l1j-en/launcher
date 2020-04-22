@@ -6,7 +6,6 @@ using Launcher.Utilities;
 using System.IO;
 using Launcher.Controls;
 using System.Drawing;
-using Microsoft.Win32;
 using System.Net;
 using System.Linq;
 using System.ComponentModel;
@@ -17,7 +16,6 @@ namespace Launcher.Forms
     public partial class Patcher : Form
     {
         private readonly LauncherConfig _config;
-        private static Image background = new Bitmap(Launcher.Properties.Resources.progess_background);
         private readonly bool _force;
 
         public static Dictionary<string, string> PatchDirectories {
@@ -93,12 +91,12 @@ namespace Launcher.Forms
             {
                 var versionInfo = Helpers.GetVersionInfo(this._config.VersionInfoUrl, this._config.PublicKey);
                 var force = e.Argument != null && (bool)e.Argument;
-                var launcherKey = Registry.CurrentUser.OpenSubKey(@"Software\" + this._config.KeyName, true);
-                var lastUpdatedCheck = launcherKey.GetValue("LastUpdated");
-                var updatesLastRun = (int?)lastUpdatedCheck ?? 0;
 
                 if (versionInfo == null)
                     return;
+
+                var settings = Helpers.LoadSettings(this._config.InstallDir);
+                var updatesLastRun = settings.LastUpdateCheck;
 
                 var appDataPath = Directory.GetParent(Application.UserAppDataPath).ToString();
                 var updaterLocation = Path.Combine(appDataPath, "Updater.exe");
@@ -142,8 +140,7 @@ namespace Launcher.Forms
                         this.updateChecker.ReportProgress(i);
                     } //end for
 
-                    var currentTime = DateTime.UtcNow - new DateTime(1970, 1, 1);
-                    launcherKey.SetValue("LastUpdated", (int)currentTime.TotalSeconds, RegistryValueKind.DWord);
+                    Helpers.SetLastUpdated(this._config.InstallDir);
                 } //end if
             }
             finally

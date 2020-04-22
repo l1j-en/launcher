@@ -29,7 +29,7 @@ namespace Launcher
         {
             var startInfo = new ProcessStartInfo
             {
-                FileName = @"C:\Program Files (x86)\Lineage Justice\Login.exe",
+                FileName = "Login.exe",
                 WindowStyle = ProcessWindowStyle.Hidden,
                 CreateNoWindow = true,
                 UseShellExecute = false
@@ -98,8 +98,7 @@ namespace Launcher
 
             if (settings.DisableUnderwater)
             {
-                Win32Api.WriteProcessMemory(hndProc, (IntPtr)0x0051E948, new byte[] { 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90 }, 7, 0);
-                Win32Api.WriteProcessMemory(hndProc, (IntPtr)0x0051E96B, new byte[] { 0x75 }, 1, 0);
+                Win32Api.WriteProcessMemory(hndProc, (IntPtr)0x0051E925, new byte[] { 0xEB }, 1, 0);
             }
 
             //TODO -- probably a better way to do this than a hard-coded sleep
