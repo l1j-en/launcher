@@ -120,12 +120,15 @@ namespace Launcher
             {
                 Win32Api.WriteProcessMemory(hndProc, (IntPtr)0x0046786E, new byte[] { 0x90, 0x90, 0x90, 0x90, 0x90, 0x90 }, 6, 0);
             }
-            
+
             // Needed to get the lance master poly working properly
-            var zelgoPak = File.ReadAllBytes(Path.Combine(clientDirectory, "zelgo.pak"));
-            Win32Api.WriteProcessMemory(hndProc, (IntPtr)0x004B6CE0, new byte[] { 0xEB }, 1, 0);
-            Win32Api.WriteProcessMemory(hndProc, (IntPtr)0x00504538, zelgoPak, (uint)zelgoPak.Length - 1, 0);
-            Win32Api.WriteProcessMemory(hndProc, (IntPtr)0x006DA508, new byte[] { 0x0F, 0x27 }, 2, 0);
+            var zelgopath = Path.Combine(clientDirectory, "zelgo.pak");
+            if (File.Exists(zelgopath)) {    
+                var zelgoPak = File.ReadAllBytes(zelgopath);
+                Win32Api.WriteProcessMemory(hndProc, (IntPtr)0x004B6CE0, new byte[] { 0xEB }, 1, 0);
+                Win32Api.WriteProcessMemory(hndProc, (IntPtr)0x00504538, zelgoPak, (uint)zelgoPak.Length - 1, 0);
+                Win32Api.WriteProcessMemory(hndProc, (IntPtr)0x006DA508, new byte[] { 0x0F, 0x27 }, 2, 0);
+            }
             Win32Api.ResumeThread(hndProc);
 
             Win32Api.CloseHandle(hndProc);
