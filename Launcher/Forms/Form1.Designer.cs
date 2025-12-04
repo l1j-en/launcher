@@ -305,7 +305,7 @@ namespace Launcher.Forms
             this.KeyPreview = true;
             this.Name = "LauncherForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "Lineage Resurrection";
+            this.Text = "Lineage";
             this.Shown += new System.EventHandler(this.LauncherForm_Shown);
             this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.LauncherForm_KeyDown);
             ((System.ComponentModel.ISupportInitialize)(this.pctLinLogo)).EndInit();
