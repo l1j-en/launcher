@@ -121,8 +121,11 @@ namespace Launcher
                 Win32Api.WriteProcessMemory(hndProc, (IntPtr)0x0046786E, new byte[] { 0x90, 0x90, 0x90, 0x90, 0x90, 0x90 }, 6, 0);
             }
 
-            // Needed to get the lance master poly working properly
-            var zelgopath = Path.Combine(clientDirectory, "zelgo.pak");
+            // NEED MORE EVIDENCE: Needed to get the lance master poly working properly ???
+
+            // zelgo.pak seems to be a customization of S3E1.pak or S3DS2.pak or older pak to allow for the lance master poly to work properly
+            // this is a custom pak file that is not included in the official client, so we need to check if it exists before trying to load it
+            var zelgopath = Path.ChangeExtension(binpath, "pak");
             if (File.Exists(zelgopath)) {    
                 var zelgoPak = File.ReadAllBytes(zelgopath);
                 Win32Api.WriteProcessMemory(hndProc, (IntPtr)0x004B6CE0, new byte[] { 0xEB }, 1, 0);
