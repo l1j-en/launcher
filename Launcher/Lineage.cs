@@ -121,15 +121,25 @@ namespace Launcher
                 Win32Api.WriteProcessMemory(hndProc, (IntPtr)0x0046786E, new byte[] { 0x90, 0x90, 0x90, 0x90, 0x90, 0x90 }, 6, 0);
             }
 
-            // NEED MORE EVIDENCE: Needed to get the lance master poly working properly ???
+            // Injects the matching sprite action table into memory and expands table limit (0x270F = 9999).
+            // Needed to get the lance master poly working properly: supplies action definitions for the 5 Lance Master
+            // polymorph tiers (Lv. 52 #7332, Lv. 55 #7338, Lv. 60 #7339, Lv. 65 #7340, Lv. 70 #7341) and other
+            // Season 3 entities, which exceed the client's hardcoded default limit of 7,184 sprites.
+            var pakPath = Path.ChangeExtension(binpath, "pak");
+            if (!File.Exists(pakPath)) {
+                pakPath = Path.Combine(clientDirectory, "S3EP1.pak");
+            }
+            if (!File.Exists(pakPath)) { 
+                // Legacy fallback honoring the launcher's origins (Lineage Resurrection). Shares retail Lance Master data,
+                // but alters attack & movement animation speeds on raid mobs/event morphs (#7864-#8120, e.g. Lindvior/Fafurion or Mambo Rabbit)
+                // and truncates late S3 content (#8121-#8214, e.g. Sea Harpy, Sea Drake, and Golden Elephant).
+                pakPath = Path.Combine(clientDirectory, "zelgo.pak");
+            }
 
-            // zelgo.pak seems to be a customization of S3E1.pak or S3DS2.pak or older pak to allow for the lance master poly to work properly
-            // this is a custom pak file that is not included in the official client, so we need to check if it exists before trying to load it
-            var zelgopath = Path.ChangeExtension(binpath, "pak");
-            if (File.Exists(zelgopath)) {    
-                var zelgoPak = File.ReadAllBytes(zelgopath);
+            if (File.Exists(pakPath)) {    
+                var pakBytes = File.ReadAllBytes(pakPath);
                 Win32Api.WriteProcessMemory(hndProc, (IntPtr)0x004B6CE0, new byte[] { 0xEB }, 1, 0);
-                Win32Api.WriteProcessMemory(hndProc, (IntPtr)0x00504538, zelgoPak, (uint)zelgoPak.Length - 1, 0);
+                Win32Api.WriteProcessMemory(hndProc, (IntPtr)0x00504538, pakBytes, (uint)pakBytes.Length - 1, 0);
                 Win32Api.WriteProcessMemory(hndProc, (IntPtr)0x006DA508, new byte[] { 0x0F, 0x27 }, 2, 0);
             }
             Win32Api.ResumeThread(hndProc);
